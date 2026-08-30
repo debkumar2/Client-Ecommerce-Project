@@ -1,0 +1,665 @@
+/* Section Common */
+.section-padding {
+    padding: 5rem 0;
+}
+
+.section-header {
+    text-align: center;
+    max-width: 680px;
+    margin: 0 auto 3rem;
+}
+
+.section-header h2 {
+    font-size: clamp(1.75rem, 3vw, 2.5rem);
+    color: var(--primary-dark);
+    margin-bottom: 0.75rem;
+}
+
+.section-header p {
+    font-size: 1rem;
+    color: var(--muted);
+}
+
+/* ===================================
+   1. HERO SECTION
+   =================================== */
+.hero-section {
+    background: linear-gradient(135deg, var(--background) 0%, #f3f0e6 100%);
+    padding: 4rem 0 5rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.hero-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3.5rem;
+    align-items: center;
+}
+
+.hero-content {
+    max-width: 540px;
+}
+
+.hero-title {
+    font-size: clamp(2.25rem, 4vw, 3.5rem);
+    line-height: 1.15;
+    color: var(--primary-dark);
+    margin-bottom: 1.25rem;
+}
+
+.hero-description {
+    font-size: 1.1rem;
+    color: var(--muted);
+    margin-bottom: 2rem;
+    line-height: 1.65;
+}
+
+.hero-actions {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.hero-image-wrapper {
+    position: relative;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-card);
+    background-color: var(--surface-alt);
+    aspect-ratio: 4/3;
+}
+
+.hero-image-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* ===================================
+   2. TRUST / SERVICE BENEFITS
+   =================================== */
+.benefits-section {
+    background-color: var(--surface);
+    border-top: 1px solid var(--border-light);
+    border-bottom: 1px solid var(--border-light);
+    padding: 2.25rem 0;
+}
+
+.benefits-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2rem;
+}
+
+.benefit-card {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+}
+
+.benefit-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius-sm);
+    background-color: var(--primary-light);
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.benefit-icon svg {
+    width: 24px;
+    height: 24px;
+}
+
+.benefit-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 0.15rem;
+}
+
+.benefit-desc {
+    font-size: 0.8125rem;
+    color: var(--muted);
+    margin: 0;
+}
+
+/* ===================================
+   3. SHOP BY CATEGORY
+   =================================== */
+.category-section {
+    background-color: var(--background);
+}
+
+.category-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.75rem;
+}
+
+.category-card {
+    background-color: var(--surface);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    border: 1px solid var(--border-light);
+    transition: var(--transition);
+    text-decoration: none;
+    display: flex;
+    flex-direction: column;
+}
+
+.category-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-card);
+    border-color: var(--accent);
+}
+
+.category-image {
+    width: 100%;
+    height: 220px;
+    object-fit: cover;
+    background-color: var(--surface-alt);
+    transition: transform 0.4s ease;
+}
+
+.category-card:hover .category-image {
+    transform: scale(1.05);
+}
+
+.category-content {
+    padding: 1.25rem;
+    text-align: center;
+}
+
+.category-name {
+    font-family: var(--font-heading);
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--primary-dark);
+    margin-bottom: 0.35rem;
+}
+
+.category-desc {
+    font-size: 0.85rem;
+    color: var(--muted);
+    margin-bottom: 0.75rem;
+}
+
+.category-cta {
+    font-size: 0.8125rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--accent);
+}
+
+/* ===================================
+   4. WHY CHOOSE US
+   =================================== */
+.why-us-section {
+    background-color: var(--surface-dark);
+    color: var(--surface);
+}
+
+.why-us-section .section-header h2 {
+    color: var(--surface);
+}
+
+.why-us-section .section-header p {
+    color: #a3b8a8;
+}
+
+.why-us-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2rem;
+}
+
+.why-card {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: var(--radius-md);
+    padding: 2rem 1.5rem;
+    transition: var(--transition);
+}
+
+.why-card:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: var(--accent);
+}
+
+.why-number {
+    font-family: var(--font-heading);
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: 1rem;
+}
+
+.why-title {
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: var(--surface);
+    margin-bottom: 0.5rem;
+}
+
+.why-desc {
+    font-size: 0.875rem;
+    color: #a3b8a8;
+    margin: 0;
+}
+
+/* ===================================
+   5. EDITORIAL / FEATURED HIGHLIGHT
+   =================================== */
+.editorial-section {
+    background-color: var(--surface);
+}
+
+.editorial-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    align-items: center;
+}
+
+.editorial-image-wrapper {
+    position: relative;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-card);
+    aspect-ratio: 4/3;
+}
+
+.editorial-image-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.editorial-content {
+    max-width: 500px;
+}
+
+.editorial-title {
+    font-size: clamp(1.85rem, 3vw, 2.75rem);
+    color: var(--primary-dark);
+    margin-bottom: 1rem;
+}
+
+.editorial-desc {
+    font-size: 1rem;
+    color: var(--muted);
+    margin-bottom: 1.5rem;
+}
+
+.editorial-price {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 1.75rem;
+}
+
+/* ===================================
+   6. COLLECTION PROMO BANNER
+   =================================== */
+.promo-banner-section {
+    position: relative;
+    padding: 6rem 0;
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    color: var(--surface);
+    text-align: center;
+}
+
+.promo-banner-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(25, 43, 29, 0.75) 0%, rgba(15, 23, 16, 0.85) 100%);
+}
+
+.promo-banner-content {
+    position: relative;
+    z-index: 2;
+    max-width: 720px;
+    margin: 0 auto;
+}
+
+.promo-banner-content h2 {
+    color: var(--surface);
+    font-size: clamp(2rem, 3.5vw, 3rem);
+    margin-bottom: 1rem;
+}
+
+.promo-banner-content p {
+    color: #d1ded4;
+    font-size: 1.1rem;
+    margin-bottom: 2rem;
+}
+
+/* ===================================
+   7. ABOUT BISWAS ENTERPRISE
+   =================================== */
+.about-section {
+    background-color: var(--background);
+}
+
+.about-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    align-items: center;
+}
+
+.about-image-wrapper {
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-card);
+    aspect-ratio: 4/3;
+}
+
+.about-image-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.about-content h2 {
+    font-size: clamp(1.85rem, 3vw, 2.75rem);
+    color: var(--primary-dark);
+    margin-bottom: 1.25rem;
+}
+
+.about-text {
+    font-size: 1rem;
+    color: var(--muted);
+    margin-bottom: 1.25rem;
+    line-height: 1.7;
+}
+
+/* ===================================
+   8. QUALITY / TRUST SECTION
+   =================================== */
+.quality-trust-section {
+    background-color: var(--surface);
+}
+
+.quality-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2rem;
+}
+
+.quality-card {
+    text-align: center;
+    padding: 2.25rem 1.5rem;
+    background-color: var(--surface-light);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-md);
+}
+
+.quality-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background-color: var(--primary-light);
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.25rem;
+}
+
+.quality-icon svg {
+    width: 28px;
+    height: 28px;
+}
+
+.quality-card h3 {
+    font-size: 1.15rem;
+    color: var(--primary-dark);
+    margin-bottom: 0.5rem;
+}
+
+.quality-card p {
+    font-size: 0.875rem;
+    color: var(--muted);
+    margin: 0;
+}
+
+/* ===================================
+   9. CUSTOMER REVIEWS
+   =================================== */
+.reviews-section {
+    background-color: var(--background);
+}
+
+.reviews-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+}
+
+.review-card {
+    background-color: var(--surface);
+    border-radius: var(--radius-md);
+    padding: 2rem;
+    border: 1px solid var(--border-light);
+    display: flex;
+    flex-direction: column;
+}
+
+.review-stars {
+    color: #f59e0b;
+    display: flex;
+    gap: 4px;
+    margin-bottom: 1rem;
+}
+
+.review-text {
+    font-style: italic;
+    color: var(--text);
+    font-size: 0.95rem;
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+    flex-grow: 1;
+}
+
+.review-author {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.author-avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background-color: var(--primary-light);
+    color: var(--primary);
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.author-info h4 {
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.author-badge {
+    font-size: 0.75rem;
+    color: var(--success);
+    display: flex;
+    align-items: center;
+    gap: 3px;
+}
+
+/* ===================================
+   10. BLOG / ARTICLES
+   =================================== */
+.blog-section {
+    background-color: var(--surface);
+}
+
+.blog-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+}
+
+.blog-card {
+    background-color: var(--surface);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-light);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.blog-image {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    background-color: var(--surface-alt);
+}
+
+.blog-body {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.blog-meta {
+    display: flex;
+    gap: 1rem;
+    font-size: 0.78125rem;
+    color: var(--accent);
+    font-weight: 600;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+}
+
+.blog-title {
+    font-family: var(--font-heading);
+    font-size: 1.25rem;
+    color: var(--primary-dark);
+    margin-bottom: 0.75rem;
+    line-height: 1.3;
+}
+
+.blog-excerpt {
+    font-size: 0.875rem;
+    color: var(--muted);
+    margin-bottom: 1.25rem;
+    flex-grow: 1;
+}
+
+.blog-link {
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: var(--primary);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+/* ===================================
+   11. NEWSLETTER / CTA
+   =================================== */
+.newsletter-section {
+    background-color: var(--primary-light);
+    padding: 5rem 0;
+}
+
+.newsletter-card {
+    background-color: var(--surface);
+    border-radius: var(--radius-lg);
+    padding: 3.5rem 2rem;
+    text-align: center;
+    max-width: 760px;
+    margin: 0 auto;
+    box-shadow: var(--shadow-card);
+    border: 1px solid var(--border);
+}
+
+.newsletter-card h2 {
+    color: var(--primary-dark);
+    margin-bottom: 0.75rem;
+}
+
+.newsletter-card p {
+    color: var(--muted);
+    max-width: 520px;
+    margin: 0 auto 2rem;
+}
+
+.newsletter-form {
+    display: flex;
+    gap: 0.75rem;
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.newsletter-input {
+    flex-grow: 1;
+    padding: 0.85rem 1.25rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background-color: var(--background);
+    font-size: 0.95rem;
+}
+
+.newsletter-input:focus {
+    border-color: var(--primary);
+    background-color: var(--surface);
+}
+
+.newsletter-feedback {
+    margin-top: 1rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    display: none;
+}
+
+.newsletter-feedback.success {
+    display: block;
+    color: var(--success);
+}
+
+.newsletter-feedback.error {
+    display: block;
+    color: var(--danger);
+}
+
+/* Responsive Layout Adjustments */
+@media (max-width: 992px) {
+    .hero-grid, .editorial-grid, .about-grid {
+        grid-template-columns: 1fr;
+        gap: 2.5rem;
+    }
+    .benefits-grid, .category-grid, .why-us-grid, .quality-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .reviews-grid, .blog-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 576px) {
+    .benefits-grid, .category-grid, .why-us-grid, .quality-grid {
+        grid-template-columns: 1fr;
+    }
+    .newsletter-form {
+        flex-direction: column;
+    }
+}

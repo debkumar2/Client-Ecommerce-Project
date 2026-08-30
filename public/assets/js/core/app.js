@@ -1,13 +1,9 @@
 /**
- * Core Application Initialization
+ * Main Application Entry Point
  */
 
-import { initApi } from './api.js';
-import { debounce } from './utils.js';
+import { initHomePage } from '../pages/home.js';
 
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('App initialized.');
-    initApi();
-    
-    // Add event listeners here
+    initHomePage();
 });

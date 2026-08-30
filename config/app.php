@@ -47,3 +47,6 @@ if (!function_exists('env')) {
 
 // Load the .env file from the project root
 loadEnv(dirname(__DIR__) . '/.env');
+
+// Load Cloudinary image helper
+require_once __DIR__ . '/cloudinary.php';
