@@ -1,0 +1,18 @@
+# Environment setup
+.env
+
+# Dependencies
+vendor/
+node_modules/
+
+# Storage
+storage/logs/*
+!storage/logs/.gitkeep
+storage/cache/*
+!storage/cache/.gitkeep
+uploads/temp/*
+!uploads/temp/.gitkeep
+
+# System
+.DS_Store
+Thumbs.db

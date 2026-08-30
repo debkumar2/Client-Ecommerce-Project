@@ -1,0 +1,32 @@
+:root {
+    /* Brand Colors */
+    --primary: #2f6b3f;
+    --secondary: #8aa65a;
+    --accent: #d9a441;
+
+    /* Text Colors */
+    --text: #222;
+    --muted: #6b7280;
+
+    /* Surface Colors */
+    --surface: #ffffff;
+    --background: #f7f7f3;
+
+    /* Border Radius */
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 16px;
+
+    /* Spacing */
+    --space-1: 0.25rem;
+    --space-2: 0.5rem;
+    --space-3: 1rem;
+    --space-4: 1.5rem;
+    --space-5: 2rem;
+    --space-6: 3rem;
+    --space-8: 4rem;
+
+    /* Container */
+    --container-width: 1200px;
+    --container-padding: 1rem;
+}

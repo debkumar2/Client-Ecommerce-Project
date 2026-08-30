@@ -1,0 +1,8 @@
+# Prevent access to admin directory without authentication
+# This is a basic setup; a proper router should handle admin auth.
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^(.*)$ dashboard.php [L]
+</IfModule>
