@@ -8,9 +8,10 @@ require_once __DIR__ . '/../config/database.php';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= env('APP_NAME', 'E-Commerce') ?></title>
-    <link rel="stylesheet" href="/assets/css/base/reset.css">
-    <link rel="stylesheet" href="/assets/css/base/variables.css">
-    <link rel="stylesheet" href="/assets/css/base/typography.css">
+    <link rel="stylesheet" href="<?= asset('css/base/reset.css') ?>">
+    <link rel="stylesheet" href="<?= asset('css/base/variables.css') ?>">
+    <link rel="stylesheet" href="<?= asset('css/base/typography.css') ?>">
+    <link rel="stylesheet" href="<?= asset('css/main.css') ?>">
 </head>
 <body>
     <div class="announcement-bar">
@@ -51,6 +52,6 @@ require_once __DIR__ . '/../config/database.php';
         </div>
     </footer>
 
-    <script type="module" src="/assets/js/core/app.js"></script>
+    <script type="module" src="<?= asset('js/core/app.js') ?>"></script>
 </body>
 </html>

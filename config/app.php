@@ -34,6 +34,15 @@ if (!function_exists('env')) {
         }
         return $value;
     }
+
+    function url(string $path = ''): string {
+        $baseUrl = rtrim(env('APP_URL', 'http://localhost/ecommerce'), '/');
+        return $baseUrl . '/' . ltrim($path, '/');
+    }
+
+    function asset(string $path): string {
+        return url('public/assets/' . ltrim($path, '/'));
+    }
 }
 
 // Load the .env file from the project root

@@ -18,10 +18,7 @@
 </Files>
 
 # Block .git
-<DirectoryMatch "^/.*/\.git/">
-    Order deny,allow
-    Deny from all
-</DirectoryMatch>
+RedirectMatch 403 /\.git
 
 # Disable directory listing
 Options -Indexes
