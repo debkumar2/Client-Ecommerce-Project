@@ -2,86 +2,103 @@
 require_once __DIR__ . '/../config/app.php';
 require_once __DIR__ . '/../config/database.php';
 
+// Lightweight Front Controller Router
+$requestUri = parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH) ?? '';
+$baseUrlPath = parse_url(url(), PHP_URL_PATH) ?? '';
+$path = str_replace($baseUrlPath, '', $requestUri);
+$path = '/' . ltrim($path, '/');
+
+if (in_array($path, ['/shop', '/shop.php', '/shop/'])) {
+    require_once __DIR__ . '/shop.php';
+    exit;
+}
+
+if (in_array($path, ['/about', '/about.php', '/about/'])) {
+    require_once __DIR__ . '/about.php';
+    exit;
+}
+
 // Development Data Structures - Prepared for future database queries
+// Biswas Enterprise Official Product Categories (sourced from biswas-enterprise.co.in)
 $categories = [
     [
         'id' => 1,
-        'name' => 'Herbal Products',
-        'slug' => 'herbal-products',
-        'description' => 'Pure herbal formulations for daily wellness and vitality.',
-        'image' => cloudinary_url('https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=600&q=80', ['width' => 600, 'height' => 450])
+        'name' => 'Arjuna Bark',
+        'slug' => 'arjuna-bark',
+        'description' => 'Pure Dried, High Quality & Premium cut Arjuna bark for heart health.',
+        'image' => cloudinary_url('https://images.unsplash.com/photo-1546868871-7041f2a55e12?auto=format&fit=crop&w=600&q=450', ['width' => 600, 'height' => 450])
     ],
     [
         'id' => 2,
         'name' => 'Dried Herbs',
         'slug' => 'dried-herbs',
-        'description' => 'Carefully selected and dried raw natural herbs.',
-        'image' => cloudinary_url('https://images.unsplash.com/photo-1509358271058-acd22cc93898?auto=format&fit=crop&w=600&q=80', ['width' => 600, 'height' => 450])
+        'description' => 'Shade-dried Neem leaves, sacred Tulsi & natural Reetha soap nuts.',
+        'image' => cloudinary_url('https://images.unsplash.com/photo-1509358271058-acd22cc93898?auto=format&fit=crop&w=600&q=450', ['width' => 600, 'height' => 450])
     ],
     [
         'id' => 3,
-        'name' => 'Herbal Powders',
-        'slug' => 'herbal-powders',
-        'description' => 'Finely ground single-herb powders of high purity.',
-        'image' => cloudinary_url('https://images.unsplash.com/photo-1615485290382-441e4d049cb5?auto=format&fit=crop&w=600&q=80', ['width' => 600, 'height' => 450])
+        'name' => 'Herbs Powder',
+        'slug' => 'herbs-powder',
+        'description' => 'Finely pulverized Harad, Neem, Ashwagandha & Triphala powders.',
+        'image' => cloudinary_url('https://images.unsplash.com/photo-1615485290382-441e4d049cb5?auto=format&fit=crop&w=600&q=450', ['width' => 600, 'height' => 450])
     ],
     [
         'id' => 4,
-        'name' => 'Wellness Products',
-        'slug' => 'wellness-products',
-        'description' => 'Natural solutions for personal body and health care.',
-        'image' => cloudinary_url('https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?auto=format&fit=crop&w=600&q=80', ['width' => 600, 'height' => 450])
+        'name' => 'Renewable Energy Products',
+        'slug' => 'renewable-energy',
+        'description' => 'Solar LED street lights, solar power batteries & photovoltaic panels.',
+        'image' => cloudinary_url('https://images.unsplash.com/photo-1509391365360-2e959784a276?auto=format&fit=crop&w=600&q=450', ['width' => 600, 'height' => 450])
     ]
 ];
 
 $featuredProducts = [
     [
         'id' => 101,
-        'name' => 'Ashwagandha Root Powder',
-        'category' => 'Herbal Powders',
-        'price' => 599,
-        'regular_price' => 749,
+        'name' => 'Dried Arjuna Bark',
+        'category' => 'Arjuna Bark',
+        'price' => 710,
+        'regular_price' => 775,
         'rating' => 5,
-        'reviews_count' => 28,
-        'stock_quantity' => 15,
+        'reviews_count' => 32,
+        'stock_quantity' => 50,
+        'badge' => 'BEST SELLER',
+        'image' => cloudinary_url('https://images.unsplash.com/photo-1546868871-7041f2a55e12?auto=format&fit=crop&w=600&q=80', ['width' => 600, 'height' => 600])
+    ],
+    [
+        'id' => 104,
+        'name' => 'Harad Powder',
+        'category' => 'Herbs Powder',
+        'price' => 350,
+        'regular_price' => 420,
+        'rating' => 5,
+        'reviews_count' => 41,
+        'stock_quantity' => 40,
         'badge' => 'BEST SELLER',
         'image' => cloudinary_url('https://images.unsplash.com/photo-1615485290382-441e4d049cb5?auto=format&fit=crop&w=600&q=80', ['width' => 600, 'height' => 600])
     ],
     [
-        'id' => 102,
-        'name' => 'Organic Neem Leaf Extract',
-        'category' => 'Herbal Products',
-        'price' => 399,
-        'regular_price' => 499,
-        'rating' => 5,
-        'reviews_count' => 14,
-        'stock_quantity' => 8,
-        'badge' => 'POPULAR',
-        'image' => cloudinary_url('https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=600&q=80', ['width' => 600, 'height' => 600])
-    ],
-    [
-        'id' => 103,
-        'name' => 'Dried Tulsi Leaves',
+        'id' => 108,
+        'name' => 'Natural Reetha Soap Nuts',
         'category' => 'Dried Herbs',
-        'price' => 299,
-        'regular_price' => 349,
+        'price' => 280,
+        'regular_price' => 340,
         'rating' => 4,
-        'reviews_count' => 19,
-        'stock_quantity' => 0, // OUT OF STOCK EXAMPLE
-        'badge' => 'OUT OF STOCK',
-        'image' => cloudinary_url('https://images.unsplash.com/photo-1509358271058-acd22cc93898?auto=format&fit=crop&w=600&q=80', ['width' => 600, 'height' => 600])
+        'reviews_count' => 22,
+        'stock_quantity' => 30,
+        'badge' => 'ECO CHOICE',
+        'image' => cloudinary_url('https://images.unsplash.com/photo-1512290900673-7002ddb97b09?auto=format&fit=crop&w=600&q=80', ['width' => 600, 'height' => 600])
     ],
     [
-        'id' => 104,
-        'name' => 'Amla Herbal Vitality Oil',
-        'category' => 'Wellness Products',
-        'price' => 699,
-        'regular_price' => 899,
+        'id' => 111,
+        'name' => 'Solar LED Street Light',
+        'category' => 'Renewable Energy Products',
+        'price' => 3499,
+        'regular_price' => 4200,
         'rating' => 5,
-        'reviews_count' => 32,
-        'stock_quantity' => 22,
-        'badge' => 'NEW',
-        'image' => cloudinary_url('https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?auto=format&fit=crop&w=600&q=80', ['width' => 600, 'height' => 600])
+        'reviews_count' => 42,
+        'stock_quantity' => 15,
+        'badge' => 'BEST SELLER',
+        'image' => cloudinary_url('https://images.unsplash.com/photo-1545259741-2ea3ebf61fa3?auto=format&fit=crop&w=600&q=80', ['width' => 600, 'height' => 600])
     ]
 ];
 
@@ -90,25 +107,28 @@ $blogArticles = [
         'id' => 1,
         'title' => 'Understanding Herbal Ingredients & Sourcing Purity',
         'category' => 'EDUCATION',
-        'date' => 'Aug 24, 2026',
-        'excerpt' => 'Discover how authentic sourcing and traditional processing preserve active botanical properties in natural products.',
-        'image' => cloudinary_url('https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=600&q=80', ['width' => 600, 'height' => 400])
+        'excerpt' => 'Learn how authentic botanical herbs are harvested, sun-dried, and laboratory tested to preserve active phytochemicals.',
+        'image' => cloudinary_url('https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=600&q=80', ['width' => 600, 'height' => 400]),
+        'date' => 'May 12, 2026',
+        'read_time' => '4 min read'
     ],
     [
         'id' => 2,
-        'title' => 'How to Choose Quality Natural Products for Daily Use',
-        'category' => 'GUIDE',
-        'date' => 'Aug 18, 2026',
-        'excerpt' => 'Key factors to look for when selecting raw herbs, finely milled botanical powders, and wellness items.',
-        'image' => cloudinary_url('https://images.unsplash.com/photo-1509358271058-acd22cc93898?auto=format&fit=crop&w=600&q=80', ['width' => 600, 'height' => 400])
+        'title' => 'Cardiovascular Wellness with Arjuna Bark',
+        'category' => 'WELLNESS',
+        'excerpt' => 'Discover traditional Ayurvedic knowledge and modern research behind Terminalia Arjuna for cardiac strength and vitality.',
+        'image' => cloudinary_url('https://images.unsplash.com/photo-1509358271058-acd22cc93898?auto=format&fit=crop&w=600&q=80', ['width' => 600, 'height' => 400]),
+        'date' => 'April 28, 2026',
+        'read_time' => '6 min read'
     ],
     [
         'id' => 3,
-        'title' => 'Traditional Ingredients in Modern Wellness Routines',
-        'category' => 'WELLNESS',
-        'date' => 'Aug 10, 2026',
-        'excerpt' => 'Integrating time-tested Indian botanical heritage into contemporary lifestyle habits effortlessly.',
-        'image' => cloudinary_url('https://images.unsplash.com/photo-1615485290382-441e4d049cb5?auto=format&fit=crop&w=600&q=80', ['width' => 600, 'height' => 400])
+        'title' => 'Sustainable Off-Grid Power Solutions',
+        'category' => 'SUSTAINABILITY',
+        'excerpt' => 'Exploring the economic and ecological impact of solar street lighting and clean photovoltaic energy systems.',
+        'image' => cloudinary_url('https://images.unsplash.com/photo-1509391365360-2e959784a276?auto=format&fit=crop&w=600&q=80', ['width' => 600, 'height' => 400]),
+        'date' => 'April 15, 2026',
+        'read_time' => '5 min read'
     ]
 ];
 ?>
@@ -117,23 +137,23 @@ $blogArticles = [
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Biswas Enterprise | Quality Natural & Herbal Products</title>
+    <title>Biswas Enterprise | Quality Natural Herbs & Clean Energy Solutions</title>
     
     <!-- SEO Meta Tags -->
-    <meta name="description" content="Biswas Enterprise offers thoughtfully sourced natural, herbal, and wellness products. Discover quality herbs, powders, and natural remedies.">
+    <meta name="description" content="Biswas Enterprise is a premier exporter and supplier of Arjuna bark, dried herbs, pure herbal powders, and renewable solar energy products.">
     <link rel="canonical" href="<?= url() ?>">
     
     <!-- Open Graph Metadata -->
-    <meta property="og:title" content="Biswas Enterprise | Quality Natural & Herbal Products">
-    <meta property="og:description" content="Discover premium natural and herbal products thoughtfully sourced for modern lifestyles.">
+    <meta property="og:title" content="Biswas Enterprise | Quality Natural Herbs & Clean Energy Solutions">
+    <meta property="og:description" content="Discover premium natural herbs, Arjuna bark, herbal powders, and solar renewable energy products.">
     <meta property="og:image" content="<?= cloudinary_url('https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=1200&q=80', ['width' => 1200, 'height' => 630]) ?>">
     <meta property="og:url" content="<?= url() ?>">
     <meta property="og:type" content="website">
     
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Biswas Enterprise | Quality Natural & Herbal Products">
-    <meta name="twitter:description" content="Discover premium natural and herbal products thoughtfully sourced for modern lifestyles.">
+    <meta name="twitter:title" content="Biswas Enterprise | Quality Natural Herbs & Clean Energy Solutions">
+    <meta name="twitter:description" content="Discover premium natural herbs, Arjuna bark, herbal powders, and solar renewable energy products.">
     
     <!-- Structured Data (JSON-LD) -->
     <script type="application/ld+json">
@@ -143,7 +163,7 @@ $blogArticles = [
       "name": "Biswas Enterprise",
       "url": "<?= url() ?>",
       "logo": "<?= asset('image/logo.png') ?>",
-      "description": "Exporter, supplier and trader dealing with quality herbal and natural products."
+      "description": "Exporter, supplier and trader dealing with quality herbal, Arjuna bark, dried herbs, powders and renewable energy products."
     }
     </script>
 
@@ -156,11 +176,11 @@ $blogArticles = [
     <div class="announcement-bar" role="region" aria-label="Announcement">
         <div class="container">
             <div class="announcement-content">
-                <span class="announcement-item">FREE SHIPPING ON SELECTED ORDERS</span>
+                <span class="announcement-item">100% AUTHENTIC NATURAL SOURCING & CLEAN ENERGY</span>
                 <span class="announcement-separator">•</span>
-                <span class="announcement-item">COD AVAILABLE</span>
+                <span class="announcement-item">EXPRESS SHIPPING ACROSS INDIA</span>
                 <span class="announcement-separator">•</span>
-                <span class="announcement-item">QUALITY ASSURED PRODUCTS</span>
+                <span class="announcement-item">BULK & EXPORT ENQUIRIES WELCOME</span>
             </div>
         </div>
     </div>
@@ -189,7 +209,6 @@ $blogArticles = [
                     <ul>
                         <li><a href="<?= url() ?>" class="nav-link active">Home</a></li>
                         <li><a href="<?= url('shop') ?>" class="nav-link">Shop</a></li>
-                        <li><a href="<?= url('categories') ?>" class="nav-link">Categories</a></li>
                         <li><a href="<?= url('about') ?>" class="nav-link">About</a></li>
                         <li><a href="<?= url('contact') ?>" class="nav-link">Contact</a></li>
                         <li><a href="<?= url('blog') ?>" class="nav-link">Blog</a></li>

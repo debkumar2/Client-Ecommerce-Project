@@ -65,8 +65,8 @@
     position: absolute;
     top: 10px;
     left: 10px;
-    background-color: var(--accent);
-    color: var(--text);
+    background-color: var(--secondary);
+    color: var(--surface);
     font-size: 0.6875rem;
     font-weight: 700;
     text-transform: uppercase;
@@ -74,6 +74,7 @@
     padding: 0.25rem 0.6rem;
     border-radius: var(--radius-sm);
     z-index: 2;
+    box-shadow: 0 2px 8px rgba(11, 83, 37, 0.15);
 }
 
 .product-badge.out-of-stock {
@@ -81,9 +82,49 @@
     color: var(--surface);
 }
 
+.product-badge.low-stock {
+    background-color: var(--warning);
+    color: var(--surface);
+}
+
 .product-badge.sale {
     background-color: var(--primary-dark);
     color: var(--surface);
+}
+
+/* Quick View Hover Button Overlay */
+.btn-quick-view {
+    position: absolute;
+    bottom: 12px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background-color: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(4px);
+    color: var(--primary-dark);
+    font-size: 0.8125rem;
+    font-weight: 700;
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    cursor: pointer;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    z-index: 3;
+}
+
+.btn-quick-view:hover {
+    background-color: var(--primary);
+    color: var(--surface);
+    border-color: var(--primary);
+}
+
+.product-card:hover .btn-quick-view {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0);
 }
 
 /* Wishlist Button */

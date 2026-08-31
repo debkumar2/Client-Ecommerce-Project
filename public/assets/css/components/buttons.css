@@ -31,15 +31,17 @@
 }
 
 .btn-secondary {
-    background-color: var(--accent);
-    color: var(--text);
-    border-color: var(--accent);
+    background-color: var(--secondary);
+    color: var(--surface);
+    border-color: var(--secondary);
 }
 
 .btn-secondary:hover {
-    background-color: var(--accent-hover);
-    border-color: var(--accent-hover);
+    background-color: var(--secondary-hover);
+    border-color: var(--secondary-hover);
+    color: var(--surface);
     transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(85, 179, 24, 0.3);
 }
 
 .btn-outline {

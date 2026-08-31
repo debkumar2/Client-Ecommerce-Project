@@ -48,4 +48,25 @@ export const initHeader = () => {
             }
         });
     }
+
+    // Dropdown Navigation Menu Toggle
+    const dropdownToggles = document.querySelectorAll('.has-dropdown');
+    dropdownToggles.forEach(dropdown => {
+        const toggleBtn = dropdown.querySelector('.dropdown-toggle');
+        if (toggleBtn) {
+            dropdown.addEventListener('mouseenter', () => {
+                dropdown.classList.add('active');
+            });
+            dropdown.addEventListener('mouseleave', () => {
+                dropdown.classList.remove('active');
+            });
+            toggleBtn.addEventListener('click', (e) => {
+                // If on mobile or touch device, toggle active state
+                if (window.innerWidth <= 1024) {
+                    e.preventDefault();
+                    dropdown.classList.toggle('active');
+                }
+            });
+        }
+    });
 };

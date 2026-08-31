@@ -1,0 +1,371 @@
+/* ==========================================================================
+   ABOUT PAGE STYLES (Ayutra D2C Inspired Rhythm & Minimal Aesthetics)
+   ========================================================================== */
+
+/* --- Hero Banner Section --- */
+.about-hero {
+    position: relative;
+    padding: 5rem 0 4rem;
+    background: linear-gradient(135deg, rgba(244, 247, 244, 0.8) 0%, rgba(255, 255, 255, 1) 100%);
+    border-bottom: 1px solid var(--border-light);
+    overflow: hidden;
+}
+
+.about-hero-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    align-items: center;
+}
+
+.about-hero-subtitle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--primary);
+    margin-bottom: 1rem;
+}
+
+.about-hero-subtitle::before {
+    content: '';
+    display: block;
+    width: 24px;
+    height: 2px;
+    background: var(--primary);
+}
+
+.about-hero-title {
+    font-size: clamp(2.25rem, 4vw, 3.25rem);
+    font-weight: 700;
+    color: var(--text-heading);
+    line-height: 1.15;
+    margin-bottom: 1.5rem;
+}
+
+.about-hero-lead {
+    font-size: 1.125rem;
+    line-height: 1.7;
+    color: var(--text-muted);
+    margin-bottom: 2rem;
+}
+
+.about-hero-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+}
+
+.hero-badge-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1.25rem;
+    background: #ffffff;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+}
+
+.hero-badge-icon {
+    width: 24px;
+    height: 24px;
+    color: var(--primary);
+}
+
+.hero-badge-text {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-heading);
+}
+
+.about-hero-image-wrapper {
+    position: relative;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+}
+
+.about-hero-img {
+    width: 100%;
+    height: 480px;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.6s ease;
+}
+
+.about-hero-image-wrapper:hover .about-hero-img {
+    transform: scale(1.03);
+}
+
+.about-experience-card {
+    position: absolute;
+    bottom: 2rem;
+    left: 2rem;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    padding: 1.25rem 1.75rem;
+    border-radius: var(--radius-md);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+    border-left: 4px solid var(--primary);
+}
+
+.exp-number {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--primary-dark);
+    line-height: 1;
+}
+
+.exp-label {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+    margin-top: 0.25rem;
+}
+
+/* --- Story & Mission Split Section --- */
+.about-story-section {
+    padding: 6rem 0;
+}
+
+.story-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    align-items: center;
+}
+
+.section-label {
+    font-size: 0.875rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--primary);
+    margin-bottom: 0.75rem;
+}
+
+.section-title {
+    font-size: 2.25rem;
+    font-weight: 700;
+    color: var(--text-heading);
+    line-height: 1.25;
+    margin-bottom: 1.5rem;
+}
+
+.story-content p {
+    font-size: 1.0625rem;
+    line-height: 1.8;
+    color: var(--text);
+    margin-bottom: 1.25rem;
+}
+
+.story-highlights {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+    margin-top: 2.5rem;
+}
+
+.highlight-box {
+    padding: 1.5rem;
+    background: #f8faf8;
+    border-radius: var(--radius-md);
+    border: 1px solid rgba(46, 125, 50, 0.1);
+}
+
+.highlight-box h4 {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: var(--primary-dark);
+    margin-bottom: 0.5rem;
+}
+
+.highlight-box p {
+    font-size: 0.9375rem !important;
+    margin-bottom: 0 !important;
+    color: var(--text-muted);
+}
+
+/* --- Values Grid Section --- */
+.about-values-section {
+    background: #f4f7f4;
+    padding: 6rem 0;
+}
+
+.section-header-center {
+    text-align: center;
+    max-width: 680px;
+    margin: 0 auto 4rem;
+}
+
+.values-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2rem;
+}
+
+.value-card {
+    background: #ffffff;
+    padding: 2.5rem 1.75rem;
+    border-radius: var(--radius-md);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.03);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    text-align: center;
+    border: 1px solid var(--border-light);
+}
+
+.value-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
+}
+
+.value-icon-circle {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 1.5rem;
+    border-radius: 50%;
+    background: var(--primary-light);
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.value-icon-circle svg {
+    width: 30px;
+    height: 30px;
+}
+
+.value-card h3 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-heading);
+    margin-bottom: 0.75rem;
+}
+
+.value-card p {
+    font-size: 0.9375rem;
+    line-height: 1.6;
+    color: var(--text-muted);
+}
+
+/* --- Company Portfolio Grid --- */
+.portfolio-overview-section {
+    padding: 6rem 0;
+}
+
+.portfolio-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2.5rem;
+    margin-top: 3rem;
+}
+
+.portfolio-card {
+    display: flex;
+    gap: 1.5rem;
+    padding: 2rem;
+    background: #ffffff;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+}
+
+.portfolio-card-icon {
+    width: 56px;
+    height: 56px;
+    flex-shrink: 0;
+    background: rgba(46, 125, 50, 0.1);
+    color: var(--primary);
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.portfolio-card-icon svg {
+    width: 28px;
+    height: 28px;
+}
+
+.portfolio-card-content h4 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-heading);
+    margin-bottom: 0.5rem;
+}
+
+.portfolio-card-content p {
+    font-size: 0.9375rem;
+    line-height: 1.6;
+    color: var(--text-muted);
+}
+
+/* --- CTA Banner --- */
+.about-cta-section {
+    background: var(--primary-dark);
+    color: #ffffff;
+    padding: 5rem 0;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.about-cta-content {
+    max-width: 720px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 2;
+}
+
+.about-cta-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    color: #ffffff;
+}
+
+.about-cta-desc {
+    font-size: 1.125rem;
+    color: rgba(255, 255, 255, 0.85);
+    margin-bottom: 2rem;
+    line-height: 1.7;
+}
+
+.cta-buttons-group {
+    display: flex;
+    justify-content: center;
+    gap: 1.25rem;
+}
+
+/* --- Responsive Adjustments --- */
+@media (max-width: 992px) {
+    .about-hero-grid, .story-grid {
+        grid-template-columns: 1fr;
+        gap: 2.5rem;
+    }
+    .values-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .portfolio-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 576px) {
+    .values-grid {
+        grid-template-columns: 1fr;
+    }
+    .story-highlights {
+        grid-template-columns: 1fr;
+    }
+    .cta-buttons-group {
+        flex-direction: column;
+    }
+}

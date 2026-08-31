@@ -36,7 +36,22 @@ if (!function_exists('env')) {
     }
 
     function url(string $path = ''): string {
-        $baseUrl = rtrim(env('APP_URL', 'http://localhost/ecommerce'), '/');
+        $appUrl = env('APP_URL');
+
+        if (empty($appUrl) || $appUrl === 'http://localhost/ecommerce') {
+            if (isset($_SERVER['HTTP_HOST'])) {
+                $scheme = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+                $host = $_SERVER['HTTP_HOST'];
+                $scriptDir = dirname($_SERVER['SCRIPT_NAME'] ?? '');
+                $scriptDir = preg_replace('/\/public$/', '', str_replace('\\', '/', $scriptDir));
+                $baseUrl = rtrim($scheme . '://' . $host . $scriptDir, '/');
+            } else {
+                $baseUrl = 'http://localhost/Client-Ecommerce-Project';
+            }
+        } else {
+            $baseUrl = rtrim($appUrl, '/');
+        }
+
         return $baseUrl . '/' . ltrim($path, '/');
     }
 
