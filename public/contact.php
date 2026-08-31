@@ -381,5 +381,6 @@ require_once __DIR__ . '/../config/database.php';
             });
         });
     </script>
+    <?php include __DIR__ . '/includes/floating_enquiry.php'; ?>
 </body>
 </html>

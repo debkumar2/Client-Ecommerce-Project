@@ -12,11 +12,22 @@ document.addEventListener('DOMContentLoaded', () => {
     initProductCards();
 
     // Cache DOM Elements
-    const productsGrid = document.getElementById('productsGrid');
-    const emptyState = document.getElementById('emptyState');
-    const showingCountEl = document.getElementById('showingCount');
-    const totalCountEl = document.getElementById('totalCount');
-    const allCards = Array.from(document.querySelectorAll('.product-card'));
+    // Parse URL query parameters for pre-selected category filter
+    const urlParams = new URLSearchParams(window.location.search);
+    const categoryParam = (urlParams.get('category') || '').toLowerCase().trim();
+
+    if (categoryParam) {
+        const catInputs = document.querySelectorAll('.filter-category-input');
+        catInputs.forEach(input => {
+            const val = input.value.toLowerCase();
+            const slug = (input.dataset.slug || '').toLowerCase();
+            const valHyphenated = val.replace(/\s+/g, '-');
+
+            if (val === categoryParam || slug === categoryParam || valHyphenated === categoryParam || categoryParam.includes(slug) || slug.includes(categoryParam)) {
+                input.checked = true;
+            }
+        });
+    }
 
     // Master Filter & Sort Execution Function
     function applyFiltersAndSort() {
@@ -28,7 +39,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // 2. Get Selected Categories
         const categoryInputs = Array.from(document.querySelectorAll('.filter-category-input:checked'));
-        const selectedCategories = categoryInputs.map(input => input.value.toLowerCase());
+        const selectedCategories = categoryInputs.map(input => ({
+            name: input.value.toLowerCase(),
+            slug: (input.dataset.slug || '').toLowerCase()
+        }));
 
         // 3. Get Max Price
         const priceSlider = document.querySelector('.price-range-slider');
@@ -56,8 +70,20 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             // Category filter
-            if (selectedCategories.length > 0 && !selectedCategories.includes(category)) {
-                return false;
+            if (selectedCategories.length > 0) {
+                const cardCat = category.toLowerCase();
+                const cardCatSlug = cardCat.replace(/\s+/g, '-');
+                const isCatMatched = selectedCategories.some(sc => 
+                    cardCat === sc.name || 
+                    cardCatSlug === sc.slug || 
+                    sc.name.includes(cardCat) || 
+                    cardCat.includes(sc.name) ||
+                    sc.slug.includes(cardCatSlug) ||
+                    cardCatSlug.includes(sc.slug)
+                );
+                if (!isCatMatched) {
+                    return false;
+                }
             }
 
             // Price filter
@@ -126,4 +152,7 @@ document.addEventListener('DOMContentLoaded', () => {
         (query) => applyFiltersAndSort(),
         (sortOption) => applyFiltersAndSort()
     );
+
+    // Run initial filter check on load
+    applyFiltersAndSort();
 });

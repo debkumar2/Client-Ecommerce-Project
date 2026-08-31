@@ -61,7 +61,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,400;0,700;1,400&family=Open+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
 
     <!-- CSS Assets -->
     <link rel="stylesheet" href="<?= asset('css/main.css') ?>">
@@ -90,7 +90,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
         }
 
         .account-hero-text h1 {
-            font-family: 'Playfair Display', serif;
+            font-family: 'Merriweather', serif;
             font-size: 30px;
             margin-bottom: 6px;
             color: #ffffff;
@@ -179,7 +179,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
             border-radius: 50%;
             background: linear-gradient(135deg, #1b3b2b 0%, #2a523c 100%);
             color: #ffffff;
-            font-family: 'Playfair Display', serif;
+            font-family: 'Merriweather', serif;
             font-size: 30px;
             font-weight: 700;
             display: flex;
@@ -191,7 +191,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
         }
 
         .user-mini-name {
-            font-family: 'Playfair Display', serif;
+            font-family: 'Merriweather', serif;
             font-size: 18px;
             font-weight: 700;
             color: #1a2721;
@@ -286,7 +286,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
         }
 
         .tab-section-title {
-            font-family: 'Playfair Display', serif;
+            font-family: 'Merriweather', serif;
             font-size: 22px;
             color: #1a2721;
             display: flex;
@@ -771,5 +771,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
             </div>
         </div>
     </footer>
+    <?php include __DIR__ . '/includes/floating_enquiry.php'; ?>
 </body>
 </html>

@@ -433,5 +433,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 </script>
+<?php include __DIR__ . '/includes/floating_enquiry.php'; ?>
 </body>
 </html>

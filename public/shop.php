@@ -336,7 +336,7 @@ $products = [
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,400;0,700;1,400&family=Open+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
     
     <!-- Stylesheets -->
     <link rel="stylesheet" href="<?= asset('css/main.css') ?>">
@@ -404,17 +404,6 @@ $products = [
         </div>
     </header>
 
-    <!-- 1. Breadcrumb Navigation -->
-    <nav class="breadcrumb-section" aria-label="Breadcrumb">
-        <div class="container">
-            <ol class="breadcrumb-list">
-                <li class="breadcrumb-item"><a href="<?= url() ?>">Home</a></li>
-                <li class="breadcrumb-separator">/</li>
-                <li class="breadcrumb-item active" aria-current="page">Shop</li>
-            </ol>
-        </div>
-    </nav>
-
     <!-- 2. Shop Hero -->
     <section class="shop-hero">
         <div class="container">
@@ -438,8 +427,24 @@ $products = [
                         <span>Filter</span>
                     </button>
 
+                    <?php 
+                    $requestedCatSlug = strtolower($_GET['category'] ?? '');
+                    $filteredInitialCount = 0;
+                    if (!empty($requestedCatSlug)) {
+                        foreach ($products as $p) {
+                            $pCatLower = strtolower($p['category']);
+                            $pCatSlugLower = strtolower($p['category_slug'] ?? str_replace(' ', '-', $pCatLower));
+                            $reqFormatted = str_replace('-', ' ', $requestedCatSlug);
+                            if ($requestedCatSlug === $pCatSlugLower || $requestedCatSlug === $pCatLower || $reqFormatted === $pCatLower || str_contains($pCatLower, $reqFormatted) || str_contains($pCatSlugLower, $requestedCatSlug)) {
+                                $filteredInitialCount++;
+                            }
+                        }
+                    } else {
+                        $filteredInitialCount = count($products);
+                    }
+                    ?>
                     <div class="results-count">
-                        Showing <strong id="showingCount"><?= count($products) ?></strong> of <strong id="totalCount"><?= count($products) ?></strong> products
+                        Showing <strong id="showingCount"><?= $filteredInitialCount ?></strong> of <strong id="totalCount"><?= count($products) ?></strong> products
                     </div>
                 </div>
 
@@ -493,9 +498,21 @@ $products = [
                     <div class="filter-group">
                         <h3 class="filter-group-title">Categories</h3>
                         <div class="filter-list">
-                            <?php foreach ($categories as $cat): ?>
+                            <?php 
+                            $requestedCategory = strtolower($_GET['category'] ?? '');
+                            foreach ($categories as $cat): 
+                                $isCatChecked = false;
+                                if (!empty($requestedCategory)) {
+                                    $catNameLower = strtolower($cat['name']);
+                                    $catSlugLower = strtolower($cat['slug']);
+                                    $reqFormatted = str_replace('-', ' ', $requestedCategory);
+                                    if ($requestedCategory === $catSlugLower || $requestedCategory === $catNameLower || $reqFormatted === $catNameLower || str_contains($catNameLower, $reqFormatted) || str_contains($requestedCategory, $catSlugLower)) {
+                                        $isCatChecked = true;
+                                    }
+                                }
+                            ?>
                             <label class="filter-item">
-                                <input type="checkbox" class="filter-category-input" value="<?= htmlspecialchars($cat['name']) ?>">
+                                <input type="checkbox" class="filter-category-input" value="<?= htmlspecialchars($cat['name']) ?>" data-slug="<?= htmlspecialchars($cat['slug']) ?>" <?= $isCatChecked ? 'checked' : '' ?>>
                                 <span class="filter-checkbox-label">
                                     <span class="custom-checkbox"></span>
                                     <span class="filter-item-name"><?= htmlspecialchars($cat['name']) ?></span>
@@ -637,8 +654,21 @@ $products = [
                 <div class="shop-products-column">
                             <!-- 7 & 8. Product Grid & Cards -->
                     <div id="productsGrid" class="products-grid">
-                        <?php foreach ($products as $p): ?>
+                        <?php 
+                        $requestedCatSlug = strtolower($_GET['category'] ?? '');
+                        foreach ($products as $p): 
+                            $isInitialHide = false;
+                            if (!empty($requestedCatSlug)) {
+                                $pCatLower = strtolower($p['category']);
+                                $pCatSlugLower = strtolower($p['category_slug'] ?? str_replace(' ', '-', $pCatLower));
+                                $reqFormatted = str_replace('-', ' ', $requestedCatSlug);
+                                if ($requestedCatSlug !== $pCatSlugLower && $requestedCatSlug !== $pCatLower && $reqFormatted !== $pCatLower && !str_contains($pCatLower, $reqFormatted) && !str_contains($pCatSlugLower, $requestedCatSlug)) {
+                                    $isInitialHide = true;
+                                }
+                            }
+                        ?>
                         <div class="product-card <?= $p['stock_status'] === 'out-of-stock' ? 'is-out-of-stock' : '' ?>"
+                             style="<?= $isInitialHide ? 'display: none !important;' : '' ?>"
                              data-id="<?= $p['id'] ?>"
                              data-title="<?= htmlspecialchars($p['name']) ?>"
                              data-category="<?= htmlspecialchars($p['category']) ?>"
@@ -933,5 +963,6 @@ $products = [
 
     <!-- Modular Page JavaScript -->
     <script type="module" src="<?= asset('js/pages/shop.js') ?>"></script>
+    <?php include __DIR__ . '/includes/floating_enquiry.php'; ?>
 </body>
 </html>
