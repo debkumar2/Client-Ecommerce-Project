@@ -350,14 +350,16 @@ require_once __DIR__ . '/../config/database.php';
             const ok   = document.getElementById('contact-form-success');
             const err  = document.getElementById('contact-form-error');
 
-            form.addEventListener('submit', (e) => {
+            form.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 ok.style.display = 'none';
                 err.style.display = 'none';
 
                 const name    = form.querySelector('#contact-name').value.trim();
                 const email   = form.querySelector('#contact-email').value.trim();
+                const phone   = form.querySelector('#contact-phone')?.value.trim() || '';
                 const subject = form.querySelector('#contact-subject').value;
+                const country = form.querySelector('#contact-country')?.value.trim() || '';
                 const message = form.querySelector('#contact-message').value.trim();
                 const emailRx = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -370,14 +372,39 @@ require_once __DIR__ . '/../config/database.php';
                 btn.disabled = true;
                 btn.textContent = 'Sending…';
 
-                // Simulate async send (replace with real AJAX/fetch to API endpoint)
-                setTimeout(() => {
-                    ok.className = 'form-alert success';
-                    ok.style.display = 'flex';
-                    form.reset();
+                try {
+                    const response = await fetch('<?= url('api/submit_enquiry.php') ?>', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            full_name: name,
+                            email: email,
+                            phone: phone,
+                            product_name: subject,
+                            requirement_details: message,
+                            destination: country
+                        })
+                    });
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        ok.className = 'form-alert success';
+                        ok.style.display = 'flex';
+                        form.reset();
+                    } else {
+                        err.className = 'form-alert error';
+                        err.textContent = result.message || 'Error sending enquiry.';
+                        err.style.display = 'flex';
+                    }
+                } catch (error) {
+                    console.error('Contact Enquiry Error:', error);
+                    err.className = 'form-alert error';
+                    err.style.display = 'flex';
+                } finally {
                     btn.disabled = false;
                     btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg> Send Enquiry`;
-                }, 1200);
+                }
             });
         });
     </script>

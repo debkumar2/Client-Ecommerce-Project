@@ -48,6 +48,26 @@ function initDatabaseTables(): void {
             `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
 
+        // Create enquiries table
+        $pdo->exec("CREATE TABLE IF NOT EXISTS `enquiries` (
+            `id` BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+            `full_name` VARCHAR(191) NOT NULL,
+            `email` VARCHAR(191) NOT NULL,
+            `phone` VARCHAR(50) NOT NULL,
+            `product_id` BIGINT UNSIGNED NULL,
+            `product_name` VARCHAR(191) NULL,
+            `requirement_details` TEXT NULL,
+            `quantity` VARCHAR(100) NULL,
+            `destination` VARCHAR(191) NULL,
+            `status` VARCHAR(30) DEFAULT 'pending',
+            `admin_notes` TEXT NULL,
+            `contacted_at` TIMESTAMP NULL,
+            `quoted_at` TIMESTAMP NULL,
+            `closed_at` TIMESTAMP NULL,
+            `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
+
         // Seed default Admin user if not existing in admins table
         $adminEmail = 'admin@123gmail.com';
         $adminPassRaw = 'Admin@2026';

@@ -290,24 +290,54 @@
         }
     });
 
-    function handlePopupEnquirySubmit(e) {
+    async function handlePopupEnquirySubmit(e) {
         e.preventDefault();
         const form = e.target;
-        const name = form.full_name.value;
-        const phone = form.phone.value;
-        const product = form.product.value;
-        const details = form.details.value;
+        const submitBtn = form.querySelector('.enquiry-submit-btn');
+        const originalText = submitBtn ? submitBtn.textContent : 'SUBMIT BULK ENQUIRY';
 
-        alert('Thank you ' + name + '! Your bulk inquiry for ' + product + ' has been received. Our sales export team (+91 93300 51702) will contact you shortly.');
+        const formData = new FormData(form);
         
-        // WhatsApp direct inquiry backup option
-        const waText = encodeURIComponent(`Hello Biswas Enterprise, I submitted a bulk enquiry for ${product}.\nName: ${name}\nPhone: ${phone}\nDetails: ${details}`);
-        if (confirm('Would you also like to send this inquiry directly to WhatsApp (+91 93300 51702)?')) {
-            window.open(`https://api.whatsapp.com/send?phone=919330051702&text=${waText}`, '_blank');
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'SUBMITTING...';
         }
 
-        form.reset();
-        closeEnquiryModal();
+        try {
+            const response = await fetch('<?= url('api/submit_enquiry.php') ?>', {
+                method: 'POST',
+                body: formData
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                alert('Thank you ' + form.full_name.value + '! Your bulk enquiry has been received and stored in our database. Our sales export team will contact you shortly.');
+
+                const name = form.full_name.value;
+                const phone = form.phone.value;
+                const product = form.product.value;
+                const details = form.details.value;
+                const waText = encodeURIComponent(`Hello Biswas Enterprise, I submitted a bulk enquiry for ${product}.\nName: ${name}\nPhone: ${phone}\nDetails: ${details}`);
+                
+                if (confirm('Would you also like to send this inquiry directly to WhatsApp (+91 93300 51702)?')) {
+                    window.open(`https://api.whatsapp.com/send?phone=919330051702&text=${waText}`, '_blank');
+                }
+
+                form.reset();
+                closeEnquiryModal();
+            } else {
+                alert('Error: ' + (result.message || 'Failed to submit enquiry.'));
+            }
+        } catch (error) {
+            console.error('Enquiry Submission Error:', error);
+            alert('Something went wrong. Please try again or contact us via WhatsApp.');
+        } finally {
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
+            }
+        }
     }
 </script>
 

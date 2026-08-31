@@ -12,8 +12,39 @@ if (!isAdmin()) {
 
 $currentUser = getCurrentUser();
 $recentUsers = [];
+$recentEnquiries = [];
 $totalUsersCount = 0;
 $totalAdminsCount = 0;
+$totalEnquiriesCount = 0;
+$pendingEnquiriesCount = 0;
+$actionMessage = '';
+
+// Handle POST actions for updating status or deleting enquiries
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['enquiry_action'])) {
+    $enquiryId = (int)($_POST['enquiry_id'] ?? 0);
+    $enquiryAction = $_POST['enquiry_action'];
+    
+    if ($enquiryId > 0) {
+        try {
+            $pdo = Database::getConnection();
+            if ($enquiryAction === 'mark_contacted') {
+                $stmt = $pdo->prepare("UPDATE `enquiries` SET status = 'contacted', contacted_at = NOW() WHERE id = ?");
+                $stmt->execute([$enquiryId]);
+                $actionMessage = 'Enquiry #' . $enquiryId . ' marked as Contacted.';
+            } elseif ($enquiryAction === 'mark_quoted') {
+                $stmt = $pdo->prepare("UPDATE `enquiries` SET status = 'quoted', quoted_at = NOW() WHERE id = ?");
+                $stmt->execute([$enquiryId]);
+                $actionMessage = 'Enquiry #' . $enquiryId . ' marked as Quoted.';
+            } elseif ($enquiryAction === 'delete') {
+                $stmt = $pdo->prepare("DELETE FROM `enquiries` WHERE id = ?");
+                $stmt->execute([$enquiryId]);
+                $actionMessage = 'Enquiry #' . $enquiryId . ' deleted successfully.';
+            }
+        } catch (\Throwable $e) {
+            $actionMessage = 'Error: ' . $e->getMessage();
+        }
+    }
+}
 
 try {
     $pdo = Database::getConnection();
@@ -25,6 +56,18 @@ try {
     // Count admins
     $stmtAdminCount = $pdo->query("SELECT COUNT(*) FROM `admins`");
     $totalAdminsCount = (int)$stmtAdminCount->fetchColumn();
+
+    // Count total enquiries
+    $stmtEnqCount = $pdo->query("SELECT COUNT(*) FROM `enquiries`");
+    $totalEnquiriesCount = (int)$stmtEnqCount->fetchColumn();
+
+    // Count pending enquiries
+    $stmtPendingEnq = $pdo->query("SELECT COUNT(*) FROM `enquiries` WHERE status = 'pending'");
+    $pendingEnquiriesCount = (int)$stmtPendingEnq->fetchColumn();
+
+    // Fetch latest enquiries
+    $stmtEnquiries = $pdo->query("SELECT * FROM `enquiries` ORDER BY id DESC LIMIT 20");
+    $recentEnquiries = $stmtEnquiries->fetchAll();
 
     // Fetch latest users
     $stmtUsers = $pdo->query("SELECT id, first_name, last_name, email, phone, status, created_at FROM `users` ORDER BY id DESC LIMIT 10");
@@ -43,7 +86,7 @@ try {
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Merriweather:wght@700&display=swap" rel="stylesheet">
 
     <!-- CSS -->
     <link rel="stylesheet" href="<?= asset('css/main.css') ?>">
@@ -65,8 +108,8 @@ try {
         }
 
         .admin-logo {
-            font-family: 'Playfair Display', serif;
-            font-size: 22px;
+            font-family: 'Merriweather', serif;
+            font-size: 20px;
             font-weight: 700;
             color: #ffffff;
             margin-bottom: 40px;
@@ -125,7 +168,7 @@ try {
         }
 
         .admin-welcome h1 {
-            font-family: 'Playfair Display', serif;
+            font-family: 'Merriweather', serif;
             font-size: 24px;
             color: #1a2721;
             margin: 0;
@@ -139,7 +182,7 @@ try {
 
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 20px;
             margin-bottom: 32px;
         }
@@ -153,8 +196,8 @@ try {
         }
 
         .stat-card-title {
-            font-size: 13px;
-            font-weight: 600;
+            font-size: 12px;
+            font-weight: 700;
             color: #728277;
             text-transform: uppercase;
             letter-spacing: 0.5px;
@@ -162,10 +205,14 @@ try {
         }
 
         .stat-card-value {
-            font-family: 'Playfair Display', serif;
-            font-size: 32px;
+            font-family: 'Merriweather', serif;
+            font-size: 30px;
             font-weight: 700;
             color: #1b3b2b;
+        }
+
+        .stat-card-value.highlight-gold {
+            color: #d4af37;
         }
 
         .data-card {
@@ -174,6 +221,7 @@ try {
             padding: 28px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.03);
             border: 1px solid #e5ebe7;
+            margin-bottom: 32px;
         }
 
         .data-card-header {
@@ -184,7 +232,7 @@ try {
         }
 
         .data-card-title {
-            font-family: 'Playfair Display', serif;
+            font-family: 'Merriweather', serif;
             font-size: 20px;
             color: #1a2721;
             margin: 0;
@@ -199,7 +247,8 @@ try {
             padding: 14px 16px;
             text-align: left;
             border-bottom: 1px solid #edf2ee;
-            font-size: 14px;
+            font-size: 13.5px;
+            vertical-align: top;
         }
 
         .admin-table th {
@@ -208,14 +257,81 @@ try {
             background-color: #f8faf8;
         }
 
-        .user-status-badge {
+        .badge-status {
             display: inline-block;
             padding: 4px 10px;
             border-radius: 50px;
             font-size: 11px;
-            font-weight: 600;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .badge-pending {
+            background-color: #fef3c7;
+            color: #92400e;
+        }
+
+        .badge-contacted {
+            background-color: #dbeafe;
+            color: #1e40af;
+        }
+
+        .badge-quoted {
             background-color: #dcfce7;
             color: #166534;
+        }
+
+        .btn-action {
+            padding: 5px 10px;
+            font-size: 11px;
+            font-weight: 600;
+            border-radius: 6px;
+            border: 1px solid #d0d7d3;
+            background: #ffffff;
+            color: #2c3e35;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            text-decoration: none;
+        }
+
+        .btn-action:hover {
+            background: #1b3b2b;
+            color: #ffffff;
+            border-color: #1b3b2b;
+        }
+
+        .btn-action.btn-whatsapp {
+            background: #25d366;
+            color: #ffffff;
+            border-color: #25d366;
+        }
+
+        .btn-action.btn-whatsapp:hover {
+            background: #1da851;
+        }
+
+        .btn-action.btn-delete {
+            color: #dc2626;
+            border-color: #fca5a5;
+        }
+
+        .btn-action.btn-delete:hover {
+            background: #dc2626;
+            color: #ffffff;
+            border-color: #dc2626;
+        }
+
+        .alert-toast {
+            padding: 12px 18px;
+            background-color: #dcfce7;
+            color: #166534;
+            border-radius: 8px;
+            margin-bottom: 24px;
+            font-size: 14px;
+            font-weight: 600;
         }
     </style>
 </head>
@@ -229,7 +345,9 @@ try {
                 </div>
                 <ul class="admin-nav">
                     <li><a href="#" class="active">📊 Overview</a></li>
-                    <li><a href="<?= url('shop') ?>">🛒 View Website</a></li>
+                    <li><a href="#enquiriesSection">📩 Wholesale Enquiries</a></li>
+                    <li><a href="#usersSection">👥 Registered Users</a></li>
+                    <li><a href="<?= url('shop') ?>">🛒 View Live Store</a></li>
                 </ul>
             </div>
             <div>
@@ -250,8 +368,22 @@ try {
                 <a href="<?= url('shop') ?>" class="btn-primary" style="padding: 10px 18px; font-size: 13px; text-decoration: none;">View Live Store &rarr;</a>
             </div>
 
+            <?php if (!empty($actionMessage)): ?>
+                <div class="alert-toast">
+                    ✅ <?= htmlspecialchars($actionMessage) ?>
+                </div>
+            <?php endif; ?>
+
             <!-- Stats Grid -->
             <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-card-title">Total Enquiries</div>
+                    <div class="stat-card-value highlight-gold"><?= number_format($totalEnquiriesCount) ?></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-title">Pending Enquiries</div>
+                    <div class="stat-card-value"><?= number_format($pendingEnquiriesCount) ?></div>
+                </div>
                 <div class="stat-card">
                     <div class="stat-card-title">Registered Customers</div>
                     <div class="stat-card-value"><?= number_format($totalUsersCount) ?></div>
@@ -260,14 +392,105 @@ try {
                     <div class="stat-card-title">System Administrators</div>
                     <div class="stat-card-value"><?= number_format($totalAdminsCount) ?></div>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-card-title">Admin Account Email</div>
-                    <div class="stat-card-value" style="font-size: 16px; font-family: 'Inter', sans-serif; color: #1b3b2b;">admin@123gmail.com</div>
+            </div>
+
+            <!-- Wholesale & Export Enquiries Data Table -->
+            <div class="data-card" id="enquiriesSection">
+                <div class="data-card-header">
+                    <div>
+                        <h2 class="data-card-title">Wholesale &amp; Product Enquiries Database</h2>
+                        <div style="font-size: 12px; color: #728277; margin-top: 2px;">Real-time SQL Enquiry Submissions from Floating Popup &amp; Contact Page</div>
+                    </div>
+                    <span style="font-size: 12px; font-weight: 700; background: #e8f0eb; color: #1b3b2b; padding: 4px 10px; border-radius: 50px;">
+                        <?= count($recentEnquiries) ?> Records
+                    </span>
                 </div>
+
+                <?php if (empty($recentEnquiries)): ?>
+                    <p style="color: #63756a; font-size: 14px; padding: 20px 0;">No wholesale or export enquiries received yet in database.</p>
+                <?php else: ?>
+                    <div style="overflow-x: auto;">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Client Details</th>
+                                    <th>Product / Subject</th>
+                                    <th>Requirement Details</th>
+                                    <th>Status</th>
+                                    <th>Submitted At</th>
+                                    <th style="text-align: right;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($recentEnquiries as $enq): ?>
+                                    <tr>
+                                        <td>#<?= $enq['id'] ?></td>
+                                        <td>
+                                            <strong><?= htmlspecialchars($enq['full_name']) ?></strong><br>
+                                            <span style="font-size: 12px; color: #555;">✉️ <?= htmlspecialchars($enq['email']) ?></span><br>
+                                            <span style="font-size: 12px; color: #555;">📞 <?= htmlspecialchars($enq['phone']) ?></span>
+                                        </td>
+                                        <td>
+                                            <strong style="color: #1b3b2b;"><?= htmlspecialchars($enq['product_name'] ?: 'General') ?></strong>
+                                            <?php if (!empty($enq['quantity'])): ?>
+                                                <br><span style="font-size: 11px; color: #728277;">Qty: <?= htmlspecialchars($enq['quantity']) ?></span>
+                                            <?php endif; ?>
+                                        </td>
+                                        <td style="max-width: 250px;">
+                                            <div style="font-size: 13px; color: #333; line-height: 1.4;"><?= nl2br(htmlspecialchars($enq['requirement_details'] ?: 'No details specified')) ?></div>
+                                            <?php if (!empty($enq['destination'])): ?>
+                                                <span style="font-size: 11px; color: #15803d; font-weight: 600;">Destination: <?= htmlspecialchars($enq['destination']) ?></span>
+                                            <?php endif; ?>
+                                        </td>
+                                        <td>
+                                            <?php
+                                            $st = strtolower($enq['status'] ?? 'pending');
+                                            $badgeClass = $st === 'contacted' ? 'badge-contacted' : ($st === 'quoted' ? 'badge-quoted' : 'badge-pending');
+                                            ?>
+                                            <span class="badge-status <?= $badgeClass ?>"><?= htmlspecialchars(ucfirst($st)) ?></span>
+                                        </td>
+                                        <td style="font-size: 12px; color: #666;">
+                                            <?= date('M d, Y', strtotime($enq['created_at'])) ?><br>
+                                            <span style="color: #888;"><?= date('h:i A', strtotime($enq['created_at'])) ?></span>
+                                        </td>
+                                        <td style="text-align: right; white-space: nowrap;">
+                                            <div style="display: flex; gap: 6px; justify-content: flex-end; flex-wrap: wrap;">
+                                                <?php 
+                                                $phoneClean = preg_replace('/[^0-9]/', '', $enq['phone']);
+                                                if (!empty($phoneClean)):
+                                                    $waMsg = rawurlencode("Hello " . $enq['full_name'] . ", regarding your inquiry for " . $enq['product_name'] . " on Biswas Enterprise:");
+                                                ?>
+                                                    <a href="https://api.whatsapp.com/send?phone=<?= $phoneClean ?>&text=<?= $waMsg ?>" target="_blank" class="btn-action btn-whatsapp" title="Chat on WhatsApp">
+                                                        💬 WhatsApp
+                                                    </a>
+                                                <?php endif; ?>
+
+                                                <?php if ($st === 'pending'): ?>
+                                                    <form method="POST" style="display:inline;">
+                                                        <input type="hidden" name="enquiry_id" value="<?= $enq['id'] ?>">
+                                                        <input type="hidden" name="enquiry_action" value="mark_contacted">
+                                                        <button type="submit" class="btn-action" title="Mark as Contacted">✓ Contacted</button>
+                                                    </form>
+                                                <?php endif; ?>
+
+                                                <form method="POST" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete Enquiry #<?= $enq['id'] ?>?');">
+                                                    <input type="hidden" name="enquiry_id" value="<?= $enq['id'] ?>">
+                                                    <input type="hidden" name="enquiry_action" value="delete">
+                                                    <button type="submit" class="btn-action btn-delete" title="Delete Record">🗑 Delete</button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                <?php endif; ?>
             </div>
 
             <!-- Recent Users Data Table -->
-            <div class="data-card">
+            <div class="data-card" id="usersSection">
                 <div class="data-card-header">
                     <h2 class="data-card-title">Registered Users Database</h2>
                     <span style="font-size: 13px; color: #728277;">Real-time SQL Records</span>
@@ -276,30 +499,32 @@ try {
                 <?php if (empty($recentUsers)): ?>
                     <p style="color: #63756a; font-size: 14px;">No customer accounts registered yet in database.</p>
                 <?php else: ?>
-                    <table class="admin-table">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Name</th>
-                                <th>Email Address</th>
-                                <th>Phone</th>
-                                <th>Status</th>
-                                <th>Registered At</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php foreach ($recentUsers as $u): ?>
+                    <div style="overflow-x: auto;">
+                        <table class="admin-table">
+                            <thead>
                                 <tr>
-                                    <td>#<?= $u['id'] ?></td>
-                                    <td><strong><?= htmlspecialchars($u['first_name'] . ' ' . $u['last_name']) ?></strong></td>
-                                    <td><?= htmlspecialchars($u['email']) ?></td>
-                                    <td><?= htmlspecialchars($u['phone'] ?: 'N/A') ?></td>
-                                    <td><span class="user-status-badge"><?= htmlspecialchars(ucfirst($u['status'])) ?></span></td>
-                                    <td><?= date('M d, Y h:i A', strtotime($u['created_at'])) ?></td>
+                                    <th>ID</th>
+                                    <th>Name</th>
+                                    <th>Email Address</th>
+                                    <th>Phone</th>
+                                    <th>Status</th>
+                                    <th>Registered At</th>
                                 </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($recentUsers as $u): ?>
+                                    <tr>
+                                        <td>#<?= $u['id'] ?></td>
+                                        <td><strong><?= htmlspecialchars($u['first_name'] . ' ' . $u['last_name']) ?></strong></td>
+                                        <td><?= htmlspecialchars($u['email']) ?></td>
+                                        <td><?= htmlspecialchars($u['phone'] ?: 'N/A') ?></td>
+                                        <td><span class="badge-status badge-quoted"><?= htmlspecialchars(ucfirst($u['status'])) ?></span></td>
+                                        <td><?= date('M d, Y h:i A', strtotime($u['created_at'])) ?></td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
                 <?php endif; ?>
             </div>
         </main>
