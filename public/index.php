@@ -28,6 +28,29 @@ if (in_array($path, ['/blog', '/blog.php', '/blog/'])) {
     exit;
 }
 
+if (in_array($path, ['/login', '/login.php', '/login/'])) {
+    require_once __DIR__ . '/login.php';
+    exit;
+}
+
+if (in_array($path, ['/register', '/register.php', '/signup', '/signup/'])) {
+    $_GET['tab'] = 'register';
+    require_once __DIR__ . '/login.php';
+    exit;
+}
+
+if (in_array($path, ['/account', '/account.php', '/account/'])) {
+    require_once __DIR__ . '/account.php';
+    exit;
+}
+
+if (in_array($path, ['/logout', '/logout.php'])) {
+    require_once __DIR__ . '/../helpers/auth.php';
+    logoutUser();
+    header('Location: ' . url('login?logged_out=1'));
+    exit;
+}
+
 // Development Data Structures - Prepared for future database queries
 // Biswas Enterprise Official Product Categories (sourced from biswas-enterprise.co.in)
 $categories = [
