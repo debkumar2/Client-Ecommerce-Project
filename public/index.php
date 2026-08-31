@@ -18,6 +18,16 @@ if (in_array($path, ['/about', '/about.php', '/about/'])) {
     exit;
 }
 
+if (in_array($path, ['/contact', '/contact.php', '/contact/'])) {
+    require_once __DIR__ . '/contact.php';
+    exit;
+}
+
+if (in_array($path, ['/blog', '/blog.php', '/blog/'])) {
+    require_once __DIR__ . '/blog.php';
+    exit;
+}
+
 // Development Data Structures - Prepared for future database queries
 // Biswas Enterprise Official Product Categories (sourced from biswas-enterprise.co.in)
 $categories = [
@@ -217,14 +227,6 @@ $blogArticles = [
 
                 <!-- Header Actions (Icons) -->
                 <div class="header-actions">
-                    <!-- Search Icon -->
-                    <button class="icon-btn" id="search-toggle" aria-label="Open search">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <circle cx="11" cy="11" r="8"></circle>
-                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                        </svg>
-                    </button>
-
                     <!-- Wishlist Icon -->
                     <a href="<?= url('wishlist') ?>" class="icon-btn" aria-label="View Wishlist">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -253,18 +255,6 @@ $blogArticles = [
             </div>
         </div>
 
-        <!-- Search Bar Modal Dropdown -->
-        <div class="search-modal" id="search-modal">
-            <div class="container">
-                <form class="search-form" action="<?= url('shop') ?>" method="GET" role="search">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="11" cy="11" r="8"></circle>
-                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                    </svg>
-                    <input type="search" name="q" placeholder="Search for natural herbs, powders, wellness products..." aria-label="Search site">
-                </form>
-            </div>
-        </div>
     </header>
 
     <!-- Mobile Drawer Overlay & Menu -->
