@@ -56,10 +56,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $result = registerUser($firstName, $lastName, $email, $phone, $password, $confirmPassword);
         if ($result['success']) {
-            header('Location: ' . url('account'));
-            exit;
+            // Redirect to login tab with a success flash message — do NOT auto-login
+            $successMessage = 'Account created successfully! Please sign in with your credentials.';
+            $activeTab = 'login';
         } else {
             $errorMessage = $result['message'];
+            $activeTab = 'register';
         }
     }
 }
@@ -80,6 +82,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <!-- CSS Assets -->
     <link rel="stylesheet" href="<?= asset('css/main.css') ?>">
     <link rel="stylesheet" href="<?= asset('css/pages/auth.css') ?>">
+    <?php include __DIR__ . '/includes/toastify.php'; ?>
 </head>
 <body class="clean-auth-body">
 
@@ -117,12 +120,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 <!-- Auth Form Body -->
                 <div class="auth-card-body">
-                    <!-- Alert Error Box -->
                     <?php if (!empty($errorMessage)): ?>
-                        <div class="alert-box alert-box-danger">
-                            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
-                            <span><?= htmlspecialchars($errorMessage) ?></span>
-                        </div>
+                        <script>document.addEventListener('DOMContentLoaded', () => showToastify('<?= addslashes(htmlspecialchars($errorMessage)) ?>', 'error'));</script>
+                    <?php endif; ?>
+
+                    <?php if (!empty($successMessage)): ?>
+                        <script>document.addEventListener('DOMContentLoaded', () => showToastify('<?= addslashes(htmlspecialchars($successMessage)) ?>', 'success'));</script>
                     <?php endif; ?>
 
                     <!-- 1. CUSTOMER LOGIN FORM PANE -->

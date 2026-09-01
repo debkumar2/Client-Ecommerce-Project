@@ -65,13 +65,15 @@ try {
     $stmtPendingEnq = $pdo->query("SELECT COUNT(*) FROM `enquiries` WHERE status = 'pending'");
     $pendingEnquiriesCount = (int)$stmtPendingEnq->fetchColumn();
 
-    // Fetch latest enquiries
-    $stmtEnquiries = $pdo->query("SELECT * FROM `enquiries` ORDER BY id DESC LIMIT 20");
-    $recentEnquiries = $stmtEnquiries->fetchAll();
+    // Fetch ALL enquiries
+    $stmtEnquiries = $pdo->query("SELECT * FROM `enquiries` ORDER BY id DESC");
+    $allEnquiries = $stmtEnquiries->fetchAll();
+    $recentEnquiries = array_slice($allEnquiries, 0, 5);
 
-    // Fetch latest users
-    $stmtUsers = $pdo->query("SELECT id, first_name, last_name, email, phone, status, created_at FROM `users` ORDER BY id DESC LIMIT 10");
-    $recentUsers = $stmtUsers->fetchAll();
+    // Fetch ALL users (exclude any admins)
+    $stmtUsers = $pdo->query("SELECT id, first_name, last_name, email, phone, status, created_at FROM `users` WHERE email NOT IN (SELECT email FROM `admins`) ORDER BY id DESC");
+    $allUsers = $stmtUsers->fetchAll();
+    $recentUsers = array_slice($allUsers, 0, 5);
 } catch (\Throwable $e) {
     error_log('Admin Dashboard Query Error: ' . $e->getMessage());
 }
@@ -344,9 +346,9 @@ try {
                     <span>🌿</span> Biswas Admin
                 </div>
                 <ul class="admin-nav">
-                    <li><a href="#" class="active">📊 Overview</a></li>
-                    <li><a href="#enquiriesSection">📩 Wholesale Enquiries</a></li>
-                    <li><a href="#usersSection">👥 Registered Users</a></li>
+                    <li><a href="#" class="active" onclick="switchView('overview', this); return false;">📊 Overview</a></li>
+                    <li><a href="#" onclick="switchView('enquiries', this); return false;">📩 Wholesale Enquiries</a></li>
+                    <li><a href="#" onclick="switchView('users', this); return false;">👥 Registered Users</a></li>
                     <li><a href="<?= url('shop') ?>">🛒 View Live Store</a></li>
                 </ul>
             </div>
@@ -394,16 +396,22 @@ try {
                 </div>
             </div>
 
-            <!-- Wholesale & Export Enquiries Data Table -->
-            <div class="data-card" id="enquiriesSection">
+            <!-- ===================== OVERVIEW SECTION ===================== -->
+            <div id="section-overview">
+
+            <!-- Wholesale & Export Enquiries Data Table (Overview: 5 records) -->
+            <div class="data-card">
                 <div class="data-card-header">
                     <div>
                         <h2 class="data-card-title">Wholesale &amp; Product Enquiries Database</h2>
                         <div style="font-size: 12px; color: #728277; margin-top: 2px;">Real-time SQL Enquiry Submissions from Floating Popup &amp; Contact Page</div>
                     </div>
-                    <span style="font-size: 12px; font-weight: 700; background: #e8f0eb; color: #1b3b2b; padding: 4px 10px; border-radius: 50px;">
-                        <?= count($recentEnquiries) ?> Records
-                    </span>
+                    <div style="display:flex;gap:8px;align-items:center;">
+                        <span style="font-size: 12px; font-weight: 700; background: #e8f0eb; color: #1b3b2b; padding: 4px 10px; border-radius: 50px;">
+                            Showing 5 of <?= count($allEnquiries) ?>
+                        </span>
+                        <a href="#" onclick="switchView('enquiries', null); return false;" style="font-size:12px;color:#1b3b2b;font-weight:600;text-decoration:underline;">View All →</a>
+                    </div>
                 </div>
 
                 <?php if (empty($recentEnquiries)): ?>
@@ -489,11 +497,14 @@ try {
                 <?php endif; ?>
             </div>
 
-            <!-- Recent Users Data Table -->
-            <div class="data-card" id="usersSection">
+            <!-- Recent Users Data Table (Overview: 5 records) -->
+            <div class="data-card">
                 <div class="data-card-header">
                     <h2 class="data-card-title">Registered Users Database</h2>
-                    <span style="font-size: 13px; color: #728277;">Real-time SQL Records</span>
+                    <div style="display:flex;gap:8px;align-items:center;">
+                        <span style="font-size:13px;color:#728277;">Showing 5 of <?= count($allUsers) ?></span>
+                        <a href="#" onclick="switchView('users', null); return false;" style="font-size:12px;color:#1b3b2b;font-weight:600;text-decoration:underline;">View All →</a>
+                    </div>
                 </div>
 
                 <?php if (empty($recentUsers)): ?>
@@ -527,7 +538,150 @@ try {
                     </div>
                 <?php endif; ?>
             </div>
+
+            </div><!-- end #section-overview -->
+
+            <!-- ===================== ENQUIRIES FULL SECTION ===================== -->
+            <div id="section-enquiries" style="display:none;">
+                <div class="data-card">
+                    <div class="data-card-header">
+                        <div>
+                            <h2 class="data-card-title">Wholesale &amp; Product Enquiries</h2>
+                            <div style="font-size:12px;color:#728277;margin-top:2px;">All enquiry submissions from Floating Popup &amp; Contact Page</div>
+                        </div>
+                        <span style="font-size:12px;font-weight:700;background:#e8f0eb;color:#1b3b2b;padding:4px 10px;border-radius:50px;">
+                            <?= count($allEnquiries) ?> Total Records
+                        </span>
+                    </div>
+                    <?php if (empty($allEnquiries)): ?>
+                        <p style="color:#63756a;font-size:14px;padding:20px 0;">No enquiries received yet.</p>
+                    <?php else: ?>
+                    <div style="overflow-x:auto;">
+                        <table class="admin-table">
+                            <thead><tr>
+                                <th>ID</th><th>Client Details</th><th>Product / Subject</th>
+                                <th>Requirement Details</th><th>Status</th><th>Submitted At</th>
+                                <th style="text-align:right;">Actions</th>
+                            </tr></thead>
+                            <tbody>
+                            <?php foreach ($allEnquiries as $enq): ?>
+                                <tr>
+                                    <td>#<?= $enq['id'] ?></td>
+                                    <td>
+                                        <strong><?= htmlspecialchars($enq['full_name']) ?></strong><br>
+                                        <span style="font-size:12px;color:#555;">✉️ <?= htmlspecialchars($enq['email']) ?></span><br>
+                                        <span style="font-size:12px;color:#555;">📞 <?= htmlspecialchars($enq['phone']) ?></span>
+                                    </td>
+                                    <td><strong style="color:#1b3b2b;"><?= htmlspecialchars($enq['product_name'] ?: 'General') ?></strong>
+                                        <?php if (!empty($enq['quantity'])): ?><br><span style="font-size:11px;color:#728277;">Qty: <?= htmlspecialchars($enq['quantity']) ?></span><?php endif; ?>
+                                    </td>
+                                    <td style="max-width:250px;"><div style="font-size:13px;color:#333;line-height:1.4;"><?= nl2br(htmlspecialchars($enq['requirement_details'] ?: 'No details')) ?></div>
+                                        <?php if (!empty($enq['destination'])): ?><span style="font-size:11px;color:#15803d;font-weight:600;">Destination: <?= htmlspecialchars($enq['destination']) ?></span><?php endif; ?>
+                                    </td>
+                                    <td><?php $st=strtolower($enq['status']??'pending'); $bc=$st==='contacted'?'badge-contacted':($st==='quoted'?'badge-quoted':'badge-pending'); ?>
+                                        <span class="badge-status <?= $bc ?>"><?= ucfirst($st) ?></span>
+                                    </td>
+                                    <td style="font-size:12px;color:#666;"><?= date('M d, Y', strtotime($enq['created_at'])) ?><br><span style="color:#888;"><?= date('h:i A', strtotime($enq['created_at'])) ?></span></td>
+                                    <td style="text-align:right;white-space:nowrap;">
+                                        <div style="display:flex;gap:6px;justify-content:flex-end;flex-wrap:wrap;">
+                                            <?php $phoneClean=preg_replace('/[^0-9]/','', $enq['phone']); if(!empty($phoneClean)): $waMsg=rawurlencode("Hello ".$enq['full_name'].", regarding your inquiry for ".$enq['product_name']." on Biswas Enterprise:"); ?>
+                                                <a href="https://api.whatsapp.com/send?phone=<?= $phoneClean ?>&text=<?= $waMsg ?>" target="_blank" class="btn-action btn-whatsapp">💬 WhatsApp</a>
+                                            <?php endif; ?>
+                                            <?php if($st==='pending'): ?>
+                                                <form method="POST" style="display:inline;">
+                                                    <input type="hidden" name="enquiry_id" value="<?= $enq['id'] ?>">
+                                                    <input type="hidden" name="enquiry_action" value="mark_contacted">
+                                                    <button type="submit" class="btn-action">✓ Contacted</button>
+                                                </form>
+                                            <?php endif; ?>
+                                            <form method="POST" style="display:inline;" onsubmit="return confirm('Delete Enquiry #<?= $enq['id'] ?>?');">
+                                                <input type="hidden" name="enquiry_id" value="<?= $enq['id'] ?>">
+                                                <input type="hidden" name="enquiry_action" value="delete">
+                                                <button type="submit" class="btn-action btn-delete">🗑 Delete</button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+
+            <!-- ===================== USERS FULL SECTION ===================== -->
+            <div id="section-users" style="display:none;">
+                <div class="data-card">
+                    <div class="data-card-header">
+                        <div>
+                            <h2 class="data-card-title">Registered Users Database</h2>
+                            <div style="font-size:12px;color:#728277;margin-top:2px;">All registered customer accounts</div>
+                        </div>
+                        <span style="font-size:12px;font-weight:700;background:#e8f0eb;color:#1b3b2b;padding:4px 10px;border-radius:50px;">
+                            <?= count($allUsers) ?> Total Records
+                        </span>
+                    </div>
+                    <?php if (empty($allUsers)): ?>
+                        <p style="color:#63756a;font-size:14px;">No users registered yet.</p>
+                    <?php else: ?>
+                    <div style="overflow-x:auto;">
+                        <table class="admin-table">
+                            <thead><tr>
+                                <th>ID</th><th>Name</th><th>Email Address</th>
+                                <th>Phone</th><th>Status</th><th>Registered At</th>
+                            </tr></thead>
+                            <tbody>
+                            <?php foreach ($allUsers as $u): ?>
+                                <tr>
+                                    <td>#<?= $u['id'] ?></td>
+                                    <td><strong><?= htmlspecialchars($u['first_name'].' '.$u['last_name']) ?></strong></td>
+                                    <td><?= htmlspecialchars($u['email']) ?></td>
+                                    <td><?= htmlspecialchars($u['phone'] ?: 'N/A') ?></td>
+                                    <td><span class="badge-status badge-quoted"><?= ucfirst($u['status']) ?></span></td>
+                                    <td><?= date('M d, Y h:i A', strtotime($u['created_at'])) ?></td>
+                                </tr>
+                            <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+
         </main>
     </div>
+
+    <script>
+    function switchView(view, clickedEl) {
+        // Hide all sections
+        document.getElementById('section-overview').style.display = 'none';
+        document.getElementById('section-enquiries').style.display = 'none';
+        document.getElementById('section-users').style.display = 'none';
+
+        // Show target
+        document.getElementById('section-' + view).style.display = 'block';
+
+        // Update active nav link
+        document.querySelectorAll('.admin-nav a').forEach(a => a.classList.remove('active'));
+        if (clickedEl) {
+            clickedEl.classList.add('active');
+        } else {
+            // Called from "View All" links — activate matching sidebar link
+            const map = { enquiries: 1, users: 2 };
+            const navLinks = document.querySelectorAll('.admin-nav a');
+            if (map[view] !== undefined) navLinks[map[view]].classList.add('active');
+        }
+
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // On page load, check hash
+    (function() {
+        const hash = window.location.hash;
+        if (hash === '#enquiries') switchView('enquiries', null);
+        else if (hash === '#users') switchView('users', null);
+    })();
+    </script>
 </body>
 </html>

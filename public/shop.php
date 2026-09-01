@@ -872,23 +872,7 @@ $products = [
         </div>
     </div>
 
-    <!-- 14. Newsletter CTA -->
-    <section class="newsletter-section">
-        <div class="container">
-            <div class="newsletter-card">
-                <div class="newsletter-content">
-                    <span class="eyebrow-tag">STAY INFORMED</span>
-                    <h2 class="section-title">Subscribe for Natural Wellness Tips</h2>
-                    <p class="section-desc">Get early notification on new harvest arrivals, herbal guides, and exclusive wellness offers.</p>
-                    
-                    <form class="newsletter-form" onsubmit="event.preventDefault(); alert('Thank you for subscribing to Biswas Enterprise!');">
-                        <input type="email" placeholder="Enter your email address" required aria-label="Email address">
-                        <button type="submit" class="btn btn-secondary">Subscribe</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </section>
+
 
     <!-- Site Footer -->
     <footer class="site-footer">

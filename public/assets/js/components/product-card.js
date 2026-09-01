@@ -283,32 +283,34 @@ export function initProductCards() {
 }
 
 // Simple Toast Notification Helper
-function showToast(message) {
+function showToast(message, type = 'success') {
+    if (typeof window.showToastify === 'function') {
+        window.showToastify(message, type);
+        return;
+    }
     let container = document.getElementById('toastContainer');
     if (!container) {
         container = document.createElement('div');
         container.id = 'toastContainer';
-        container.style.cssText = 'position:fixed;bottom:24px;right:24px;z-index:9999;display:flex;flex-direction:column;gap:10px;';
+        container.style.cssText = 'position:fixed;top:24px;left:50%;transform:translateX(-50%);z-index:999999;display:flex;flex-direction:column;gap:10px;align-items:center;pointer-events:none;';
         document.body.appendChild(container);
     }
 
     const toast = document.createElement('div');
-    toast.style.cssText = 'background:var(--primary-dark);color:#ffffff;padding:0.75rem 1.25rem;border-radius:8px;font-size:0.875rem;font-weight:600;box-shadow:0 10px 25px rgba(0,0,0,0.2);transform:translateY(20px);opacity:0;transition:all 0.3s ease;display:flex;align-items:center;gap:8px;';
+    toast.style.cssText = 'background:#10b981;color:#ffffff;padding:13px 22px;border-radius:12px;font-size:14px;font-weight:600;box-shadow:0 12px 32px rgba(0,0,0,0.18);transition:all 0.3s ease;pointer-events:auto;display:flex;align-items:center;gap:8px;';
     toast.innerHTML = `
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--secondary)" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 8 12 12 14 14"/></svg>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
         <span>${message}</span>
     `;
 
     container.appendChild(toast);
 
     requestAnimationFrame(() => {
-        toast.style.transform = 'translateY(0)';
         toast.style.opacity = '1';
     });
 
     setTimeout(() => {
-        toast.style.transform = 'translateY(20px)';
         toast.style.opacity = '0';
         setTimeout(() => toast.remove(), 300);
-    }, 2800);
+    }, 3500);
 }

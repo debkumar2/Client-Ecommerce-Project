@@ -68,6 +68,24 @@ function initDatabaseTables(): void {
             `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
 
+        // Create addresses table
+        $pdo->exec("CREATE TABLE IF NOT EXISTS `addresses` (
+            `id` BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+            `user_id` BIGINT UNSIGNED NOT NULL,
+            `full_name` VARCHAR(191) NOT NULL,
+            `phone` VARCHAR(30) NULL,
+            `address_line_1` VARCHAR(255) NOT NULL,
+            `address_line_2` VARCHAR(255) NULL,
+            `city` VARCHAR(100) NOT NULL,
+            `state` VARCHAR(100) NOT NULL,
+            `postal_code` VARCHAR(20) NOT NULL,
+            `country` VARCHAR(100) DEFAULT 'India',
+            `address_type` VARCHAR(20) DEFAULT 'home',
+            `is_default` TINYINT(1) DEFAULT 0,
+            `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
+
         // Seed default Admin user if not existing in admins table
         $adminEmail = 'admin@123gmail.com';
         $adminPassRaw = 'Admin@2026';
@@ -84,15 +102,7 @@ function initDatabaseTables(): void {
             $insertStmt->execute(['System', 'Admin', $adminEmail, '9876543210', $hashedPass]);
         }
 
-        // Also seed default admin into users table for universal login convenience
-        $stmtUser = $pdo->prepare("SELECT id FROM `users` WHERE email = ? LIMIT 1");
-        $stmtUser->execute([$adminEmail]);
-        if (!$stmtUser->fetch()) {
-            $insertUserStmt = $pdo->prepare("INSERT INTO `users` 
-                (first_name, last_name, email, phone, password, status, created_at, updated_at) 
-                VALUES (?, ?, ?, ?, ?, 'active', NOW(), NOW())");
-            $insertUserStmt->execute(['System', 'Admin', $adminEmail, '9876543210', $hashedPass]);
-        }
+        // NOTE: Admins are stored ONLY in the `admins` table, not in `users`.
 
     } catch (\Throwable $e) {
         // Table initialization fail-safe error logging
@@ -153,12 +163,12 @@ function loginUser(string $email, string $password): array {
         $admin = $stmt->fetch();
 
         if ($admin) {
-            $passValid = password_verify($password, $admin['password']) || ($password === $admin['password']) || ($email === 'admin@123gmail.com' && $password === 'Admin@2026');
+            $passValid = password_verify($password, $admin['password']) || ($password === $admin['password']);
             
             if ($passValid) {
-                // Update hashed password if it was plain text or admin fallback
+                // Update hashed password if it was plain text
                 if (!password_verify($password, $admin['password'])) {
-                    $newHash = password_hash('Admin@2026', PASSWORD_BCRYPT);
+                    $newHash = password_hash($password, PASSWORD_BCRYPT);
                     $updatePass = $pdo->prepare("UPDATE `admins` SET password = ? WHERE id = ?");
                     $updatePass->execute([$newHash, $admin['id']]);
                 }
@@ -184,7 +194,7 @@ function loginUser(string $email, string $password): array {
         $user = $stmt->fetch();
 
         if ($user) {
-            $passValid = password_verify($password, $user['password']) || ($password === $user['password']) || ($email === 'admin@123gmail.com' && $password === 'Admin@2026');
+            $passValid = password_verify($password, $user['password']) || ($password === $user['password']);
 
             if ($passValid) {
                 $role = ($user['email'] === 'admin@123gmail.com') ? 'admin' : 'user';
@@ -256,17 +266,10 @@ function registerUser(string $firstName, string $lastName, string $email, string
             (first_name, last_name, email, phone, password, status, created_at, updated_at) 
             VALUES (?, ?, ?, ?, ?, 'active', NOW(), NOW())");
         $insert->execute([$firstName, $lastName, $email, $phone, $hashedPass]);
-        $newUserId = $pdo->lastInsertId();
+        $pdo->lastInsertId();
 
-        // Automatically log in newly registered user
-        $_SESSION['user_id'] = $newUserId;
-        $_SESSION['first_name'] = $firstName;
-        $_SESSION['last_name'] = $lastName;
-        $_SESSION['user_email'] = $email;
-        $_SESSION['user_phone'] = $phone;
-        $_SESSION['user_role'] = 'user';
-
-        return ['success' => true, 'message' => 'Account created successfully! Welcome to Biswas Enterprise.'];
+        // Do NOT auto-login — user must login manually with their credentials.
+        return ['success' => true, 'message' => 'Account created successfully! Please login with your credentials.'];
 
     } catch (\Throwable $e) {
         return ['success' => false, 'message' => 'Registration failed: ' . $e->getMessage()];

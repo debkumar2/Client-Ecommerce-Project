@@ -19,24 +19,30 @@ export const debounce = (func, wait = 300) => {
 };
 
 export const showToast = (message, type = 'info') => {
+    if (typeof window.showToastify === 'function') {
+        window.showToastify(message, type);
+        return;
+    }
     let toastContainer = document.getElementById('toast-container');
     if (!toastContainer) {
         toastContainer = document.createElement('div');
         toastContainer.id = 'toast-container';
-        toastContainer.style.cssText = 'position:fixed;bottom:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:10px;';
+        toastContainer.style.cssText = 'position:fixed;top:24px;left:50%;transform:translateX(-50%);z-index:999999;display:flex;flex-direction:column;gap:10px;align-items:center;pointer-events:none;';
         document.body.appendChild(toastContainer);
     }
 
     const toast = document.createElement('div');
     toast.className = `toast toast-${type}`;
-    toast.style.cssText = `background:${type === 'success' ? '#2f5d3a' : type === 'error' ? '#c62828' : '#1f2922'};color:#ffffff;padding:12px 20px;border-radius:6px;font-size:0.9rem;font-weight:500;box-shadow:0 4px 12px rgba(0,0,0,0.15);transition:all 0.3s ease;`;
-    toast.textContent = message;
+    const bg = type === 'success' ? '#10b981' : (type === 'error' || type === 'danger' ? '#ef4444' : '#1b3b2b');
+    const icon = type === 'success' ? '✓ ' : (type === 'error' || type === 'danger' ? '⚠️ ' : 'ℹ️ ');
+    toast.style.cssText = `background:${bg};color:#ffffff;padding:13px 22px;border-radius:12px;font-size:14px;font-weight:600;box-shadow:0 12px 32px rgba(0,0,0,0.18);transition:all 0.3s ease;pointer-events:auto;display:flex;align-items:center;gap:8px;`;
+    toast.innerHTML = icon + message;
 
     toastContainer.appendChild(toast);
 
     setTimeout(() => {
         toast.style.opacity = '0';
-        toast.style.transform = 'translateY(10px)';
+        toast.style.transform = 'translateY(-10px)';
         setTimeout(() => toast.remove(), 300);
-    }, 3000);
+    }, 4000);
 };

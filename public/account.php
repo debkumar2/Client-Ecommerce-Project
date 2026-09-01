@@ -49,6 +49,108 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
         $updateError = 'First name and last name are required.';
     }
 }
+
+// ---- Address CRUD Handlers ----
+$addressMessage = '';
+$addressError   = '';
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['address_action'])) {
+    $addrAction = $_POST['address_action'];
+    $uid = $currentUser['id'];
+    try {
+        $pdo = Database::getConnection();
+        if ($addrAction === 'add_address' || $addrAction === 'edit_address') {
+            $fn  = trim($_POST['full_name']      ?? '');
+            $ph  = trim($_POST['phone']           ?? '');
+            $al1 = trim($_POST['address_line_1'] ?? '');
+            $al2 = trim($_POST['address_line_2'] ?? '');
+            $cy  = trim($_POST['city']           ?? '');
+            $st  = trim($_POST['state']          ?? '');
+            $pc  = trim($_POST['postal_code']    ?? '');
+            $co  = trim($_POST['country']        ?? 'India');
+            $at  = trim($_POST['address_type']   ?? 'home');
+            $isd = isset($_POST['is_default']) ? 1 : 0;
+            if (empty($fn) || empty($al1) || empty($cy) || empty($st) || empty($pc)) {
+                $addressError = 'Please fill all required fields (Name, Address, City, State, Postal Code).';
+            } else {
+                if ($isd) {
+                    $pdo->prepare("UPDATE `addresses` SET is_default = 0 WHERE user_id = ?")->execute([$uid]);
+                }
+                if ($addrAction === 'add_address') {
+                    $pdo->prepare("INSERT INTO `addresses` (user_id, full_name, phone, address_line_1, address_line_2, city, state, postal_code, country, address_type, is_default, created_at, updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,NOW(),NOW())")
+                        ->execute([$uid,$fn,$ph,$al1,$al2,$cy,$st,$pc,$co,$at,$isd]);
+                    $addressMessage = 'New address added successfully!';
+                } else {
+                    $aid = (int)($_POST['address_id'] ?? 0);
+                    $pdo->prepare("UPDATE `addresses` SET full_name=?, phone=?, address_line_1=?, address_line_2=?, city=?, state=?, postal_code=?, country=?, address_type=?, is_default=?, updated_at=NOW() WHERE id=? AND user_id=?")
+                        ->execute([$fn,$ph,$al1,$al2,$cy,$st,$pc,$co,$at,$isd,$aid,$uid]);
+                    $addressMessage = 'Address updated successfully!';
+                    header('Location: ' . url('account.php?tab=addresses&saved=1')); exit;
+                }
+            }
+        } elseif ($addrAction === 'set_default') {
+            $aid = (int)($_POST['address_id'] ?? 0);
+            $pdo->prepare("UPDATE `addresses` SET is_default = 0 WHERE user_id = ?")->execute([$uid]);
+            $pdo->prepare("UPDATE `addresses` SET is_default = 1 WHERE id = ? AND user_id = ?")->execute([$aid,$uid]);
+            $addressMessage = 'Default address updated.';
+        } elseif ($addrAction === 'delete_address') {
+            $aid = (int)($_POST['address_id'] ?? 0);
+            $pdo->prepare("DELETE FROM `addresses` WHERE id = ? AND user_id = ?")->execute([$aid,$uid]);
+            $addressMessage = 'Address deleted successfully.';
+        }
+    } catch (\Throwable $e) {
+        $addressError = 'Error: ' . $e->getMessage();
+    }
+}
+
+// ---- Password Change Handler ----
+$passwordSuccess = '';
+$passwordError   = '';
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['change_password'])) {
+    $oldPassword     = $_POST['old_password'] ?? '';
+    $newPassword     = $_POST['new_password'] ?? '';
+    $confirmPassword = $_POST['confirm_password'] ?? '';
+    $uid             = $currentUser['id'];
+    $userRole        = $currentUser['role'] ?? 'user';
+    $table           = ($userRole === 'admin') ? 'admins' : 'users';
+
+    if (empty($oldPassword) || empty($newPassword) || empty($confirmPassword)) {
+        $passwordError = 'All password fields are required.';
+    } elseif (strlen($newPassword) < 6) {
+        $passwordError = 'New password must be at least 6 characters long.';
+    } elseif ($newPassword !== $confirmPassword) {
+        $passwordError = 'New password and confirm password do not match.';
+    } else {
+        try {
+            $pdo = Database::getConnection();
+            $stmt = $pdo->prepare("SELECT password FROM `{$table}` WHERE id = ?");
+            $stmt->execute([$uid]);
+            $userDb = $stmt->fetch();
+
+            if ($userDb && (password_verify($oldPassword, $userDb['password']) || $oldPassword === $userDb['password'])) {
+                $newHash = password_hash($newPassword, PASSWORD_BCRYPT);
+                $updateStmt = $pdo->prepare("UPDATE `{$table}` SET password = ?, updated_at = NOW() WHERE id = ?");
+                $updateStmt->execute([$newHash, $uid]);
+                $passwordSuccess = 'Your password has been changed successfully!';
+            } else {
+                $passwordError = 'Current password is incorrect. Please try again.';
+            }
+        } catch (\Throwable $e) {
+            $passwordError = 'Failed to update password: ' . $e->getMessage();
+        }
+    }
+}
+
+// Fetch all saved addresses for current user
+$userAddresses = [];
+try {
+    $pdo = Database::getConnection();
+    $stmtAddr = $pdo->prepare("SELECT * FROM `addresses` WHERE user_id = ? ORDER BY is_default DESC, id DESC");
+    $stmtAddr->execute([$currentUser['id']]);
+    $userAddresses = $stmtAddr->fetchAll();
+} catch (\Throwable $e) { /* silent */ }
+
+// Flash message from redirect
+if (isset($_GET['saved']) && empty($addressMessage)) $addressMessage = 'Address updated successfully!';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -66,6 +168,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
     <!-- CSS Assets -->
     <link rel="stylesheet" href="<?= asset('css/main.css') ?>">
     <link rel="stylesheet" href="<?= asset('css/pages/auth.css') ?>">
+    <?php include __DIR__ . '/includes/toastify.php'; ?>
 
     <style>
         /* Account Dashboard Clean Styles */
@@ -574,17 +677,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
             <!-- Main Content Area -->
             <main class="account-main-card">
                 <?php if ($updateSuccess): ?>
-                    <div class="alert-box alert-box-success">
-                        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                        <span>Your profile information has been successfully updated!</span>
-                    </div>
+                    <script>document.addEventListener('DOMContentLoaded', () => showToastify('Your profile information has been successfully updated!', 'success'));</script>
                 <?php endif; ?>
 
                 <?php if (!empty($updateError)): ?>
-                    <div class="alert-box alert-box-danger">
-                        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
-                        <span><?= htmlspecialchars($updateError) ?></span>
-                    </div>
+                    <script>document.addEventListener('DOMContentLoaded', () => showToastify('<?= addslashes(htmlspecialchars($updateError)) ?>', 'error'));</script>
                 <?php endif; ?>
 
                 <!-- TAB 1: OVERVIEW -->
@@ -608,15 +705,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
                             </div>
                         </div>
 
-                        <div class="stat-widget-card">
-                            <div class="stat-widget-icon gold">
-                                <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-                            </div>
-                            <div>
-                                <div class="stat-widget-val">Gold Member</div>
-                                <div class="stat-widget-lbl">Loyalty Tier</div>
-                            </div>
-                        </div>
+
 
                         <div class="stat-widget-card">
                             <div class="stat-widget-icon">
@@ -713,46 +802,346 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
 
                 <!-- TAB 4: ADDRESSES -->
                 <?php elseif ($activeTab === 'addresses'): ?>
-                    <div class="tab-section-header">
-                        <h2 class="tab-section-title">
-                            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#1b3b2b" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path></svg>
-                            <span>Saved Delivery Addresses</span>
+
+                    <style>
+                        .addr-page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;padding-bottom:18px;border-bottom:1px solid #edf2ef}
+                        .addr-page-title{font-family:'Merriweather',serif;font-size:20px;color:#1a2721;display:flex;align-items:center;gap:10px;margin:0}
+                        .addr-add-btn{display:inline-flex;align-items:center;gap:7px;background:#1b3b2b;color:#fff;border:none;padding:10px 20px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;letter-spacing:.3px;transition:background .2s,transform .15s}
+                        .addr-add-btn:hover{background:#2a523c;transform:translateY(-1px)}
+                        .addr-flash{display:flex;align-items:center;gap:10px;padding:13px 18px;border-radius:10px;font-size:13.5px;font-weight:500;margin-bottom:20px}
+                        .addr-flash.ok{background:#f0fdf4;color:#166534;border:1px solid #bbf7d0}
+                        .addr-flash.err{background:#fef2f2;color:#dc2626;border:1px solid #fecaca}
+                        .addr-form-panel{background:#f8faf9;border:1.5px solid #d9e8de;border-radius:16px;padding:28px 28px 24px;margin-bottom:24px;animation:fadeSlideDown .25s ease}
+                        .addr-form-panel-title{font-size:15px;font-weight:700;color:#1a2721;margin:0 0 20px;display:flex;align-items:center;gap:8px}
+                        .addr-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+                        .addr-fg{display:flex;flex-direction:column;gap:6px}
+                        .addr-fg.full{grid-column:1/-1}
+                        .addr-fg label{font-size:11.5px;font-weight:700;color:#6b7c72;text-transform:uppercase;letter-spacing:.6px}
+                        .addr-fg input,.addr-fg select{padding:11px 14px;border:1.5px solid #dce8e0;border-radius:9px;font-size:13.5px;color:#1a2721;background:#fff;outline:none;transition:border-color .2s,box-shadow .2s;font-family:inherit}
+                        .addr-fg input:focus,.addr-fg select:focus{border-color:#1b3b2b;box-shadow:0 0 0 3px rgba(27,59,43,.08)}
+                        .addr-fg input::placeholder{color:#b0bdb6}
+                        .addr-checkbox-row{display:flex;align-items:center;gap:9px;font-size:13px;color:#4a5c52;cursor:pointer;margin-top:4px}
+                        .addr-checkbox-row input[type=checkbox]{width:16px;height:16px;accent-color:#1b3b2b;cursor:pointer}
+                        .addr-form-actions{display:flex;gap:10px;margin-top:22px}
+                        .addr-form-save{background:#1b3b2b;color:#fff;border:none;padding:11px 26px;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;transition:background .2s}
+                        .addr-form-save:hover{background:#2a523c}
+                        .addr-form-cancel{background:#fff;color:#4a5c52;border:1.5px solid #d4ddd7;padding:11px 20px;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;text-decoration:none;display:inline-flex;align-items:center}
+                        .addr-form-cancel:hover{border-color:#1b3b2b;color:#1b3b2b}
+                        .addr-cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:18px}
+                        .addr-card{background:#fff;border:1.5px solid #e4ede8;border-radius:16px;padding:22px 22px 18px;display:flex;flex-direction:column;gap:14px;transition:border-color .2s,box-shadow .2s;position:relative}
+                        .addr-card:hover{border-color:#c5d9ca;box-shadow:0 6px 20px rgba(27,59,43,.06)}
+                        .addr-card.is-default{border-color:#1b3b2b;box-shadow:0 0 0 1px #1b3b2b,0 6px 20px rgba(27,59,43,.09)}
+                        .addr-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+                        .addr-badges{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+                        .badge-type{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;padding:3px 10px;border-radius:20px;background:#eef4f0;color:#2a6040}
+                        .badge-default{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;padding:3px 10px;border-radius:20px;background:#1b3b2b;color:#fff}
+                        .addr-info{font-size:13.5px;color:#3a4a40;line-height:1.75}
+                        .addr-info strong{color:#1a2721;font-size:14.5px;display:block;margin-bottom:2px}
+                        .addr-phone-line{display:flex;align-items:center;gap:6px;font-size:12.5px;color:#728277;margin-top:4px}
+                        .addr-card-actions{display:flex;align-items:center;gap:8px;padding-top:12px;border-top:1px solid #f0f5f2}
+                        .aBtn{display:inline-flex;align-items:center;gap:5px;padding:6px 14px;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;transition:all .18s;border:1.5px solid transparent;text-decoration:none}
+                        .aBtn-edit{border-color:#d4ddd7;background:#fff;color:#2c3e35}
+                        .aBtn-edit:hover{border-color:#1b3b2b;background:#1b3b2b;color:#fff}
+                        .aBtn-star{border-color:#d4ddd7;background:#fff;color:#2c3e35}
+                        .aBtn-star:hover{border-color:#d4af37;background:#fefce8;color:#92400e}
+                        .aBtn-del{border-color:#fecaca;background:#fff;color:#dc2626;margin-left:auto}
+                        .aBtn-del:hover{background:#dc2626;border-color:#dc2626;color:#fff}
+                        .addr-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 20px;gap:12px}
+                        .addr-empty-icon{width:72px;height:72px;border-radius:50%;background:#f0f5f2;display:flex;align-items:center;justify-content:center}
+                        .addr-empty h3{font-family:'Merriweather',serif;font-size:18px;color:#1a2721;margin:0}
+                        .addr-empty p{font-size:13.5px;color:#728277;margin:0;text-align:center}
+                        @keyframes fadeSlideDown{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
+                        @media(max-width:640px){.addr-form-grid,.addr-cards-grid{grid-template-columns:1fr}}
+                    </style>
+
+                    <!-- Header -->
+                    <div class="addr-page-header">
+                        <h2 class="addr-page-title">
+                            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                            Saved Addresses
                         </h2>
+                        <button type="button" id="btnAddAddress" class="addr-add-btn" onclick="toggleAddressForm()">
+                            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                            Add New Address
+                        </button>
                     </div>
 
-                    <div class="info-card-box">
-                        <div class="info-card-title">
-                            <span>Default Delivery Address</span>
-                            <span class="account-role-badge role-badge-user">Primary</span>
+                    <?php if (!empty($addressMessage)): ?>
+                        <script>document.addEventListener('DOMContentLoaded', () => showToastify('<?= addslashes(htmlspecialchars($addressMessage)) ?>', 'success'));</script>
+                    <?php endif; ?>
+                    <?php if (!empty($addressError)): ?>
+                        <script>document.addEventListener('DOMContentLoaded', () => showToastify('<?= addslashes(htmlspecialchars($addressError)) ?>', 'error'));</script>
+                    <?php endif; ?>
+
+                    <!-- Add New Address Form Panel -->
+                    <div id="addAddressForm" style="display:none;">
+                        <div class="addr-form-panel">
+                            <p class="addr-form-panel-title">
+                                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#1b3b2b" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                                New Delivery Address
+                            </p>
+                            <form method="POST" action="<?= url('account.php?tab=addresses') ?>">
+                                <input type="hidden" name="address_action" value="add_address">
+                                <div class="addr-form-grid">
+                                    <div class="addr-fg">
+                                        <label>Full Name <span style="color:#dc2626">*</span></label>
+                                        <input type="text" name="full_name" placeholder="Recipient name" required value="<?= htmlspecialchars($currentUser['name']) ?>">
+                                    </div>
+                                    <div class="addr-fg">
+                                        <label>Phone Number</label>
+                                        <input type="tel" name="phone" placeholder="+91 98765 43210" value="<?= htmlspecialchars($currentUser['phone'] ?? '') ?>">
+                                    </div>
+                                    <div class="addr-fg full">
+                                        <label>Address Line 1 <span style="color:#dc2626">*</span></label>
+                                        <input type="text" name="address_line_1" placeholder="House / Flat No., Street, Area" required>
+                                    </div>
+                                    <div class="addr-fg full">
+                                        <label>Address Line 2 <span style="color:#b0bdb6;font-weight:400;text-transform:none;">— optional</span></label>
+                                        <input type="text" name="address_line_2" placeholder="Landmark, Colony (optional)">
+                                    </div>
+                                    <div class="addr-fg">
+                                        <label>City <span style="color:#dc2626">*</span></label>
+                                        <input type="text" name="city" placeholder="City" required>
+                                    </div>
+                                    <div class="addr-fg">
+                                        <label>State <span style="color:#dc2626">*</span></label>
+                                        <input type="text" name="state" placeholder="State" required>
+                                    </div>
+                                    <div class="addr-fg">
+                                        <label>Postal Code <span style="color:#dc2626">*</span></label>
+                                        <input type="text" name="postal_code" placeholder="700001" required>
+                                    </div>
+                                    <div class="addr-fg">
+                                        <label>Address Type</label>
+                                        <select name="address_type">
+                                            <option value="home">🏠 Home</option>
+                                            <option value="work">🏢 Work</option>
+                                            <option value="other">📦 Other</option>
+                                        </select>
+                                    </div>
+                                    <div class="addr-fg full">
+                                        <label class="addr-checkbox-row">
+                                            <input type="checkbox" name="is_default" <?= empty($userAddresses) ? 'checked' : '' ?>>
+                                            Set as my default delivery address
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="addr-form-actions">
+                                    <button type="submit" class="addr-form-save">Save Address</button>
+                                    <button type="button" class="addr-form-cancel" onclick="toggleAddressForm()">Cancel</button>
+                                </div>
+                            </form>
                         </div>
-                        <p style="font-size: 14px; color: #3a4a40; line-height: 1.6; margin-bottom: 12px;">
-                            <strong><?= htmlspecialchars($currentUser['name']) ?></strong><br>
-                            Biswas Enterprise Care Center<br>
-                            Kolkata, West Bengal - 700001<br>
-                            India<br>
-                            Phone: <?= !empty($currentUser['phone']) ? htmlspecialchars($currentUser['phone']) : '+91 (Not Provided)' ?>
-                        </p>
                     </div>
+
+                    <!-- Address Cards / Empty State -->
+                    <?php if (empty($userAddresses)): ?>
+                        <div class="addr-empty">
+                            <div class="addr-empty-icon">
+                                <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="#9ab4a2" stroke-width="1.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                            </div>
+                            <h3>No Saved Addresses</h3>
+                            <p>Click "Add New Address" above to save<br>your first delivery address.</p>
+                        </div>
+                    <?php else: ?>
+                        <div class="addr-cards-grid">
+                        <?php foreach ($userAddresses as $addr): ?>
+                            <?php $editMode = isset($_GET['edit_id']) && (int)$_GET['edit_id'] === (int)$addr['id']; ?>
+
+                            <?php if ($editMode): ?>
+                                <div style="grid-column:1/-1;">
+                                <div class="addr-form-panel" style="border-color:#1b3b2b;">
+                                    <p class="addr-form-panel-title">
+                                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#1b3b2b" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                                        Edit Address
+                                    </p>
+                                    <form method="POST" action="<?= url('account.php?tab=addresses') ?>">
+                                        <input type="hidden" name="address_action" value="edit_address">
+                                        <input type="hidden" name="address_id" value="<?= $addr['id'] ?>">
+                                        <div class="addr-form-grid">
+                                            <div class="addr-fg">
+                                                <label>Full Name <span style="color:#dc2626">*</span></label>
+                                                <input type="text" name="full_name" required value="<?= htmlspecialchars($addr['full_name']) ?>">
+                                            </div>
+                                            <div class="addr-fg">
+                                                <label>Phone Number</label>
+                                                <input type="tel" name="phone" value="<?= htmlspecialchars($addr['phone'] ?? '') ?>">
+                                            </div>
+                                            <div class="addr-fg full">
+                                                <label>Address Line 1 <span style="color:#dc2626">*</span></label>
+                                                <input type="text" name="address_line_1" required value="<?= htmlspecialchars($addr['address_line_1']) ?>">
+                                            </div>
+                                            <div class="addr-fg full">
+                                                <label>Address Line 2</label>
+                                                <input type="text" name="address_line_2" value="<?= htmlspecialchars($addr['address_line_2'] ?? '') ?>">
+                                            </div>
+                                            <div class="addr-fg">
+                                                <label>City <span style="color:#dc2626">*</span></label>
+                                                <input type="text" name="city" required value="<?= htmlspecialchars($addr['city']) ?>">
+                                            </div>
+                                            <div class="addr-fg">
+                                                <label>State <span style="color:#dc2626">*</span></label>
+                                                <input type="text" name="state" required value="<?= htmlspecialchars($addr['state']) ?>">
+                                            </div>
+                                            <div class="addr-fg">
+                                                <label>Postal Code <span style="color:#dc2626">*</span></label>
+                                                <input type="text" name="postal_code" required value="<?= htmlspecialchars($addr['postal_code']) ?>">
+                                            </div>
+                                            <div class="addr-fg">
+                                                <label>Address Type</label>
+                                                <select name="address_type">
+                                                    <option value="home" <?= $addr['address_type']==='home'?'selected':'' ?>>🏠 Home</option>
+                                                    <option value="work" <?= $addr['address_type']==='work'?'selected':'' ?>>🏢 Work</option>
+                                                    <option value="other" <?= $addr['address_type']==='other'?'selected':'' ?>>📦 Other</option>
+                                                </select>
+                                            </div>
+                                            <div class="addr-fg full">
+                                                <label class="addr-checkbox-row">
+                                                    <input type="checkbox" name="is_default" <?= $addr['is_default']?'checked':'' ?>>
+                                                    Set as my default delivery address
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="addr-form-actions">
+                                            <button type="submit" class="addr-form-save">Save Changes</button>
+                                            <a href="<?= url('account.php?tab=addresses') ?>" class="addr-form-cancel">Cancel</a>
+                                        </div>
+                                    </form>
+                                </div>
+                                </div>
+                            <?php else: ?>
+                                <!-- ADDRESS CARD -->
+                                <div class="addr-card <?= $addr['is_default'] ? 'is-default' : '' ?>">
+                                    <div class="addr-card-top">
+                                        <div class="addr-badges">
+                                            <span class="badge-type"><?= ucfirst(htmlspecialchars($addr['address_type'])) ?></span>
+                                            <?php if ($addr['is_default']): ?><span class="badge-default">✓ Default</span><?php endif; ?>
+                                        </div>
+                                    </div>
+                                    <div class="addr-info">
+                                        <strong><?= htmlspecialchars($addr['full_name']) ?></strong>
+                                        <?= htmlspecialchars($addr['address_line_1']) ?>
+                                        <?php if (!empty($addr['address_line_2'])): ?>, <?= htmlspecialchars($addr['address_line_2']) ?><?php endif; ?><br>
+                                        <?= htmlspecialchars($addr['city']) ?>, <?= htmlspecialchars($addr['state']) ?> – <?= htmlspecialchars($addr['postal_code']) ?><br>
+                                        <?= htmlspecialchars($addr['country'] ?? 'India') ?>
+                                        <?php if (!empty($addr['phone'])): ?>
+                                        <div class="addr-phone-line">
+                                            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.11 11.9 19.79 19.79 0 0 1 1.04 3.27 2 2 0 0 1 3 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 8.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                                            <?= htmlspecialchars($addr['phone']) ?>
+                                        </div>
+                                        <?php endif; ?>
+                                    </div>
+                                    <div class="addr-card-actions">
+                                        <a href="<?= url('account.php?tab=addresses&edit_id='.$addr['id']) ?>" class="aBtn aBtn-edit">
+                                            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                                            Edit
+                                        </a>
+                                        <?php if (!$addr['is_default']): ?>
+                                        <form method="POST" style="display:contents;">
+                                            <input type="hidden" name="address_action" value="set_default">
+                                            <input type="hidden" name="address_id" value="<?= $addr['id'] ?>">
+                                            <button type="submit" class="aBtn aBtn-star">
+                                                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                                                Set Default
+                                            </button>
+                                        </form>
+                                        <?php endif; ?>
+                                        <form method="POST" style="display:contents;" onsubmit="return confirm('Remove this address?');">
+                                            <input type="hidden" name="address_action" value="delete_address">
+                                            <input type="hidden" name="address_id" value="<?= $addr['id'] ?>">
+                                            <button type="submit" class="aBtn aBtn-del">
+                                                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+                                                Delete
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            <?php endif; ?>
+                        <?php endforeach; ?>
+                        </div>
+                    <?php endif; ?>
+
+                    <script>
+                    function toggleAddressForm() {
+                        const form = document.getElementById('addAddressForm');
+                        const btn  = document.getElementById('btnAddAddress');
+                        const open = form.style.display === 'none';
+                        form.style.display = open ? 'block' : 'none';
+                        btn.innerHTML = open
+                            ? '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Cancel'
+                            : '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add New Address';
+                        if (open) form.scrollIntoView({ behavior:'smooth', block:'start' });
+                    }
+                    <?php if (!empty($addressError)): ?>
+                    document.addEventListener('DOMContentLoaded', () => toggleAddressForm());
+                    <?php endif; ?>
+                    </script>
+
 
                 <!-- TAB 5: SECURITY -->
                 <?php elseif ($activeTab === 'security'): ?>
-                    <div class="tab-section-header">
-                        <h2 class="tab-section-title">
-                            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#1b3b2b" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-                            <span>Account Security & Login</span>
+                    <style>
+                        .sec-page-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; padding-bottom:18px; border-bottom:1px solid #edf2ef; }
+                        .sec-page-title  { font-family:'Merriweather',serif; font-size:20px; color:#1a2721; display:flex; align-items:center; gap:10px; margin:0; }
+                        .sec-card { background:#fff; border:1.5px solid #e4ede8; border-radius:16px; padding:28px; max-width:540px; margin-bottom:24px; box-shadow:0 4px 16px rgba(27,59,43,0.03); }
+                        .sec-card-title { font-size:16px; font-weight:700; color:#1a2721; margin:0 0 8px; display:flex; align-items:center; gap:8px; }
+                        .sec-card-sub { font-size:13px; color:#6b7c72; margin-bottom:22px; line-height:1.5; }
+                        .sec-form-grid { display:flex; flex-direction:column; gap:18px; }
+                        .sec-fg { display:flex; flex-direction:column; gap:6px; }
+                        .sec-fg label { font-size:11.5px; font-weight:700; color:#6b7c72; text-transform:uppercase; letter-spacing:0.6px; }
+                        .sec-fg input { padding:12px 14px; border:1.5px solid #dce8e0; border-radius:9px; font-size:14px; color:#1a2721; background:#fff; outline:none; transition:border-color 0.2s,box-shadow 0.2s; font-family:inherit; }
+                        .sec-fg input:focus { border-color:#1b3b2b; box-shadow:0 0 0 3px rgba(27,59,43,0.08); }
+                        .sec-submit-btn { background:#1b3b2b; color:#fff; border:none; padding:12px 26px; border-radius:9px; font-size:13.5px; font-weight:600; cursor:pointer; transition:background 0.2s,transform 0.15s; width:fit-content; display:inline-flex; align-items:center; gap:8px; margin-top:6px; }
+                        .sec-submit-btn:hover { background:#2a523c; transform:translateY(-1px); }
+                        .sec-flash { display:flex; align-items:center; gap:10px; padding:13px 18px; border-radius:10px; font-size:13.5px; font-weight:500; margin-bottom:20px; max-width:540px; }
+                        .sec-flash.ok { background:#f0fdf4; color:#166534; border:1px solid #bbf7d0; }
+                        .sec-flash.err { background:#fef2f2; color:#dc2626; border:1px solid #fecaca; }
+                    </style>
+
+                    <div class="sec-page-header">
+                        <h2 class="sec-page-title">
+                            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                            Account Security
                         </h2>
                     </div>
 
-                    <div class="info-card-box">
-                        <div class="info-card-title">
-                            <span>Database Authentication Status</span>
-                        </div>
-                        <p style="font-size: 14px; color: #4a5c52; margin-bottom: 14px;">
-                            Your account is protected using BCRYPT hashing and PDO secure prepared statements connected to Hostinger MySQL Database.
-                        </p>
-                        <a href="javascript:void(0)" onclick="alert('Password reset link sent to your email.')" class="btn-auth-submit" style="display: inline-flex; width: auto; padding: 10px 22px; font-size: 13px;">
-                            <span>Change Account Password</span>
-                        </a>
+                    <?php if (!empty($passwordSuccess)): ?>
+                        <script>document.addEventListener('DOMContentLoaded', () => showToastify('<?= addslashes(htmlspecialchars($passwordSuccess)) ?>', 'success'));</script>
+                    <?php endif; ?>
+                    <?php if (!empty($passwordError)): ?>
+                        <script>document.addEventListener('DOMContentLoaded', () => showToastify('<?= addslashes(htmlspecialchars($passwordError)) ?>', 'error'));</script>
+                    <?php endif; ?>
+
+                    <div class="sec-card">
+                        <h3 class="sec-card-title">
+                            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#1b3b2b" stroke-width="2"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.778-7.778zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+                            Change Password
+                        </h3>
+                        <p class="sec-card-sub">Enter your current password and choose a strong new password to update your account security in the database.</p>
+
+                        <form method="POST" action="<?= url('account.php?tab=security') ?>">
+                            <input type="hidden" name="change_password" value="1">
+                            <div class="sec-form-grid">
+                                <div class="sec-fg">
+                                    <label for="old_password">Current Password <span style="color:#dc2626">*</span></label>
+                                    <input type="password" id="old_password" name="old_password" placeholder="Enter current password" required>
+                                </div>
+                                <div class="sec-fg">
+                                    <label for="new_password">New Password <span style="color:#dc2626">*</span></label>
+                                    <input type="password" id="new_password" name="new_password" placeholder="Enter new password (min. 6 characters)" required minlength="6">
+                                </div>
+                                <div class="sec-fg">
+                                    <label for="confirm_password">Confirm New Password <span style="color:#dc2626">*</span></label>
+                                    <input type="password" id="confirm_password" name="confirm_password" placeholder="Confirm new password" required minlength="6">
+                                </div>
+                                <div>
+                                    <button type="submit" class="sec-submit-btn">
+                                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                                        Update Password
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
                     </div>
                 <?php endif; ?>
             </main>

@@ -39,6 +39,7 @@ require_once __DIR__ . '/../config/database.php';
     }
     </script>
     <link rel="stylesheet" href="<?= asset('css/main.css') ?>">
+    <?php include __DIR__ . '/includes/toastify.php'; ?>
 </head>
 <body>
 
@@ -364,8 +365,7 @@ require_once __DIR__ . '/../config/database.php';
                 const emailRx = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
                 if (!name || !email || !subject || !message || !emailRx.test(email)) {
-                    err.className = 'form-alert error';
-                    err.style.display = 'flex';
+                    showToastify('Please fill in all required fields correctly.', 'error');
                     return;
                 }
 
@@ -389,18 +389,14 @@ require_once __DIR__ . '/../config/database.php';
                     const result = await response.json();
 
                     if (result.success) {
-                        ok.className = 'form-alert success';
-                        ok.style.display = 'flex';
+                        showToastify('Thank you! Your enquiry has been sent successfully. We will respond within 24 hours.', 'success');
                         form.reset();
                     } else {
-                        err.className = 'form-alert error';
-                        err.textContent = result.message || 'Error sending enquiry.';
-                        err.style.display = 'flex';
+                        showToastify(result.message || 'Error sending enquiry.', 'error');
                     }
                 } catch (error) {
                     console.error('Contact Enquiry Error:', error);
-                    err.className = 'form-alert error';
-                    err.style.display = 'flex';
+                    showToastify('Connection error. Please try again.', 'error');
                 } finally {
                     btn.disabled = false;
                     btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg> Send Enquiry`;
