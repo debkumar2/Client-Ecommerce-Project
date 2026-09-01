@@ -57,41 +57,68 @@ if (in_array($path, ['/logout', '/logout.php'])) {
     exit;
 }
 
-// Official Product Categories (Extracted from biswas-enterprise.co.in)
-$categories = [
-    [
-        'id' => 1,
-        'name' => 'Arjuna Bark Collection',
-        'slug' => 'arjuna-bark',
-        'subtext' => 'Dried, High Quality & Premium Cut',
-        'description' => '99% Pure Terminalia Arjuna bark. Shade-cured for cardiac wellness & natural heart health support.',
-        'image' => 'https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?auto=format&fit=crop&w=600&q=80'
-    ],
-    [
-        'id' => 2,
-        'name' => 'Dried Herbs',
-        'slug' => 'dried-herbs',
-        'subtext' => 'Neem Leaves, Tulsi & Reetha Nuts',
-        'description' => 'Medicine-grade dried Neem leaves, organic Tulsi leaves & natural Reetha soap nut shells.',
-        'image' => 'https://images.unsplash.com/photo-1544787219-7f47ccb76574?auto=format&fit=crop&w=600&q=80'
-    ],
-    [
-        'id' => 3,
-        'name' => 'Herbs Powder',
-        'slug' => 'herbs-powder',
-        'subtext' => 'Harad Powder & Neem Powder',
-        'description' => '100% fine pulverized Harad (Terminalia Chebula) powder and antibacterial Neem leaf powder.',
-        'image' => 'https://images.unsplash.com/photo-1599940824399-b87987ceb72a?auto=format&fit=crop&w=600&q=80'
-    ],
-    [
-        'id' => 4,
-        'name' => 'Renewable Energy Products',
-        'slug' => 'renewable-energy',
-        'subtext' => 'Solar Street Lights, Batteries & Panels',
-        'description' => 'Commercial integrated solar LED street lights, lithium/lead-acid solar batteries & PV panels.',
-        'image' => 'https://images.unsplash.com/photo-1509391365360-2e959784a276?auto=format&fit=crop&w=600&q=80'
-    ]
-];
+// Dynamic Product Categories from Database Table
+$categories = [];
+try {
+    $pdo = Database::getConnection();
+    $stmtCat = $pdo->query("SELECT * FROM `categories` WHERE status IN ('approved', 'active') ORDER BY id ASC");
+    $rowsCat = $stmtCat->fetchAll(PDO::FETCH_ASSOC);
+    if (!empty($rowsCat)) {
+        foreach ($rowsCat as $c) {
+            $subtext = !empty($c['seo_title']) ? $c['seo_title'] : 'Biswas Official Selection';
+            if ($c['slug'] === 'arjuna-bark') $subtext = 'Dried, High Quality & Premium Cut';
+            elseif ($c['slug'] === 'dried-herbs') $subtext = 'Neem Leaves, Tulsi & Reetha Nuts';
+            elseif ($c['slug'] === 'herbs-powder') $subtext = 'Harad Powder & Neem Powder';
+            elseif ($c['slug'] === 'renewable-energy') $subtext = 'Solar Street Lights, Batteries & Panels';
+
+            $categories[] = [
+                'id' => (int)$c['id'],
+                'name' => $c['name'],
+                'slug' => $c['slug'],
+                'subtext' => $subtext,
+                'description' => $c['description'] ?: 'High quality natural products supplied directly from Kolkata.',
+                'image' => !empty($c['image_url']) ? $c['image_url'] : 'https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=600&q=80'
+            ];
+        }
+    }
+} catch (\Throwable $e) {}
+
+if (empty($categories)) {
+    $categories = [
+        [
+            'id' => 1,
+            'name' => 'Arjuna Bark Collection',
+            'slug' => 'arjuna-bark',
+            'subtext' => 'Dried, High Quality & Premium Cut',
+            'description' => '99% Pure Terminalia Arjuna bark. Shade-cured for cardiac wellness & natural heart health support.',
+            'image' => 'https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?auto=format&fit=crop&w=600&q=80'
+        ],
+        [
+            'id' => 2,
+            'name' => 'Dried Herbs',
+            'slug' => 'dried-herbs',
+            'subtext' => 'Neem Leaves, Tulsi & Reetha Nuts',
+            'description' => 'Medicine-grade dried Neem leaves, organic Tulsi leaves & natural Reetha soap nut shells.',
+            'image' => 'https://images.unsplash.com/photo-1544787219-7f47ccb76574?auto=format&fit=crop&w=600&q=80'
+        ],
+        [
+            'id' => 3,
+            'name' => 'Herbs Powder',
+            'slug' => 'herbs-powder',
+            'subtext' => 'Harad Powder & Neem Powder',
+            'description' => '100% fine pulverized Harad (Terminalia Chebula) powder and antibacterial Neem leaf powder.',
+            'image' => 'https://images.unsplash.com/photo-1599940824399-b87987ceb72a?auto=format&fit=crop&w=600&q=80'
+        ],
+        [
+            'id' => 4,
+            'name' => 'Renewable Energy Products',
+            'slug' => 'renewable-energy',
+            'subtext' => 'Solar Street Lights, Batteries & Panels',
+            'description' => 'Commercial integrated solar LED street lights, lithium/lead-acid solar batteries & PV panels.',
+            'image' => 'https://images.unsplash.com/photo-1509391365360-2e959784a276?auto=format&fit=crop&w=600&q=80'
+        ]
+    ];
+}
 
 // Official Featured Products (Derived from biswas-enterprise.co.in catalog)
 $featuredProducts = [
@@ -494,7 +521,7 @@ $companyDetails = [
     <div class="announcement-bar" role="region" aria-label="Announcement">
         <div class="container">
             <div class="announcement-content">
-                <span class="announcement-item">🌿 GST NO: <?= $companyDetails['gst'] ?></span>
+                <span class="announcement-item">GST NO: <?= $companyDetails['gst'] ?></span>
                 <span class="announcement-separator">•</span>
                 <span class="announcement-item">WHOLESALE EXPORTER & SUPPLIER FROM KOLKATA</span>
                 <span class="announcement-separator">•</span>
@@ -748,22 +775,52 @@ $companyDetails = [
                     <h2>OUR PRODUCT CATEGORIES</h2>
                     <p>Supplying natural herbal raw materials and eco-conscious solar energy systems.</p>
                 </div>
-                <div class="category-grid">
-                    <?php foreach ($categories as $cat): ?>
-                        <a href="<?= url('shop?category=' . $cat['slug']) ?>" class="category-card">
-                            <img src="<?= $cat['image'] ?>" alt="<?= htmlspecialchars($cat['name']) ?>" class="category-image" loading="lazy" decoding="async">
-                            <div class="category-content">
-                                <h3 class="category-name"><?= htmlspecialchars($cat['name']) ?></h3>
-                                <div style="font-size: 12px; color: #d4af37; font-weight: 700; margin-bottom: 6px; text-transform: uppercase;"><?= htmlspecialchars($cat['subtext']) ?></div>
-                                <p class="category-desc"><?= htmlspecialchars($cat['description']) ?></p>
-                                <span class="category-cta">
-                                    <span>EXPLORE CATEGORY</span>
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-                                </span>
+
+                <?php if (count($categories) > 4): ?>
+                    <!-- Swiper Carousel Slider for > 4 Categories -->
+                    <div class="categories-slider-wrapper" style="position: relative; padding: 10px 5px 45px 5px;">
+                        <div class="swiper categoriesSwiper">
+                            <div class="swiper-wrapper">
+                                <?php foreach ($categories as $cat): ?>
+                                    <div class="swiper-slide">
+                                        <a href="<?= url('shop?category=' . $cat['slug']) ?>" class="category-card" style="height: 100%; display: flex; flex-direction: column;">
+                                            <img src="<?= $cat['image'] ?>" alt="<?= htmlspecialchars($cat['name']) ?>" class="category-image" loading="lazy" decoding="async">
+                                            <div class="category-content" style="flex: 1; display: flex; flex-direction: column;">
+                                                <h3 class="category-name"><?= htmlspecialchars($cat['name']) ?></h3>
+                                                <div style="font-size: 12px; color: #d4af37; font-weight: 700; margin-bottom: 6px; text-transform: uppercase;"><?= htmlspecialchars($cat['subtext']) ?></div>
+                                                <p class="category-desc" style="flex: 1;"><?= htmlspecialchars($cat['description']) ?></p>
+                                                <span class="category-cta" style="margin-top: 12px;">
+                                                    <span>EXPLORE CATEGORY</span>
+                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                                                </span>
+                                            </div>
+                                        </a>
+                                    </div>
+                                <?php endforeach; ?>
                             </div>
-                        </a>
-                    <?php endforeach; ?>
-                </div>
+                            <div class="swiper-pagination" style="bottom: 0px;"></div>
+                        </div>
+                        <div class="swiper-button-prev category-swiper-prev"></div>
+                        <div class="swiper-button-next category-swiper-next"></div>
+                    </div>
+                <?php else: ?>
+                    <div class="category-grid">
+                        <?php foreach ($categories as $cat): ?>
+                            <a href="<?= url('shop?category=' . $cat['slug']) ?>" class="category-card">
+                                <img src="<?= $cat['image'] ?>" alt="<?= htmlspecialchars($cat['name']) ?>" class="category-image" loading="lazy" decoding="async">
+                                <div class="category-content">
+                                    <h3 class="category-name"><?= htmlspecialchars($cat['name']) ?></h3>
+                                    <div style="font-size: 12px; color: #d4af37; font-weight: 700; margin-bottom: 6px; text-transform: uppercase;"><?= htmlspecialchars($cat['subtext']) ?></div>
+                                    <p class="category-desc"><?= htmlspecialchars($cat['description']) ?></p>
+                                    <span class="category-cta">
+                                        <span>EXPLORE CATEGORY</span>
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                                    </span>
+                                </div>
+                            </a>
+                        <?php endforeach; ?>
+                    </div>
+                <?php endif; ?>
             </div>
         </section>
 
@@ -919,60 +976,10 @@ $companyDetails = [
     </main>
 
     <!-- FOOTER -->
-    <footer class="site-footer" role="contentinfo">
-        <div class="footer-top">
-            <div class="container">
-                <div class="footer-grid">
-                    <div class="footer-brand">
-                        <a href="<?= url() ?>" class="site-logo" aria-label="Biswas Enterprise Home">
-                            <img src="<?= asset('image/logo.png') ?>" alt="Biswas Enterprise" class="brand-logo-img">
-                        </a>
-                        <p class="footer-desc">Prominent Exporter & Supplier of Harad Powder, Arjuna Bark, and Renewable Energy Products in Kolkata, West Bengal.</p>
-                        <p style="font-size: 12px; color: #a8c0b1; margin-top: 10px;"><strong>GST NO:</strong> <?= $companyDetails['gst'] ?></p>
-                    </div>
+    <?php include __DIR__ . '/includes/footer.php'; ?>
 
-                    <div>
-                        <h4 class="footer-heading">PRODUCTS</h4>
-                        <ul class="footer-links">
-                            <li><a href="<?= url('shop') ?>">Arjuna Bark Cuts</a></li>
-                            <li><a href="<?= url('shop') ?>">Harad Powder</a></li>
-                            <li><a href="<?= url('shop') ?>">Neem Leaves & Powder</a></li>
-                            <li><a href="<?= url('shop') ?>">Reetha Soap Nuts</a></li>
-                            <li><a href="<?= url('shop') ?>">Solar LED Street Light</a></li>
-                        </ul>
-                    </div>
-
-                    <div>
-                        <h4 class="footer-heading">COMPANY</h4>
-                        <ul class="footer-links">
-                            <li><a href="<?= url('about') ?>">About Biswas Enterprise</a></li>
-                            <li><a href="<?= url('contact') ?>">Contact Us</a></li>
-                            <li><a href="<?= url('blog') ?>">Blog Journal</a></li>
-                            <li><a href="#quick-quote">Bulk Quote Request</a></li>
-                        </ul>
-                    </div>
-
-                    <div>
-                        <h4 class="footer-heading">HEADQUARTERS</h4>
-                        <div class="footer-contact-item">
-                            <span>Na Kalikapur Berhampore Murshidabad, Bara Bazar, Kolkata, West Bengal - 742102</span>
-                        </div>
-                        <div class="footer-contact-item" style="margin-top: 10px;">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
-                            <span><?= $companyDetails['email'] ?></span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="footer-bottom">
-            <div class="container">
-                <p>&copy; <?= date('Y') ?> Biswas Enterprise. All Rights Reserved. Exporter & Supplier from Kolkata, West Bengal.</p>
-            </div>
-        </div>
-    </footer>
-
+    <!-- Swiper 11 JS CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
     <script>
         function toggleFaq(element) {
             const item = element.parentElement;
@@ -990,6 +997,62 @@ $companyDetails = [
                 alert('GST Number: ' + gstNo);
             }
         }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof Swiper !== 'undefined') {
+                if (document.querySelector('.categoriesSwiper')) {
+                    new Swiper('.categoriesSwiper', {
+                        slidesPerView: 1,
+                        spaceBetween: 20,
+                        autoplay: {
+                            delay: 4000,
+                            disableOnInteraction: false,
+                            pauseOnMouseEnter: true
+                        },
+                        loop: true,
+                        navigation: {
+                            nextEl: '.category-swiper-next',
+                            prevEl: '.category-swiper-prev',
+                        },
+                        pagination: {
+                            el: '.categoriesSwiper .swiper-pagination',
+                            clickable: true,
+                        },
+                        breakpoints: {
+                            640: { slidesPerView: 2, spaceBetween: 20 },
+                            992: { slidesPerView: 3, spaceBetween: 24 },
+                            1200: { slidesPerView: 4, spaceBetween: 24 },
+                        },
+                    });
+                }
+
+                if (document.querySelector('.featuredProductsSwiper')) {
+                    new Swiper('.featuredProductsSwiper', {
+                        slidesPerView: 1,
+                        spaceBetween: 20,
+                        autoplay: {
+                            delay: 3500,
+                            disableOnInteraction: false,
+                            pauseOnMouseEnter: true
+                        },
+                        loop: true,
+                        navigation: {
+                            nextEl: '.featured-swiper-next',
+                            prevEl: '.featured-swiper-prev',
+                        },
+                        pagination: {
+                            el: '.featuredProductsSwiper .swiper-pagination',
+                            clickable: true,
+                        },
+                        breakpoints: {
+                            640: { slidesPerView: 2, spaceBetween: 20 },
+                            992: { slidesPerView: 3, spaceBetween: 24 },
+                            1200: { slidesPerView: 4, spaceBetween: 24 },
+                        },
+                    });
+                }
+            }
+        });
     </script>
     <?php include __DIR__ . '/includes/floating_enquiry.php'; ?>
 </body>

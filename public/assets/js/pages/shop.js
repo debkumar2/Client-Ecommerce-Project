@@ -12,6 +12,12 @@ document.addEventListener('DOMContentLoaded', () => {
     initProductCards();
 
     // Cache DOM Elements
+    const productsGrid = document.getElementById('productsGrid');
+    const allCards = productsGrid ? Array.from(productsGrid.querySelectorAll('.product-card')) : [];
+    const showingCountEl = document.getElementById('showingCount');
+    const totalCountEl = document.getElementById('totalCount');
+    const emptyState = document.getElementById('shopEmptyState');
+
     // Parse URL query parameters for pre-selected category filter
     const urlParams = new URLSearchParams(window.location.search);
     const categoryParam = (urlParams.get('category') || '').toLowerCase().trim();
@@ -19,8 +25,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (categoryParam) {
         const catInputs = document.querySelectorAll('.filter-category-input');
         catInputs.forEach(input => {
-            const val = input.value.toLowerCase();
-            const slug = (input.dataset.slug || '').toLowerCase();
+            const val = input.value.toLowerCase().trim();
+            const slug = (input.dataset.slug || '').toLowerCase().trim();
             const valHyphenated = val.replace(/\s+/g, '-');
 
             if (val === categoryParam || slug === categoryParam || valHyphenated === categoryParam || categoryParam.includes(slug) || slug.includes(categoryParam)) {
@@ -40,29 +46,34 @@ document.addEventListener('DOMContentLoaded', () => {
         // 2. Get Selected Categories
         const categoryInputs = Array.from(document.querySelectorAll('.filter-category-input:checked'));
         const selectedCategories = categoryInputs.map(input => ({
-            name: input.value.toLowerCase(),
-            slug: (input.dataset.slug || '').toLowerCase()
+            name: input.value.toLowerCase().trim(),
+            slug: (input.dataset.slug || '').toLowerCase().trim()
         }));
 
         // 3. Get Max Price
         const priceSlider = document.querySelector('.price-range-slider');
-        const maxPrice = priceSlider ? parseFloat(priceSlider.value) : 10000;
+        const maxPrice = priceSlider ? parseFloat(priceSlider.value) : 100000;
 
         // 4. Get Availability Filters
         const inStockOnly = document.getElementById('filterInStock')?.checked || false;
         const outOfStockOnly = document.getElementById('filterOutOfStock')?.checked || false;
 
-        // 5. Get Selected Brands
+        // 5. Get Rating Filter
+        const ratingRadio = document.querySelector('input[name="rating-filter"]:checked');
+        const minRating = ratingRadio ? parseFloat(ratingRadio.value) : 0;
+
+        // 6. Get Selected Brands
         const brandInputs = Array.from(document.querySelectorAll('.filter-brand-input:checked'));
-        const selectedBrands = brandInputs.map(input => input.value.toLowerCase());
+        const selectedBrands = brandInputs.map(input => input.value.toLowerCase().trim());
 
         // Filter Cards
         let visibleCards = allCards.filter(card => {
-            const title = (card.dataset.title || '').toLowerCase();
-            const category = (card.dataset.category || '').toLowerCase();
+            const title = (card.dataset.title || '').toLowerCase().trim();
+            const category = (card.dataset.category || '').toLowerCase().trim();
             const price = parseFloat(card.dataset.rawPrice || '0');
+            const cardRating = parseFloat(card.dataset.rating || '5');
             const isOutOfStock = card.classList.contains('is-out-of-stock');
-            const brand = (card.dataset.brand || '').toLowerCase();
+            const brand = (card.dataset.brand || '').toLowerCase().trim();
 
             // Search filter
             if (searchQuery && !title.includes(searchQuery) && !category.includes(searchQuery)) {
@@ -71,16 +82,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Category filter
             if (selectedCategories.length > 0) {
-                const cardCat = category.toLowerCase();
-                const cardCatSlug = cardCat.replace(/\s+/g, '-');
-                const isCatMatched = selectedCategories.some(sc => 
-                    cardCat === sc.name || 
-                    cardCatSlug === sc.slug || 
-                    sc.name.includes(cardCat) || 
-                    cardCat.includes(sc.name) ||
-                    sc.slug.includes(cardCatSlug) ||
-                    cardCatSlug.includes(sc.slug)
-                );
+                const cardCat = category;
+                const cardCatClean = cardCat.replace(/[^a-z0-9]/g, '');
+                
+                const isCatMatched = selectedCategories.some(sc => {
+                    const scNameClean = sc.name.replace(/[^a-z0-9]/g, '');
+                    const scSlugClean = sc.slug.replace(/[^a-z0-9]/g, '');
+                    
+                    return cardCat === sc.name || 
+                           cardCat.includes(sc.name) || 
+                           sc.name.includes(cardCat) ||
+                           (scNameClean && cardCatClean.includes(scNameClean)) ||
+                           (scSlugClean && cardCatClean.includes(scSlugClean));
+                });
+
                 if (!isCatMatched) {
                     return false;
                 }
@@ -95,15 +110,23 @@ document.addEventListener('DOMContentLoaded', () => {
             if (inStockOnly && isOutOfStock) return false;
             if (outOfStockOnly && !isOutOfStock) return false;
 
-            // Brand filter
-            if (selectedBrands.length > 0 && !selectedBrands.includes(brand)) {
+            // Rating filter
+            if (minRating > 0 && cardRating < minRating) {
                 return false;
+            }
+
+            // Brand filter
+            if (selectedBrands.length > 0) {
+                const isBrandMatched = selectedBrands.some(sb => brand.includes(sb) || sb.includes(brand));
+                if (!isBrandMatched) {
+                    return false;
+                }
             }
 
             return true;
         });
 
-        // 6. Sort Cards
+        // 7. Sort Cards
         const sortSelect = document.getElementById('shopSortSelect');
         const sortVal = sortSelect ? sortSelect.value : 'featured';
 
@@ -116,7 +139,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (sortVal === 'price-low') return priceA - priceB;
             if (sortVal === 'price-high') return priceB - priceA;
             if (sortVal === 'rating') return ratingB - ratingA;
-            return 0; // default featured / newest
+            return 0; // default featured
         });
 
         // Update DOM Visibility
@@ -152,6 +175,11 @@ document.addEventListener('DOMContentLoaded', () => {
         (query) => applyFiltersAndSort(),
         (sortOption) => applyFiltersAndSort()
     );
+
+    // Also listen directly on rating radio inputs
+    document.querySelectorAll('input[name="rating-filter"]').forEach(radio => {
+        radio.addEventListener('change', () => applyFiltersAndSort());
+    });
 
     // Run initial filter check on load
     applyFiltersAndSort();

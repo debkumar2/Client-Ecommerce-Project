@@ -1155,17 +1155,7 @@ if (isset($_GET['saved']) && empty($addressMessage)) $addressMessage = 'Address 
     </div>
 
     <!-- Site Footer -->
-    <footer class="site-footer">
-        <div class="container">
-            <div class="footer-bottom flex-between">
-                <p>&copy; <?= date('Y') ?> Biswas Enterprise. All Rights Reserved. Pure Ayurvedic Solutions.</p>
-                <div class="footer-social-links">
-                    <a href="#">Privacy Policy</a>
-                    <a href="#">Terms of Service</a>
-                </div>
-            </div>
-        </div>
-    </footer>
+    <?php include __DIR__ . '/includes/footer.php'; ?>
     <?php include __DIR__ . '/includes/floating_enquiry.php'; ?>
 </body>
 </html>

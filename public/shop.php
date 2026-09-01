@@ -59,261 +59,47 @@ function getProductSpecs(array $p): array {
     ];
 }
 
-// Biswas Enterprise Official Product Categories (sourced from biswas-enterprise.co.in)
-$categories = [
-    ['id' => 1, 'name' => 'Arjuna Bark', 'slug' => 'arjuna-bark', 'count' => 3],
-    ['id' => 2, 'name' => 'Dried Herbs', 'slug' => 'dried-herbs', 'count' => 3],
-    ['id' => 3, 'name' => 'Herbs Powder', 'slug' => 'herbs-powder', 'count' => 4],
-    ['id' => 4, 'name' => 'Renewable Energy Products', 'slug' => 'renewable-energy', 'count' => 4],
-];
+require_once __DIR__ . '/../config/products.php';
 
-$brands = [
-    ['id' => 1, 'name' => 'Biswas Organics', 'slug' => 'biswas-organics', 'count' => 8],
-    ['id' => 2, 'name' => 'Heritage Botanicals', 'slug' => 'heritage-botanicals', 'count' => 3],
-    ['id' => 3, 'name' => 'Pure Herbs Co.', 'slug' => 'pure-herbs', 'count' => 3],
-    ['id' => 4, 'name' => 'Biswas Eco Tech', 'slug' => 'biswas-eco-tech', 'count' => 4],
-];
+// Fetch all dynamic products from Database
+$products = getAllProducts();
 
-$products = [
-    [
-        'id' => 101,
-        'name' => 'Dried Arjuna Bark',
-        'category' => 'Arjuna Bark',
-        'category_slug' => 'arjuna-bark',
-        'brand' => 'Biswas Organics',
-        'price' => 710,
-        'regular_price' => 775,
-        'rating' => 5,
-        'reviews_count' => 32,
-        'stock_quantity' => 50,
-        'stock_status' => 'in-stock',
-        'badge' => 'BEST SELLER',
-        'badge_type' => 'sale',
-        'description' => 'Pure 99% high-purity Dried Arjuna Bark sourced directly from West Bengal for traditional heart remedies and cardio support.',
-        'image' => cloudinary_url('https://images.unsplash.com/photo-1546868871-7041f2a55e12?auto=format&fit=crop&w=600&q=80', ['width' => 600, 'height' => 600])
-    ],
-    [
-        'id' => 102,
-        'name' => 'High Quality Arjuna Bark',
-        'category' => 'Arjuna Bark',
-        'category_slug' => 'arjuna-bark',
-        'brand' => 'Biswas Organics',
-        'price' => 750,
-        'regular_price' => 820,
-        'rating' => 5,
-        'reviews_count' => 24,
-        'stock_quantity' => 35,
-        'stock_status' => 'in-stock',
-        'badge' => 'POPULAR',
-        'badge_type' => 'sale',
-        'description' => 'Selected thick cut medicinal-grade Arjuna bark rich in tannins and flavonoids for natural cardiovascular health.',
-        'image' => cloudinary_url('https://images.unsplash.com/photo-1563865436874-9aef32095fad?auto=format&fit=crop&w=600&q=80', ['width' => 600, 'height' => 600])
-    ],
-    [
-        'id' => 103,
-        'name' => 'Premium Quality Arjuna Bark',
-        'category' => 'Arjuna Bark',
-        'category_slug' => 'arjuna-bark',
-        'brand' => 'Biswas Organics',
-        'price' => 790,
-        'regular_price' => 890,
-        'rating' => 5,
-        'reviews_count' => 18,
-        'stock_quantity' => 20,
-        'stock_status' => 'in-stock',
-        'badge' => 'PREMIUM',
-        'badge_type' => 'sale',
-        'description' => 'Export-quality sun-dried Terminalia Arjuna tree bark strips carefully cleaned and sorted for pharmaceutical and herbal use.',
-        'image' => cloudinary_url('https://images.unsplash.com/photo-1509358271058-acd22cc93898?auto=format&fit=crop&w=600&q=80', ['width' => 600, 'height' => 600])
-    ],
-    [
-        'id' => 104,
-        'name' => 'Harad Powder',
-        'category' => 'Herbs Powder',
-        'category_slug' => 'herbs-powder',
-        'brand' => 'Biswas Organics',
-        'price' => 350,
-        'regular_price' => 420,
-        'rating' => 5,
-        'reviews_count' => 41,
-        'stock_quantity' => 40,
-        'stock_status' => 'in-stock',
-        'badge' => 'BEST SELLER',
-        'badge_type' => 'sale',
-        'description' => 'Pure blended Harad (Haritaki) powder from Kolkata. Promotes digestive wellness, detoxification, and natural rejuvenation.',
-        'image' => cloudinary_url('https://images.unsplash.com/photo-1615485290382-441e4d049cb5?auto=format&fit=crop&w=600&q=80', ['width' => 600, 'height' => 600])
-    ],
-    [
-        'id' => 105,
-        'name' => 'Neem Powder',
-        'category' => 'Herbs Powder',
-        'category_slug' => 'herbs-powder',
-        'brand' => 'Heritage Botanicals',
-        'price' => 299,
-        'regular_price' => 380,
-        'rating' => 5,
-        'reviews_count' => 29,
-        'stock_quantity' => 25,
-        'stock_status' => 'in-stock',
-        'badge' => 'POPULAR',
-        'badge_type' => 'sale',
-        'description' => 'Fine micro-powdered organic Neem leaves. Antibacterial, antifungal & antioxidant for skincare, haircare, and Ayurvedic remedies.',
-        'image' => cloudinary_url('https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=600&q=80', ['width' => 600, 'height' => 600])
-    ],
-    [
-        'id' => 106,
-        'name' => 'Ashwagandha Root Powder',
-        'category' => 'Herbs Powder',
-        'category_slug' => 'herbs-powder',
-        'brand' => 'Biswas Organics',
-        'price' => 599,
-        'regular_price' => 749,
-        'rating' => 5,
-        'reviews_count' => 28,
-        'stock_quantity' => 15,
-        'stock_status' => 'in-stock',
-        'badge' => 'BEST SELLER',
-        'badge_type' => 'sale',
-        'description' => 'Pure premium Ashwagandha (Withania Somnifera) root powder, traditional revitalizing herb for energy, stamina, and stress management.',
-        'image' => cloudinary_url('https://images.unsplash.com/photo-1615485290382-441e4d049cb5?auto=format&fit=crop&w=600&q=80', ['width' => 600, 'height' => 600])
-    ],
-    [
-        'id' => 107,
-        'name' => 'Organic Triphala Powder',
-        'category' => 'Herbs Powder',
-        'category_slug' => 'herbs-powder',
-        'brand' => 'Biswas Organics',
-        'price' => 349,
-        'regular_price' => 429,
-        'rating' => 5,
-        'reviews_count' => 38,
-        'stock_quantity' => 25,
-        'stock_status' => 'in-stock',
-        'badge' => 'POPULAR',
-        'badge_type' => 'sale',
-        'description' => 'Balanced classic formulation of Amla, Haritaki, and Bibhitaki for gentle gut cleansing and daily digestive harmony.',
-        'image' => cloudinary_url('https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&w=600&q=80', ['width' => 600, 'height' => 600])
-    ],
-    [
-        'id' => 108,
-        'name' => 'Natural Reetha Soap Nuts',
-        'category' => 'Dried Herbs',
-        'category_slug' => 'dried-herbs',
-        'brand' => 'Pure Herbs Co.',
-        'price' => 280,
-        'regular_price' => 340,
-        'rating' => 4,
-        'reviews_count' => 22,
-        'stock_quantity' => 30,
-        'stock_status' => 'in-stock',
-        'badge' => 'ECO CHOICE',
-        'badge_type' => 'sale',
-        'description' => '90% pure medicine grade Reetha (Soapnut) shells. 100% natural chemical-free organic cleanser for hair washing and delicate fabrics.',
-        'image' => cloudinary_url('https://images.unsplash.com/photo-1512290900673-7002ddb97b09?auto=format&fit=crop&w=600&q=80', ['width' => 600, 'height' => 600])
-    ],
-    [
-        'id' => 109,
-        'name' => 'Dried Tulsi Leaves',
-        'category' => 'Dried Herbs',
-        'category_slug' => 'dried-herbs',
-        'brand' => 'Pure Herbs Co.',
-        'price' => 299,
-        'regular_price' => 349,
-        'rating' => 4,
-        'reviews_count' => 19,
-        'stock_quantity' => 12,
-        'stock_status' => 'in-stock',
-        'badge' => 'FRESH HARVEST',
-        'badge_type' => 'sale',
-        'description' => 'Handpicked shade-dried sacred Rama & Krishna Tulsi leaves for natural immunity teas and respiratory wellness.',
-        'image' => cloudinary_url('https://images.unsplash.com/photo-1509358271058-acd22cc93898?auto=format&fit=crop&w=600&q=80', ['width' => 600, 'height' => 600])
-    ],
-    [
-        'id' => 110,
-        'name' => 'Dried Neem Leaves',
-        'category' => 'Dried Herbs',
-        'category_slug' => 'dried-herbs',
-        'brand' => 'Heritage Botanicals',
-        'price' => 249,
-        'regular_price' => 299,
-        'rating' => 5,
-        'reviews_count' => 31,
-        'stock_quantity' => 18,
-        'stock_status' => 'in-stock',
-        'badge' => 'POPULAR',
-        'badge_type' => 'sale',
-        'description' => '99% pure sun-dried green Neem leaves. Essential for therapeutic herbal baths, skin detox, and botanical infusions.',
-        'image' => cloudinary_url('https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=600&q=80', ['width' => 600, 'height' => 600])
-    ],
-    [
-        'id' => 111,
-        'name' => 'Solar LED Street Light',
-        'category' => 'Renewable Energy Products',
-        'category_slug' => 'renewable-energy',
-        'brand' => 'Biswas Eco Tech',
-        'price' => 3499,
-        'regular_price' => 4200,
-        'rating' => 5,
-        'reviews_count' => 42,
-        'stock_quantity' => 15,
-        'stock_status' => 'in-stock',
-        'badge' => 'BEST SELLER',
-        'badge_type' => 'sale',
-        'description' => 'Integrated aluminum & polycrystalline silicon solar LED street light. High lumen output, dusk-to-dawn sensor, and weather resistance.',
-        'image' => cloudinary_url('https://images.unsplash.com/photo-1545259741-2ea3ebf61fa3?auto=format&fit=crop&w=600&q=80', ['width' => 600, 'height' => 600])
-    ],
-    [
-        'id' => 112,
-        'name' => 'Solar Power Battery',
-        'category' => 'Renewable Energy Products',
-        'category_slug' => 'renewable-energy',
-        'brand' => 'Biswas Eco Tech',
-        'price' => 5899,
-        'regular_price' => 6999,
-        'rating' => 5,
-        'reviews_count' => 27,
-        'stock_quantity' => 8,
-        'stock_status' => 'in-stock',
-        'badge' => 'HIGH CYCLE',
-        'badge_type' => 'sale',
-        'description' => 'Heavy-duty Lithium-ion & deep-cycle lead-acid solar storage battery (12V/24V/48V) for reliable off-grid power storage.',
-        'image' => cloudinary_url('https://images.unsplash.com/photo-1508514177221-188b1cf16e9d?auto=format&fit=crop&w=600&q=80', ['width' => 600, 'height' => 600])
-    ],
-    [
-        'id' => 113,
-        'name' => 'Solar PV Panel',
-        'category' => 'Renewable Energy Products',
-        'category_slug' => 'renewable-energy',
-        'brand' => 'Biswas Eco Tech',
-        'price' => 4200,
-        'regular_price' => 4999,
-        'rating' => 5,
-        'reviews_count' => 35,
-        'stock_quantity' => 20,
-        'stock_status' => 'in-stock',
-        'badge' => 'ECO POWER',
-        'badge_type' => 'sale',
-        'description' => 'High efficiency silicon & tempered glass solar photovoltaic panel for residential, commercial & industrial power generation.',
-        'image' => cloudinary_url('https://images.unsplash.com/photo-1509391365360-2e959784a276?auto=format&fit=crop&w=600&q=80', ['width' => 600, 'height' => 600])
-    ],
-    [
-        'id' => 114,
-        'name' => 'Solar Emergency LED Lantern',
-        'category' => 'Renewable Energy Products',
-        'category_slug' => 'renewable-energy',
-        'brand' => 'Biswas Eco Tech',
-        'price' => 1299,
-        'regular_price' => 1599,
-        'rating' => 5,
-        'reviews_count' => 19,
-        'stock_quantity' => 18,
-        'stock_status' => 'in-stock',
-        'badge' => 'PORTABLE',
-        'badge_type' => 'sale',
-        'description' => 'High-efficiency solar rechargeable lantern with dual USB emergency phone charging and 12-hour illumination.',
-        'image' => cloudinary_url('https://images.unsplash.com/photo-1509391365360-2e959784a276?auto=format&fit=crop&w=600&q=80', ['width' => 600, 'height' => 600])
-    ]
-];
+// Dynamic Categories from Database
+$categories = [];
+try {
+    $pdo = Database::getConnection();
+    $stmtC = $pdo->query("SELECT c.*, (SELECT COUNT(*) FROM `products` p WHERE p.category_id = c.id AND (p.status IS NULL OR p.status IN ('approved', 'published', 'active', ''))) as count FROM `categories` c WHERE c.status IN ('approved', 'active') ORDER BY c.id ASC");
+    $rowsC = $stmtC->fetchAll(PDO::FETCH_ASSOC);
+    foreach ($rowsC as $rc) {
+        $categories[] = [
+            'id' => (int)$rc['id'],
+            'name' => $rc['name'],
+            'slug' => $rc['slug'],
+            'count' => (int)($rc['count'] ?? 0)
+        ];
+    }
+} catch (\Throwable $e) {}
+
+if (empty($categories)) {
+    $categories = [
+        ['id' => 1, 'name' => 'Arjuna Bark', 'slug' => 'arjuna-bark', 'count' => 3],
+        ['id' => 2, 'name' => 'Dried Herbs', 'slug' => 'dried-herbs', 'count' => 3],
+        ['id' => 3, 'name' => 'Herbs Powder', 'slug' => 'herbs-powder', 'count' => 4],
+        ['id' => 4, 'name' => 'Renewable Energy Products', 'slug' => 'renewable-energy', 'count' => 4],
+    ];
+}
+
+// Dynamic Brands List derived from products
+$brandsMap = [];
+foreach ($products as $p) {
+    $bName = !empty($p['brand']) ? $p['brand'] : 'Biswas Enterprise';
+    $bSlug = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $bName), '-'));
+    if (!isset($brandsMap[$bSlug])) {
+        $brandsMap[$bSlug] = ['id' => count($brandsMap) + 1, 'name' => $bName, 'slug' => $bSlug, 'count' => 0];
+    }
+    $brandsMap[$bSlug]['count']++;
+}
+$brands = array_values($brandsMap);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -669,7 +455,7 @@ $products = [
                             }
                         ?>
                         <div class="product-card <?= $p['stock_status'] === 'out-of-stock' ? 'is-out-of-stock' : '' ?>"
-                             style="<?= $isInitialHide ? 'display: none !important;' : '' ?>"
+                             style="<?= $isInitialHide ? 'display: none;' : '' ?>"
                              data-id="<?= $p['id'] ?>"
                              data-title="<?= htmlspecialchars($p['name']) ?>"
                              data-category="<?= htmlspecialchars($p['category']) ?>"
@@ -876,75 +662,7 @@ $products = [
 
 
     <!-- Site Footer -->
-    <footer class="site-footer">
-        <div class="container">
-            <div class="footer-top">
-                <div class="footer-grid">
-                    <div class="footer-brand">
-                        <a href="<?= url() ?>" class="site-logo">
-                            <img src="<?= asset('image/logo.png') ?>" alt="Biswas Enterprise Logo" class="brand-logo-img">
-                        </a>
-                        <p class="footer-desc">Biswas Enterprise is dedicated to delivering genuine natural herbs, pure botanical powders, and holistic wellness products.</p>
-                        <div class="social-links">
-                            <a href="#" class="social-link" aria-label="Facebook"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg></a>
-                            <a href="#" class="social-link" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg></a>
-                            <a href="#" class="social-link" aria-label="WhatsApp"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg></a>
-                        </div>
-                    </div>
-
-                    <div class="footer-column">
-                        <h4 class="footer-heading">Quick Links</h4>
-                        <ul class="footer-links">
-                            <li><a href="<?= url() ?>">Home</a></li>
-                            <li><a href="<?= url('shop') ?>">Shop All Products</a></li>
-                            <li><a href="<?= url('#categories') ?>">Product Categories</a></li>
-                            <li><a href="<?= url('#about') ?>">About Us</a></li>
-                        </ul>
-                    </div>
-
-                    <div class="footer-column">
-                        <h4 class="footer-heading">Categories</h4>
-                        <ul class="footer-links">
-                            <li><a href="<?= url('shop') ?>">Herbal Products</a></li>
-                            <li><a href="<?= url('shop') ?>">Dried Herbs</a></li>
-                            <li><a href="<?= url('shop') ?>">Herbal Powders</a></li>
-                            <li><a href="<?= url('shop') ?>">Wellness Items</a></li>
-                        </ul>
-                    </div>
-
-                    <div class="footer-column">
-                        <h4 class="footer-heading">Customer Care</h4>
-                        <ul class="footer-links">
-                            <li><a href="#">Shipping &amp; Delivery</a></li>
-                            <li><a href="#">Returns &amp; Refunds</a></li>
-                            <li><a href="#">Quality Sourcing Guarantee</a></li>
-                            <li><a href="#">Contact Support</a></li>
-                        </ul>
-                    </div>
-
-                    <div class="footer-column">
-                        <h4 class="footer-heading">Contact Us</h4>
-                        <div class="footer-contact-item">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-                            <span>West Bengal, India</span>
-                        </div>
-                        <div class="footer-contact-item">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
-                            <span>info@biswasenterprise.com</span>
-                        </div>
-                        <div class="footer-contact-item">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
-                            <span>+91 98765 43210</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="footer-bottom">
-                <p>&copy; <?= date('Y') ?> Biswas Enterprise. All Rights Reserved. Crafted for Natural Living.</p>
-            </div>
-        </div>
-    </footer>
+    <?php include __DIR__ . '/includes/footer.php'; ?>
 
     <!-- Modular Page JavaScript -->
     <script type="module" src="<?= asset('js/pages/shop.js') ?>"></script>

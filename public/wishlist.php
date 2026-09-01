@@ -289,13 +289,7 @@ if ($userLoggedIn) {
     </main>
 
     <!-- FOOTER -->
-    <footer class="site-footer" role="contentinfo">
-        <div class="footer-bottom">
-            <div class="container">
-                <p>&copy; <?= date('Y') ?> Biswas Enterprise. All Rights Reserved. Exporter & Supplier from Kolkata, West Bengal.</p>
-            </div>
-        </div>
-    </footer>
+    <?php include __DIR__ . '/includes/footer.php'; ?>
 
     <script>
         async function removeWishlistItem(productId) {

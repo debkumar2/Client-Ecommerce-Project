@@ -103,6 +103,50 @@ function initDatabaseTables(): void {
             UNIQUE KEY `unique_wishlist_item` (`wishlist_id`, `product_id`)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
 
+        // Create categories table
+        $pdo->exec("CREATE TABLE IF NOT EXISTS `categories` (
+            `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+            `slug` VARCHAR(100) NOT NULL UNIQUE,
+            `name` VARCHAR(191) NOT NULL,
+            `description` TEXT NULL,
+            `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
+
+        // Seed default categories if empty
+        $stmtCatCount = $pdo->query("SELECT COUNT(*) FROM `categories`");
+        if ((int)$stmtCatCount->fetchColumn() === 0) {
+            $defaultCategories = [
+                ['slug' => 'arjuna-bark', 'name' => 'Arjuna Bark', 'description' => 'Medicinal grade Terminalia Arjuna bark strips and remedies.'],
+                ['slug' => 'herbs-powder', 'name' => 'Herbs Powder', 'description' => 'Micro-powdered organic herbs, Ashwagandha, Neem and Harad.'],
+                ['slug' => 'dried-herbs', 'name' => 'Dried Herbs', 'description' => 'Sun-dried botanical herbs, Neem leaves, Reetha and Tulsi.'],
+                ['slug' => 'renewable-energy', 'name' => 'Renewable Energy Products', 'description' => 'Solar panels, street lights, emergency lanterns and solar batteries.']
+            ];
+            $stmtInsCat = $pdo->prepare("INSERT INTO `categories` (slug, name, description) VALUES (?, ?, ?)");
+            foreach ($defaultCategories as $c) {
+                $stmtInsCat->execute([$c['slug'], $c['name'], $c['description']]);
+            }
+        }
+
+        // Create products table
+        $pdo->exec("CREATE TABLE IF NOT EXISTS `products` (
+            `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+            `category_id` INT UNSIGNED NULL,
+            `category_slug` VARCHAR(100) NOT NULL,
+            `category_name` VARCHAR(191) NOT NULL,
+            `name` VARCHAR(191) NOT NULL,
+            `brand` VARCHAR(100) DEFAULT 'Biswas Enterprise',
+            `price` DECIMAL(10,2) NOT NULL,
+            `regular_price` DECIMAL(10,2) NOT NULL,
+            `stock` INT DEFAULT 100,
+            `badge` VARCHAR(50) NULL,
+            `short_desc` TEXT NULL,
+            `description` TEXT NULL,
+            `image` TEXT NOT NULL,
+            `status` VARCHAR(20) DEFAULT 'active',
+            `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
+
         // Safely drop any legacy strict foreign key constraint on wishlist_items if present
         try {
             $pdo->exec("ALTER TABLE `wishlist_items` DROP FOREIGN KEY `fk_wishlist_item_product`");

@@ -301,46 +301,7 @@ require_once __DIR__ . '/../config/database.php';
     </main>
 
     <!-- FOOTER -->
-    <footer class="site-footer" role="contentinfo">
-        <div class="container">
-            <div class="footer-grid">
-                <div class="footer-col footer-brand-col">
-                    <a href="<?= url() ?>" class="footer-logo">
-                        <img src="<?= asset('image/logo.png') ?>" alt="Biswas Enterprise" class="brand-logo-img">
-                    </a>
-                    <p class="footer-desc">Globally oriented trading and export company established in 2023, headquartered in Kolkata, West Bengal, India.</p>
-                    <div class="footer-gst-info"><strong>GST NO:</strong> 19AGXPB1978M1ZI</div>
-                </div>
-                <div class="footer-col">
-                    <h3 class="footer-title">Quick Links</h3>
-                    <ul class="footer-links">
-                        <li><a href="<?= url() ?>">Home</a></li>
-                        <li><a href="<?= url('shop') ?>">Shop All Products</a></li>
-                        <li><a href="<?= url('about') ?>">About Us</a></li>
-                        <li><a href="<?= url('contact') ?>">Contact Us</a></li>
-                        <li><a href="<?= url('blog') ?>">Latest Blog</a></li>
-                    </ul>
-                </div>
-                <div class="footer-col">
-                    <h3 class="footer-title">Categories</h3>
-                    <ul class="footer-links">
-                        <li><a href="<?= url('shop?category=arjuna-bark') ?>">Arjuna Bark</a></li>
-                        <li><a href="<?= url('shop?category=dried-herbs') ?>">Dried Herbs</a></li>
-                        <li><a href="<?= url('shop?category=herbs-powder') ?>">Herbs Powder</a></li>
-                        <li><a href="<?= url('shop?category=renewable-energy') ?>">Renewable Energy</a></li>
-                    </ul>
-                </div>
-                <div class="footer-col">
-                    <h3 class="footer-title">Headquarters</h3>
-                    <p class="footer-address">Na Kalikapur Berhampore Murshidabad,<br>Bara Bazar, Kolkata, West Bengal – 742102, India</p>
-                    <p class="footer-contact-item"><strong>Email:</strong> <a href="mailto:dipak_200607@yahoo.co.in">dipak_200607@yahoo.co.in</a></p>
-                </div>
-            </div>
-            <div class="footer-bottom">
-                <p>&copy; <?= date('Y') ?> Biswas Enterprise. All Rights Reserved.</p>
-            </div>
-        </div>
-    </footer>
+    <?php include __DIR__ . '/includes/footer.php'; ?>
 
     <script type="module">
         import { initHeader } from '<?= asset('js/components/header.js') ?>';

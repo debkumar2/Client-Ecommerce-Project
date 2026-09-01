@@ -4,8 +4,53 @@
  * Biswas Enterprise E-Commerce
  */
 
+require_once __DIR__ . '/database.php';
+
 if (!function_exists('getAllProducts')) {
     function getAllProducts(): array {
+        try {
+            $pdo = Database::getConnection();
+                $stmt = $pdo->query("SELECT p.*, 
+                    COALESCE(c.name, 'General') as category_name_resolved, 
+                    COALESCE(c.slug, 'general') as category_slug_resolved,
+                    (SELECT image_url FROM `product_images` WHERE product_id = p.id ORDER BY is_primary DESC, id ASC LIMIT 1) as gallery_image
+                    FROM `products` p 
+                    LEFT JOIN `categories` c ON p.category_id = c.id 
+                    WHERE (p.status IS NULL OR p.status IN ('approved', 'published', 'active', '')) 
+                    ORDER BY p.id DESC");
+                $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+                if (!empty($rows)) {
+                    $dbProducts = [];
+                    foreach ($rows as $r) {
+                        $price = !empty($r['selling_price']) ? (float)$r['selling_price'] : ((float)($r['price'] ?? 0));
+                        $regPrice = !empty($r['regular_price']) ? (float)$r['regular_price'] : round($price * 1.15);
+                        $stock = isset($r['stock_quantity']) ? (int)$r['stock_quantity'] : (int)($r['stock'] ?? 50);
+
+                        $img = !empty($r['gallery_image']) ? $r['gallery_image'] : (!empty($r['image']) ? $r['image'] : 'https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=600&q=80');
+
+                        $dbProducts[] = [
+                            'id' => (int)$r['id'],
+                            'name' => $r['name'],
+                            'category' => $r['category_name_resolved'],
+                            'category_slug' => $r['category_slug_resolved'],
+                            'brand' => !empty($r['brand']) ? $r['brand'] : 'Biswas Enterprise',
+                            'price' => $price,
+                            'regular_price' => $regPrice,
+                            'rating' => 5,
+                            'reviews_count' => 24,
+                            'stock_quantity' => $stock,
+                            'stock_status' => ($stock > 0) ? 'in-stock' : 'out-of-stock',
+                            'badge' => !empty($r['badge']) ? $r['badge'] : (!empty($r['is_bestseller']) ? 'BEST SELLER' : ''),
+                            'badge_type' => 'sale',
+                            'description' => !empty($r['description']) ? $r['description'] : (!empty($r['short_description']) ? $r['short_description'] : ''),
+                            'image' => $img
+                        ];
+                    }
+                    return $dbProducts;
+                }
+        } catch (\Throwable $e) {}
+
         return [
             [
                 'id' => 101,
