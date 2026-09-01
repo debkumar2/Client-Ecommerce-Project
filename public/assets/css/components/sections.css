@@ -653,13 +653,73 @@
     .reviews-grid, .blog-grid {
         grid-template-columns: 1fr;
     }
+    .section-padding {
+        padding: 3.5rem 0;
+    }
 }
 
-@media (max-width: 576px) {
-    .benefits-grid, .category-grid, .why-us-grid, .quality-grid {
+@media (max-width: 640px) {
+    .section-padding {
+        padding: 2.75rem 0;
+    }
+    .section-header {
+        margin-bottom: 2rem;
+    }
+    .section-header h2 {
+        font-size: clamp(1.5rem, 6vw, 2rem);
+    }
+    .section-header p {
+        font-size: 0.9375rem;
+    }
+    /* Category grid stays 2-col on mobile for good UX */
+    .category-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+    .category-image {
+        height: 160px;
+    }
+    .category-name {
+        font-size: 1rem;
+    }
+    .category-content {
+        padding: 0.875rem;
+    }
+    /* Benefits go single column */
+    .benefits-grid, .why-us-grid, .quality-grid {
         grid-template-columns: 1fr;
     }
     .newsletter-form {
         flex-direction: column;
+    }
+    /* Hero image */
+    .hero-image-wrapper {
+        aspect-ratio: 16/9;
+    }
+}
+
+@media (max-width: 475px) {
+    /* Single column category cards below 475px */
+    .category-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    .category-image {
+        height: 200px;
+    }
+    .category-name {
+        font-size: 1.05rem;
+    }
+    .category-content {
+        padding: 1rem;
+    }
+}
+
+@media (max-width: 400px) {
+    .category-image {
+        height: 170px;
+    }
+    .category-content {
+        padding: 0.875rem;
     }
 }

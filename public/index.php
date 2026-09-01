@@ -456,9 +456,70 @@ $companyDetails = [
             }
         }
 
-        @media (max-width: 576px) {
-            .glimpse-right-cards {
-                grid-template-columns: 1fr;
+        /* ============================================
+           INLINE RESPONSIVE OVERRIDES
+           ============================================ */
+
+        /* Hero stat inline text sizes */
+        @media (max-width: 640px) {
+            .stat-item-cell > div > div:first-child {
+                font-size: 1.1rem !important;
+            }
+            .stat-item-cell > div > div:last-child {
+                font-size: 0.7rem !important;
+            }
+
+            /* Company glimpse buttons */
+            .glimpse-left-content > div:last-child {
+                flex-direction: column !important;
+            }
+            .glimpse-left-content > div:last-child .btn-modern-outline,
+            .glimpse-left-content > div:last-child .btn-modern-primary {
+                font-size: 12px !important;
+                padding: 9px 14px !important;
+                justify-content: center !important;
+            }
+
+            /* Product card action buttons */
+            .product-card-body > div:last-child {
+                flex-wrap: wrap !important;
+            }
+            .product-card-body > div:last-child .btn-modern-outline {
+                width: 100% !important;
+                justify-content: center !important;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .btn-modern-primary,
+            .btn-modern-outline,
+            .btn-whatsapp-direct {
+                font-size: 13px !important;
+                padding: 11px 18px !important;
+            }
+            .bulk-quote-section {
+                padding: 22px 14px !important;
+            }
+        }
+
+        @media (max-width: 475px) {
+            .btn-modern-primary,
+            .btn-modern-outline,
+            .btn-whatsapp-direct {
+                font-size: 11px !important;
+                padding: 9px 14px !important;
+                gap: 6px !important;
+                border-radius: 40px !important;
+            }
+            /* Shrink the arrow SVG inside primary btn */
+            .btn-modern-primary svg,
+            .btn-modern-outline svg {
+                width: 13px !important;
+                height: 13px !important;
+            }
+            /* Tighter gap between hero buttons */
+            .hero-content > div[style*="flex"] {
+                gap: 10px !important;
             }
         }
 
@@ -573,6 +634,26 @@ $companyDetails = [
         </div>
     </header>
 
+    <!-- MOBILE DRAWER OVERLAY -->
+    <div class="drawer-overlay" id="drawer-overlay"></div>
+
+    <!-- MOBILE NAVIGATION DRAWER -->
+    <div class="mobile-drawer" id="mobile-drawer" role="dialog" aria-modal="true" aria-label="Mobile Navigation">
+        <div class="drawer-header">
+            <a href="<?= url() ?>" class="site-logo" aria-label="Biswas Enterprise Home">
+                <img src="<?= asset('image/logo.png') ?>" alt="Biswas Enterprise" class="brand-logo-img">
+            </a>
+            <button class="drawer-close" id="drawer-close" aria-label="Close menu">&times;</button>
+        </div>
+        <nav class="mobile-nav-links">
+            <a href="<?= url() ?>">Home</a>
+            <a href="<?= url('shop') ?>">Shop</a>
+            <a href="<?= url('about') ?>">About Us</a>
+            <a href="<?= url('contact') ?>">Contact</a>
+            <a href="<?= url('blog') ?>">Blog</a>
+        </nav>
+    </div>
+
     <main id="main-content">
         <!-- 3. HERO SECTION -->
         <section class="hero-section" aria-label="Hero Introduction">
@@ -677,7 +758,7 @@ $companyDetails = [
                                 <span>VERIFIED GOVT REGISTERED EXPORTER</span>
                             </div>
                             
-                            <h2 style="font-family: 'Merriweather', serif; font-size: 2rem; color: #1b3b2b; margin: 0; line-height: 1.25;">
+                            <h2 style="font-family: 'Merriweather', serif; font-size: clamp(1.5rem, 4vw, 2rem); color: #1b3b2b; margin: 0; line-height: 1.25;">
                                 About Biswas Enterprise
                             </h2>
                             
@@ -891,7 +972,7 @@ $companyDetails = [
                     <div class="bulk-quote-grid">
                         <div>
                             <span class="eyebrow" style="color: #d4af37;">QUICK BULK ENQUIRY</span>
-                            <h2 style="font-family: 'Merriweather', serif; font-size: 2.2rem; margin-bottom: 16px; color: #ffffff;">Request Wholesale Best Price</h2>
+                            <h2 style="font-family: 'Merriweather', serif; font-size: clamp(1.5rem, 4vw, 2.2rem); margin-bottom: 16px; color: #ffffff;">Request Wholesale Best Price</h2>
                             <p style="color: #b8d4c1; line-height: 1.6; font-size: 15px; margin-bottom: 24px;">
                                 Looking for bulk quantities of Harad Powder, Arjuna Bark, or Commercial Solar LED Lights? Send us your requirement and our export team will send you the best quote within 2 hours.
                             </p>
@@ -1055,5 +1136,13 @@ $companyDetails = [
         });
     </script>
     <?php include __DIR__ . '/includes/floating_enquiry.php'; ?>
+
+    <!-- Mobile Drawer Init -->
+    <script type="module">
+        import { initHeader } from '<?= asset('js/components/header.js') ?>';
+        document.addEventListener('DOMContentLoaded', () => {
+            initHeader();
+        });
+    </script>
 </body>
 </html>

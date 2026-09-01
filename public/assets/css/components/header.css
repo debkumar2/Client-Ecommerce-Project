@@ -377,4 +377,117 @@
         display: flex;
         align-items: center;
     }
+
+    /* Center the logo between the toggle and actions */
+    .site-header .header-inner {
+        position: relative;
+    }
+    .site-header .site-logo {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+    }
 }
+
+@media (max-width: 640px) {
+    /* Hide separators in announcement bar on mobile */
+    .announcement-separator {
+        display: none;
+    }
+    .announcement-content {
+        gap: 0.375rem;
+    }
+    .announcement-bar {
+        font-size: 0.7rem;
+        padding: 0.4rem 0.75rem;
+    }
+    /* Reduce logo size on mobile */
+    .brand-logo-img {
+        height: 52px;
+    }
+    .header-inner {
+        height: 68px;
+    }
+    .header-actions {
+        gap: 0.75rem;
+    }
+}
+
+@media (max-width: 375px) {
+    /* Smaller logo */
+    .brand-logo-img {
+        height: 44px;
+        max-width: 140px;
+    }
+    .header-inner {
+        height: 60px;
+    }
+    /* Smaller icon buttons */
+    .icon-btn {
+        width: 32px;
+        height: 32px;
+    }
+    .icon-btn svg {
+        width: 18px;
+        height: 18px;
+    }
+    .header-actions {
+        gap: 0.5rem;
+    }
+    /* Smaller hamburger */
+    .mobile-toggle {
+        padding: 0.35rem;
+    }
+    .mobile-toggle svg {
+        width: 20px;
+        height: 20px;
+    }
+    /* Announcement bar */
+    .announcement-bar {
+        font-size: 0.62rem;
+        padding: 0.35rem 0.5rem;
+    }
+    /* Only show one announcement item */
+    .announcement-item:not(:first-child) {
+        display: none;
+    }
+}
+
+@media (max-width: 320px) {
+    /* Minimum viable navbar for 320px screens */
+    .brand-logo-img {
+        height: 38px;
+        max-width: 120px;
+    }
+    .header-inner {
+        height: 54px;
+    }
+    .icon-btn {
+        width: 28px;
+        height: 28px;
+    }
+    .icon-btn svg {
+        width: 16px;
+        height: 16px;
+    }
+    .header-actions {
+        gap: 0.25rem;
+    }
+
+    .mobile-toggle svg {
+        width: 18px;
+        height: 18px;
+    }
+    /* Cart badge smaller */
+    .cart-badge,
+    .wishlist-badge {
+        width: 14px;
+        height: 14px;
+        font-size: 0.55rem;
+    }
+    /* Announcement bar hidden at 320px to save space */
+    .announcement-bar {
+        display: none;
+    }
+}
+

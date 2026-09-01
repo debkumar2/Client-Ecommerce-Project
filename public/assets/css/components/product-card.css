@@ -19,6 +19,14 @@
     }
 }
 
+@media (max-width: 475px) {
+    /* Single column product cards below 475px */
+    .products-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+}
+
 /* Individual Product Card */
 .product-card {
     background-color: var(--surface);

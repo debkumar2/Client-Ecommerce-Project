@@ -338,18 +338,460 @@
     padding: 0 24px 20px;
 }
 
+/* =========================================
+   MOBILE RESPONSIVE — HOME PAGE
+   ========================================= */
+
 @media (max-width: 992px) {
+    /* Hero — text first, image second, both full width */
     .hero-grid {
         grid-template-columns: 1fr;
-        gap: 2.5rem;
+        gap: 2rem;
     }
+    .hero-content {
+        order: 1; /* Text always first */
+        width: 100%;
+        max-width: 100%;
+    }
+    .hero-image-wrapper {
+        order: 2; /* Image below text */
+        width: 100%;
+        max-height: none;     /* Remove any height cap */
+        aspect-ratio: 16 / 9; /* Full-width cinematic ratio */
+    }
+    .hero-title {
+        font-size: clamp(2rem, 5vw, 3rem);
+    }
+    .hero-description {
+        font-size: 1rem;
+    }
+
+    /* Stats grid from sections.css override */
     .stats-grid {
         grid-template-columns: repeat(2, 1fr);
     }
+
+    /* Stats counter card (inline-defined in index.php) */
+    .stats-counter-card {
+        padding: 22px 20px !important;
+        margin-top: 28px !important;
+    }
+    .stats-grid-row {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 16px !important;
+    }
+
+    /* Company Glimpse */
+    .company-glimpse-wrapper {
+        padding: 28px 24px !important;
+    }
+    .glimpse-split-grid {
+        grid-template-columns: 1fr !important;
+        gap: 28px !important;
+    }
+    .glimpse-right-cards {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+
+    /* Bulk Quote */
+    .bulk-quote-section {
+        padding: 36px 24px !important;
+    }
+    .bulk-quote-grid {
+        grid-template-columns: 1fr !important;
+        gap: 28px !important;
+    }
 }
 
-@media (max-width: 576px) {
+@media (max-width: 575px) {
+    /* ---- HERO ---- */
+    .hero-section {
+        padding: 2rem 0 2.5rem;
+    }
+    .hero-title {
+        font-size: clamp(1.6rem, 6.5vw, 2.2rem);
+        line-height: 1.18;
+    }
+    .hero-badge-pill {
+        font-size: 0.65rem;
+        padding: 5px 12px;
+    }
+    .hero-description {
+        font-size: 0.875rem;
+        line-height: 1.6;
+        margin-bottom: 1.5rem;
+    }
+
+    /* ---- SECTION HEADERS ---- */
+    .section-header h2 {
+        font-size: clamp(1.3rem, 5.5vw, 1.75rem);
+    }
+    .section-header p {
+        font-size: 0.875rem;
+    }
+    .eyebrow {
+        font-size: 0.65rem !important;
+    }
+
+    /* ---- STATS COUNTER CARD ---- */
+    .stats-counter-card {
+        padding: 16px 14px !important;
+        border-radius: 14px !important;
+    }
+    .stats-grid-row {
+        grid-template-columns: 1fr 1fr !important;
+        gap: 10px !important;
+    }
+    .stat-item-cell {
+        gap: 8px !important;
+    }
+    .stat-icon-circle {
+        width: 34px !important;
+        height: 34px !important;
+    }
+    /* Inline stat values */
+    .stat-item-cell > div > div:first-child {
+        font-size: 1rem !important;
+    }
+    .stat-item-cell > div > div:last-child {
+        font-size: 0.68rem !important;
+    }
+
+    /* ---- COMPANY GLIMPSE ---- */
+    .company-glimpse-wrapper {
+        padding: 18px 14px !important;
+        border-radius: 14px !important;
+    }
+    .glimpse-verified-badge {
+        font-size: 0.65rem !important;
+    }
+    .glimpse-card-label {
+        font-size: 0.6rem !important;
+    }
+    .glimpse-card-val {
+        font-size: 0.8rem !important;
+    }
+    .glimpse-interactive-card {
+        padding: 12px 10px !important;
+    }
+
+    /* ---- BULK QUOTE ---- */
+    .bulk-quote-section {
+        padding: 24px 14px !important;
+    }
+
+    /* ---- FAQ ---- */
+    .faq-section {
+        padding: 3rem 0;
+    }
+    .faq-question {
+        padding: 14px 16px;
+        font-size: 0.875rem;
+    }
+    .faq-answer {
+        font-size: 0.875rem;
+        padding: 0 16px;
+    }
+    .faq-item.active .faq-answer {
+        padding: 0 16px 16px;
+    }
+
+    /* ---- PRODUCT CARDS ---- */
+    .product-title {
+        font-size: 0.875rem;
+    }
+    .product-category {
+        font-size: 0.68rem;
+    }
+    .price-current {
+        font-size: 1rem;
+    }
+    .price-original {
+        font-size: 0.78rem;
+    }
+    .prod-specs-pill {
+        font-size: 0.68rem !important;
+    }
+    .btn-add-cart {
+        font-size: 0.78rem;
+        padding: 0.55rem 0.75rem;
+    }
+
+    /* ---- CATEGORY CARDS ---- */
+    .category-name {
+        font-size: 0.95rem;
+    }
+    .category-desc {
+        font-size: 0.78rem;
+    }
+    .category-cta {
+        font-size: 0.72rem;
+    }
+    .category-image {
+        height: 170px;
+    }
+
+    /* ---- SECTION PADDING ---- */
+    .section-padding {
+        padding: 2.5rem 0;
+    }
+}
+
+@media (max-width: 640px) {
+    /* Hero section padding */
+    .hero-section {
+        padding: 2.5rem 0 3rem;
+    }
+    .hero-title {
+        font-size: clamp(1.75rem, 7vw, 2.5rem);
+    }
+    .hero-badge-pill {
+        font-size: 0.7rem;
+    }
+    .hero-description {
+        font-size: 0.9375rem;
+    }
+    .hero-image-wrapper {
+        max-height: 280px;
+    }
+
+    /* Stats counter card — single column on mobile */
+    .stats-counter-card {
+        padding: 18px 16px !important;
+        border-radius: 14px !important;
+    }
+    .stats-grid-row {
+        grid-template-columns: 1fr 1fr !important;
+        gap: 12px !important;
+    }
+    .stat-item-cell {
+        gap: 10px !important;
+    }
+    .stat-icon-circle {
+        width: 38px !important;
+        height: 38px !important;
+        flex-shrink: 0 !important;
+    }
+
+    /* Stats grid override */
     .stats-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+
+    /* Company glimpse */
+    .company-glimpse-wrapper {
+        padding: 20px 16px !important;
+        border-radius: 16px !important;
+    }
+    .glimpse-right-cards {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 12px !important;
+    }
+    .glimpse-interactive-card {
+        padding: 14px 12px !important;
+    }
+
+    /* Bulk Quote */
+    .bulk-quote-section {
+        padding: 28px 16px !important;
+        border-radius: 18px !important;
+        margin-top: 40px !important;
+    }
+
+    /* FAQ */
+    .faq-section {
+        padding: 3.5rem 0;
+    }
+    .faq-question {
+        padding: 16px 18px;
+        font-size: 0.9375rem;
+    }
+
+    /* Section padding reduction */
+    .section-padding {
+        padding: 3rem 0;
+    }
+}
+
+@media (max-width: 475px) {
+    /* Hero float card — compact on small phones */
+    .hero-float-card {
+        padding: 10px 12px;
+        border-radius: 12px;
+        bottom: 12px;
+        left: 12px;
+        right: 12px;
+        gap: 8px;
+    }
+    .hero-float-info {
+        gap: 8px;
+    }
+    .hero-float-icon {
+        width: 30px;
+        height: 30px;
+        font-size: 14px;
+        flex-shrink: 0;
+    }
+    .hero-float-title {
+        font-size: 0.75rem;
+    }
+    .hero-float-sub {
+        font-size: 0.65rem;
+    }
+    /* Hide the organic badge pill to prevent overflow */
+    .hero-float-card .account-role-badge {
+        display: none !important;
+    }
+}
+
+@media (max-width: 400px) {
+    /* Very small phones */
+    .stats-grid-row {
+        grid-template-columns: 1fr !important;
+    }
+    .glimpse-right-cards {
+        grid-template-columns: 1fr !important;
+    }
+    .hero-title {
+        font-size: 1.6rem;
+    }
+    .stats-counter-card {
+        padding: 14px 12px !important;
+    }
+}
+
+@media (max-width: 375px) {
+    /* ---- HERO ---- */
+    .hero-title {
+        font-size: 1.4rem !important;
+        line-height: 1.2;
+    }
+    .hero-badge-pill {
+        font-size: 0.58rem !important;
+        padding: 4px 10px !important;
+    }
+    .hero-description {
+        font-size: 0.8rem !important;
+        line-height: 1.55;
+    }
+
+    /* ---- SECTION HEADERS ---- */
+    .section-header h2 {
+        font-size: 1.25rem !important;
+    }
+    .section-header p {
+        font-size: 0.8rem !important;
+    }
+    .eyebrow {
+        font-size: 0.6rem !important;
+    }
+
+    /* ---- STATS COUNTER ---- */
+    .stat-item-cell > div > div:first-child {
+        font-size: 0.9rem !important;
+    }
+    .stat-item-cell > div > div:last-child {
+        font-size: 0.62rem !important;
+    }
+    .stat-icon-circle {
+        width: 30px !important;
+        height: 30px !important;
+    }
+
+    /* ---- COMPANY GLIMPSE ---- */
+    .glimpse-card-label {
+        font-size: 0.55rem !important;
+    }
+    .glimpse-card-val {
+        font-size: 0.72rem !important;
+    }
+    .glimpse-verified-badge {
+        font-size: 0.58rem !important;
+    }
+
+    /* ---- BULK QUOTE ---- */
+    .bulk-quote-section {
+        padding: 20px 12px !important;
+    }
+
+    /* ---- FAQ ---- */
+    .faq-question {
+        font-size: 0.8rem !important;
+        padding: 12px 14px !important;
+    }
+    .faq-answer {
+        font-size: 0.8rem !important;
+    }
+
+    /* ---- PRODUCT CARDS ---- */
+    .product-title {
+        font-size: 0.8rem !important;
+    }
+    .product-category {
+        font-size: 0.62rem !important;
+    }
+    .price-current {
+        font-size: 0.9rem !important;
+    }
+    .price-original {
+        font-size: 0.72rem !important;
+    }
+    .prod-specs-pill {
+        font-size: 0.62rem !important;
+    }
+    .btn-add-cart {
+        font-size: 0.72rem !important;
+        padding: 0.5rem 0.6rem !important;
+    }
+
+    /* ---- CATEGORY CARDS ---- */
+    .category-name {
+        font-size: 0.875rem !important;
+    }
+    .category-desc {
+        font-size: 0.72rem !important;
+    }
+    .category-cta {
+        font-size: 0.65rem !important;
+    }
+    .category-image {
+        height: 150px !important;
+    }
+
+    /* ---- HERO FLOAT CARD ---- */
+    .hero-float-card {
+        padding: 8px 10px !important;
+        bottom: 10px !important;
+        left: 10px !important;
+        right: 10px !important;
+    }
+    .hero-float-title {
+        font-size: 0.68rem !important;
+    }
+    .hero-float-sub {
+        font-size: 0.58rem !important;
+    }
+    .hero-float-icon {
+        width: 26px !important;
+        height: 26px !important;
+        font-size: 12px !important;
+    }
+
+    /* ---- BUTTONS ---- */
+    .btn-modern-primary,
+    .btn-modern-outline,
+    .btn-whatsapp-direct {
+        font-size: 10px !important;
+        padding: 8px 12px !important;
+        gap: 5px !important;
+    }
+
+    /* ---- SECTION PADDING ---- */
+    .section-padding {
+        padding: 2rem 0 !important;
+    }
+    .faq-section {
+        padding: 2.5rem 0 !important;
     }
 }

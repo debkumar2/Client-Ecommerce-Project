@@ -78,6 +78,10 @@
     border-radius: 12px;
     margin-bottom: 1.2rem;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    /* Prevent header's mobile centering rule from leaking in */
+    position: relative !important;
+    left: auto !important;
+    transform: none !important;
 }
 
 .footer-brand .brand-logo-img {

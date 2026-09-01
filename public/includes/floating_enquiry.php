@@ -196,6 +196,27 @@
             padding: 28px 20px !important;
         }
     }
+
+    @media (max-width: 575px) {
+        .floating-enquiry-trigger {
+            padding: 10px 8px !important;
+            gap: 6px !important;
+            border-radius: 10px 0 0 10px !important;
+        }
+        .enquiry-btn-icon {
+            width: 16px !important;
+            height: 16px !important;
+            padding: 3px !important;
+        }
+        .enquiry-btn-icon svg {
+            width: 10px !important;
+            height: 10px !important;
+        }
+        .enquiry-btn-text {
+            font-size: 9px !important;
+            letter-spacing: 0.1em !important;
+        }
+    }
 </style>
 
 <!-- FLOATING TRIGGER BUTTON -->
