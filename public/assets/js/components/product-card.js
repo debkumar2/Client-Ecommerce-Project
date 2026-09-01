@@ -4,27 +4,144 @@
  */
 
 export function initProductCards() {
-    // 1. Wishlist Button Interactivity
+    // 1. Wishlist Button Interactivity (Instant LocalStorage + MySQL DB Sync)
     const wishlistBtns = document.querySelectorAll('.btn-wishlist');
+
+    // Helper: Get stored local wishlist IDs
+    function getLocalWishlist() {
+        try {
+            return JSON.parse(localStorage.getItem('biswas_wishlist_ids') || '[]');
+        } catch (e) {
+            return [];
+        }
+    }
+
+    // Helper: Save local wishlist IDs
+    function setLocalWishlist(ids) {
+        try {
+            localStorage.setItem('biswas_wishlist_ids', JSON.stringify(ids.map(String)));
+        } catch (e) {}
+    }
+
+    // Helper: Highlight heart icon for given button
+    function setHeartState(btn, isActive) {
+        const svg = btn.querySelector('svg');
+        if (isActive) {
+            btn.classList.add('active');
+            if (svg) svg.setAttribute('fill', 'currentColor');
+            btn.style.color = '#e53e3e';
+        } else {
+            btn.classList.remove('active');
+            if (svg) svg.setAttribute('fill', 'none');
+            btn.style.color = '';
+        }
+    }
+
+    // Phase 1: Immediately highlight hearts from LocalStorage on page render
+    const localIds = getLocalWishlist();
     wishlistBtns.forEach(btn => {
-        btn.addEventListener('click', (e) => {
+        const card = btn.closest('.product-card');
+        const productId = card ? (card.dataset.id || btn.dataset.id) : btn.dataset.id;
+        if (productId && localIds.includes(String(productId))) {
+            setHeartState(btn, true);
+        }
+    });
+
+    if (localIds.length > 0) {
+        updateWishlistHeaderBadge(localIds.length);
+    }
+
+    // Phase 2: Sync with MySQL DB via API endpoint
+    const apiUrl = '/Client-Ecommerce-Project/public/api/wishlist.php';
+    fetch(apiUrl)
+        .then(res => res.json())
+        .then(data => {
+            if (data.success && Array.isArray(data.items)) {
+                const serverItemIds = data.items.map(String);
+                setLocalWishlist(serverItemIds);
+
+                wishlistBtns.forEach(btn => {
+                    const card = btn.closest('.product-card');
+                    const productId = card ? (card.dataset.id || btn.dataset.id) : btn.dataset.id;
+                    if (productId) {
+                        setHeartState(btn, serverItemIds.includes(String(productId)));
+                    }
+                });
+                updateWishlistHeaderBadge(data.count);
+            }
+        })
+        .catch(() => {});
+
+    // Phase 3: Handle click toggles
+    wishlistBtns.forEach(btn => {
+        btn.addEventListener('click', async (e) => {
             e.preventDefault();
             e.stopPropagation();
 
-            const isLiked = btn.classList.toggle('active');
-            const svg = btn.querySelector('svg');
+            const card = btn.closest('.product-card');
+            const productId = card ? (card.dataset.id || btn.dataset.id) : btn.dataset.id;
+            if (!productId) return;
 
-            if (isLiked) {
-                svg.setAttribute('fill', 'currentColor');
-                btn.style.color = '#e53e3e';
-                showToast('Product added to your wishlist!');
-            } else {
-                svg.setAttribute('fill', 'none');
-                btn.style.color = '';
-                showToast('Product removed from wishlist.');
+            btn.disabled = true;
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'toggle', product_id: productId })
+                });
+
+                const result = await response.json();
+
+                if (result.require_login) {
+                    if (typeof window.showToastify === 'function') {
+                        window.showToastify(result.message, 'warning');
+                    } else {
+                        alert(result.message);
+                    }
+                    setTimeout(() => {
+                        window.location.href = '/Client-Ecommerce-Project/public/login.php';
+                    }, 1200);
+                    return;
+                }
+
+                if (result.success) {
+                    setHeartState(btn, result.is_in_wishlist);
+
+                    // Update LocalStorage array
+                    let currentLocal = getLocalWishlist();
+                    if (result.is_in_wishlist) {
+                        if (!currentLocal.includes(String(productId))) currentLocal.push(String(productId));
+                    } else {
+                        currentLocal = currentLocal.filter(id => String(id) !== String(productId));
+                    }
+                    setLocalWishlist(currentLocal);
+
+                    if (typeof window.showToastify === 'function') {
+                        window.showToastify(result.message, result.is_in_wishlist ? 'success' : 'info');
+                    }
+
+                    updateWishlistHeaderBadge(result.count);
+                } else {
+                    if (typeof window.showToastify === 'function') {
+                        window.showToastify(result.message || 'Error updating wishlist.', 'error');
+                    }
+                }
+            } catch (err) {
+                console.error('Wishlist error:', err);
+            } finally {
+                btn.disabled = false;
             }
         });
     });
+
+    function updateWishlistHeaderBadge(count) {
+        const badges = document.querySelectorAll('.wishlist-badge');
+        badges.forEach(b => {
+            b.textContent = count;
+            b.style.display = count > 0 ? 'inline-flex' : 'none';
+        });
+    }
 
     // 2. Quick View Button Trigger
     const quickViewBtns = document.querySelectorAll('.btn-quick-view');

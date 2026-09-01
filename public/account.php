@@ -142,11 +142,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['change_password'])) {
 
 // Fetch all saved addresses for current user
 $userAddresses = [];
+$wishlistCount = 0;
 try {
     $pdo = Database::getConnection();
     $stmtAddr = $pdo->prepare("SELECT * FROM `addresses` WHERE user_id = ? ORDER BY is_default DESC, id DESC");
     $stmtAddr->execute([$currentUser['id']]);
     $userAddresses = $stmtAddr->fetchAll();
+
+    $stmtWish = $pdo->prepare("SELECT COUNT(*) FROM `wishlist_items` wi JOIN `wishlists` w ON wi.wishlist_id = w.id WHERE w.user_id = ?");
+    $stmtWish->execute([$currentUser['id']]);
+    $wishlistCount = (int)$stmtWish->fetchColumn();
 } catch (\Throwable $e) { /* silent */ }
 
 // Flash message from redirect
@@ -564,10 +569,11 @@ if (isset($_GET['saved']) && empty($addressMessage)) $addressMessage = 'Address 
                 <!-- Header Actions (Icons) -->
                 <div class="header-actions">
                     <!-- Wishlist Icon -->
-                    <a href="<?= url('wishlist') ?>" class="icon-btn" aria-label="View Wishlist">
+                    <a href="<?= url('wishlist.php') ?>" class="icon-btn" aria-label="View Wishlist">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
                         </svg>
+                        <span class="wishlist-badge" style="display:none;">0</span>
                     </a>
 
                     <!-- Account Icon -->
@@ -707,15 +713,15 @@ if (isset($_GET['saved']) && empty($addressMessage)) $addressMessage = 'Address 
 
 
 
-                        <div class="stat-widget-card">
-                            <div class="stat-widget-icon">
-                                <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                        <a href="<?= url('wishlist') ?>" class="stat-widget-card" style="text-decoration: none; color: inherit;">
+                            <div class="stat-widget-icon" style="color: #e53e3e; background: #fff5f5;">
+                                <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
                             </div>
                             <div>
-                                <div class="stat-widget-val">0 Items</div>
+                                <div class="stat-widget-val"><?= $wishlistCount ?> <?= $wishlistCount === 1 ? 'Item' : 'Items' ?></div>
                                 <div class="stat-widget-lbl">Saved Wishlist</div>
                             </div>
-                        </div>
+                        </a>
                     </div>
 
                     <!-- Personal Information Box -->

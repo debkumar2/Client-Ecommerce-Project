@@ -86,6 +86,28 @@ function initDatabaseTables(): void {
             `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
 
+        // Create wishlists table
+        $pdo->exec("CREATE TABLE IF NOT EXISTS `wishlists` (
+            `id` BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+            `user_id` BIGINT UNSIGNED NOT NULL UNIQUE,
+            `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
+
+        // Create wishlist_items table
+        $pdo->exec("CREATE TABLE IF NOT EXISTS `wishlist_items` (
+            `id` BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+            `wishlist_id` BIGINT UNSIGNED NOT NULL,
+            `product_id` VARCHAR(100) NOT NULL,
+            `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE KEY `unique_wishlist_item` (`wishlist_id`, `product_id`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
+
+        // Safely drop any legacy strict foreign key constraint on wishlist_items if present
+        try {
+            $pdo->exec("ALTER TABLE `wishlist_items` DROP FOREIGN KEY `fk_wishlist_item_product`");
+        } catch (\Throwable $e) {}
+
         // Seed default Admin user if not existing in admins table
         $adminEmail = 'admin@123gmail.com';
         $adminPassRaw = 'Admin@2026';

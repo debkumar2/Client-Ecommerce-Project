@@ -242,7 +242,8 @@
     stroke-width: 1.8;
 }
 
-.cart-badge {
+.cart-badge,
+.wishlist-badge {
     position: absolute;
     top: 2px;
     right: 2px;
