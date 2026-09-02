@@ -140,11 +140,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['change_password'])) {
     }
 }
 
-// Fetch all saved addresses for current user
-$userAddresses = [];
-$wishlistCount = 0;
+// Fetch all saved addresses, wishlist, and orders for current user
+$userAddresses  = [];
+$wishlistCount  = 0;
+$userOrders     = [];
+$ordersCount    = 0;
+$ordersByStatus = [
+    'pending'    => 0,
+    'processing' => 0,
+    'shipped'    => 0,
+    'delivered'  => 0,
+    'cancelled'  => 0
+];
+
 try {
+    initDatabaseTables();
     $pdo = Database::getConnection();
+
     $stmtAddr = $pdo->prepare("SELECT * FROM `addresses` WHERE user_id = ? ORDER BY is_default DESC, id DESC");
     $stmtAddr->execute([$currentUser['id']]);
     $userAddresses = $stmtAddr->fetchAll();
@@ -152,7 +164,205 @@ try {
     $stmtWish = $pdo->prepare("SELECT COUNT(*) FROM `wishlist_items` wi JOIN `wishlists` w ON wi.wishlist_id = w.id WHERE w.user_id = ?");
     $stmtWish->execute([$currentUser['id']]);
     $wishlistCount = (int)$stmtWish->fetchColumn();
-} catch (\Throwable $e) { /* silent */ }
+
+    // Fetch user orders with address information
+    $stmtOrders = $pdo->prepare("
+        SELECT o.*, 
+               a.full_name as ship_name, a.phone as ship_phone, a.address_line_1, a.address_line_2, a.city, a.state, a.postal_code, a.country
+        FROM `orders` o 
+        LEFT JOIN `addresses` a ON o.shipping_address_id = a.id
+        WHERE o.user_id = ? 
+        ORDER BY o.id DESC
+    ");
+    $stmtOrders->execute([$currentUser['id']]);
+    $userOrders = $stmtOrders->fetchAll(PDO::FETCH_ASSOC);
+    $ordersCount = count($userOrders);
+
+    foreach ($userOrders as $ord) {
+        $st = strtolower($ord['order_status'] ?? 'pending');
+        if (isset($ordersByStatus[$st])) {
+            $ordersByStatus[$st]++;
+        }
+    }
+
+    // Fetch order items for each order
+    if (!empty($userOrders)) {
+        $orderIds = array_column($userOrders, 'id');
+        $in  = str_repeat('?,', count($orderIds) - 1) . '?';
+        $stmtItems = $pdo->prepare("
+            SELECT oi.*, p.image as product_image, p.category_name, p.slug as product_slug 
+            FROM `order_items` oi 
+            LEFT JOIN `products` p ON oi.product_id = p.id 
+            WHERE oi.order_id IN ($in)
+            ORDER BY oi.id ASC
+        ");
+        $stmtItems->execute($orderIds);
+        $allItems = $stmtItems->fetchAll(PDO::FETCH_ASSOC);
+
+        // Group items by order_id
+        $itemsByOrder = [];
+        foreach ($allItems as $item) {
+            $itemsByOrder[$item['order_id']][] = $item;
+        }
+
+        foreach ($userOrders as &$ord) {
+            $ord['items'] = $itemsByOrder[$ord['id']] ?? [];
+        }
+        unset($ord);
+    }
+} catch (\Throwable $e) {
+    error_log('Account orders fetch error: ' . $e->getMessage());
+}
+
+// Handle Print Invoice request
+if (isset($_GET['print_id'])) {
+    $printId = (int)$_GET['print_id'];
+    $printOrder = null;
+    foreach ($userOrders as $o) {
+        if ((int)$o['id'] === $printId) {
+            $printOrder = $o;
+            break;
+        }
+    }
+
+    if ($printOrder) {
+        ?>
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <title>Invoice #<?= htmlspecialchars($printOrder['order_number']) ?> - Biswas Enterprise</title>
+            <style>
+                body { font-family: 'Inter', -apple-system, sans-serif; color: #1a2721; padding: 40px; margin: 0; background: #ffffff; }
+                .invoice-box { max-width: 800px; margin: auto; border: 1px solid #e1ebe4; border-radius: 12px; padding: 36px; box-shadow: 0 4px 14px rgba(0,0,0,0.05); }
+                .inv-header { display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 24px; border-bottom: 2px solid #1b3b2b; margin-bottom: 24px; }
+                .brand-title { font-family: Georgia, serif; font-size: 24px; font-weight: 700; color: #1b3b2b; }
+                .brand-sub { font-size: 12px; color: #64746b; margin-top: 4px; }
+                .inv-meta { text-align: right; }
+                .inv-title { font-size: 20px; font-weight: 700; color: #1b3b2b; text-transform: uppercase; letter-spacing: 1px; }
+                .inv-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 28px; font-size: 13.5px; }
+                .inv-section-title { font-weight: 700; color: #1b3b2b; margin-bottom: 8px; text-transform: uppercase; font-size: 11.5px; letter-spacing: 0.5px; }
+                .inv-table { width: 100%; border-collapse: collapse; margin-bottom: 24px; }
+                .inv-table th { background: #f4f8f5; color: #1b3b2b; text-align: left; padding: 12px 14px; font-size: 12.5px; font-weight: 700; border-bottom: 1.5px solid #d4ddd7; }
+                .inv-table td { padding: 12px 14px; border-bottom: 1px solid #edf2ef; font-size: 13.5px; }
+                .inv-totals { width: 280px; margin-left: auto; font-size: 13.5px; }
+                .inv-totals-row { display: flex; justify-content: space-between; padding: 6px 0; color: #4a5c52; }
+                .inv-totals-row.grand { border-top: 2px solid #1b3b2b; font-weight: 700; font-size: 16px; color: #1b3b2b; padding-top: 10px; margin-top: 6px; }
+                .inv-footer { border-top: 1px solid #e1ebe4; padding-top: 20px; text-align: center; font-size: 12px; color: #728277; margin-top: 36px; }
+                @media print {
+                    body { padding: 0; }
+                    .invoice-box { border: none; box-shadow: none; padding: 0; }
+                }
+            </style>
+        </head>
+        <body>
+            <div class="invoice-box">
+                <div class="inv-header">
+                    <div>
+                        <div class="brand-title">Biswas Enterprise</div>
+                        <div class="brand-sub">100% Authentic Ayurvedic Care & Botanical Products</div>
+                        <div style="font-size: 12px; color: #4a5c52; margin-top: 8px;">
+                            Kolkata, West Bengal, India<br>
+                            Email: support@biswasenterprise.com | Tel: +91 98765 43210
+                        </div>
+                    </div>
+                    <div class="inv-meta">
+                        <div class="inv-title">TAX INVOICE</div>
+                        <div style="font-size: 13px; color: #4a5c52; margin-top: 6px;">
+                            <strong>Order #:</strong> <?= htmlspecialchars($printOrder['order_number']) ?><br>
+                            <strong>Date:</strong> <?= date('d M Y, h:i A', strtotime($printOrder['created_at'])) ?><br>
+                            <strong>Status:</strong> <?= ucfirst($printOrder['order_status']) ?>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="inv-grid">
+                    <div>
+                        <div class="inv-section-title">Billed & Shipped To:</div>
+                        <strong><?= htmlspecialchars($printOrder['ship_name'] ?? $currentUser['name']) ?></strong><br>
+                        <?= htmlspecialchars($printOrder['address_line_1'] ?? 'Default Address') ?><br>
+                        <?php if (!empty($printOrder['address_line_2'])): ?><?= htmlspecialchars($printOrder['address_line_2']) ?><br><?php endif; ?>
+                        <?= htmlspecialchars($printOrder['city'] ?? '') ?>, <?= htmlspecialchars($printOrder['state'] ?? '') ?> - <?= htmlspecialchars($printOrder['postal_code'] ?? '') ?><br>
+                        Phone: <?= htmlspecialchars($printOrder['ship_phone'] ?? $currentUser['phone'] ?? 'N/A') ?>
+                    </div>
+                    <div style="text-align: right;">
+                        <div class="inv-section-title">Payment Overview:</div>
+                        Method: <strong><?= strtoupper(htmlspecialchars($printOrder['payment_method'] ?? 'COD')) ?></strong><br>
+                        Payment Status: <strong><?= ucfirst(htmlspecialchars($printOrder['payment_status'] ?? 'pending')) ?></strong><br>
+                        Currency: <strong>INR (₹)</strong>
+                    </div>
+                </div>
+
+                <table class="inv-table">
+                    <thead>
+                        <tr>
+                            <th>Item Description</th>
+                            <th>Qty</th>
+                            <th>Unit Price</th>
+                            <th style="text-align: right;">Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php if (!empty($printOrder['items'])): ?>
+                            <?php foreach ($printOrder['items'] as $it): ?>
+                                <tr>
+                                    <td>
+                                        <strong><?= htmlspecialchars($it['product_name']) ?></strong>
+                                        <?php if (!empty($it['sku'])): ?>
+                                            <div style="font-size: 11.5px; color: #728277;">SKU: <?= htmlspecialchars($it['sku']) ?></div>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td><?= (int)$it['quantity'] ?></td>
+                                    <td>₹<?= number_format($it['unit_price'], 2) ?></td>
+                                    <td style="text-align: right;">₹<?= number_format($it['total'], 2) ?></td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <tr>
+                                <td colspan="4" style="text-align: center; color: #728277;">Order line items summarized in order record.</td>
+                            </tr>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+
+                <div class="inv-totals">
+                    <div class="inv-totals-row">
+                        <span>Subtotal:</span>
+                        <span>₹<?= number_format($printOrder['subtotal'], 2) ?></span>
+                    </div>
+                    <div class="inv-totals-row">
+                        <span>Shipping Charge:</span>
+                        <span><?= $printOrder['shipping_charge'] > 0 ? '₹'.number_format($printOrder['shipping_charge'], 2) : 'FREE' ?></span>
+                    </div>
+                    <?php if ($printOrder['discount'] > 0 || $printOrder['coupon_discount'] > 0): ?>
+                    <div class="inv-totals-row" style="color: #166534;">
+                        <span>Discount:</span>
+                        <span>- ₹<?= number_format($printOrder['discount'] + $printOrder['coupon_discount'], 2) ?></span>
+                    </div>
+                    <?php endif; ?>
+                    <div class="inv-totals-row grand">
+                        <span>Grand Total:</span>
+                        <span>₹<?= number_format($printOrder['total_amount'], 2) ?></span>
+                    </div>
+                </div>
+
+                <div class="inv-footer">
+                    Thank you for shopping with <strong>Biswas Enterprise</strong>. For support inquiries, please contact support@biswasenterprise.com.<br>
+                    <em>This is a computer-generated tax invoice and requires no physical signature.</em>
+                </div>
+            </div>
+
+            <script>
+                window.onload = function() {
+                    window.print();
+                };
+            </script>
+        </body>
+        </html>
+        <?php
+        exit;
+    }
+}
 
 // Flash message from redirect
 if (isset($_GET['saved']) && empty($addressMessage)) $addressMessage = 'Address updated successfully!';
@@ -185,7 +395,7 @@ if (isset($_GET['saved']) && empty($addressMessage)) $addressMessage = 'Address 
         .account-hero-banner {
             background: linear-gradient(135deg, #1b3b2b 0%, #2a523c 100%);
             color: #ffffff;
-            padding: 45px 0;
+            padding: 18px 0;
             position: relative;
         }
 
@@ -199,14 +409,15 @@ if (isset($_GET['saved']) && empty($addressMessage)) $addressMessage = 'Address 
 
         .account-hero-text h1 {
             font-family: 'Merriweather', serif;
-            font-size: 30px;
-            margin-bottom: 6px;
+            font-size: 22px;
+            margin-bottom: 2px;
             color: #ffffff;
         }
 
         .account-hero-text p {
             color: #b8ccbf;
-            font-size: 14px;
+            font-size: 13px;
+            margin: 0;
         }
 
         .account-hero-actions {
@@ -217,10 +428,10 @@ if (isset($_GET['saved']) && empty($addressMessage)) $addressMessage = 'Address 
         .hero-btn-accent {
             background: #d4af37;
             color: #1b3b2b;
-            padding: 10px 22px;
+            padding: 7px 18px;
             border-radius: 50px;
             font-weight: 700;
-            font-size: 13px;
+            font-size: 12.5px;
             text-decoration: none;
             display: inline-flex;
             align-items: center;
@@ -238,10 +449,10 @@ if (isset($_GET['saved']) && empty($addressMessage)) $addressMessage = 'Address 
             background: rgba(255, 255, 255, 0.12);
             color: #ffffff;
             border: 1px solid rgba(255, 255, 255, 0.25);
-            padding: 10px 22px;
+            padding: 7px 18px;
             border-radius: 50px;
             font-weight: 600;
-            font-size: 13px;
+            font-size: 12.5px;
             text-decoration: none;
             display: inline-flex;
             align-items: center;
@@ -255,7 +466,7 @@ if (isset($_GET['saved']) && empty($addressMessage)) $addressMessage = 'Address 
 
         /* Layout Grid */
         .account-layout-container {
-            padding: 40px 0 70px;
+            padding: 24px 0 60px;
         }
 
         .account-grid-wrapper {
@@ -701,25 +912,13 @@ if (isset($_GET['saved']) && empty($addressMessage)) $addressMessage = 'Address 
 
                     <!-- Widgets Grid -->
                     <div class="overview-stats-grid">
-                        <div class="stat-widget-card">
+                        <a href="<?= url('account.php?tab=orders') ?>" class="stat-widget-card" style="text-decoration: none; color: inherit;">
                             <div class="stat-widget-icon">
                                 <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path></svg>
                             </div>
                             <div>
-                                <div class="stat-widget-val">0</div>
+                                <div class="stat-widget-val"><?= $ordersCount ?> <?= $ordersCount === 1 ? 'Order' : 'Orders' ?></div>
                                 <div class="stat-widget-lbl">Total Orders</div>
-                            </div>
-                        </div>
-
-
-
-                        <a href="<?= url('wishlist') ?>" class="stat-widget-card" style="text-decoration: none; color: inherit;">
-                            <div class="stat-widget-icon" style="color: #e53e3e; background: #fff5f5;">
-                                <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
-                            </div>
-                            <div>
-                                <div class="stat-widget-val"><?= $wishlistCount ?> <?= $wishlistCount === 1 ? 'Item' : 'Items' ?></div>
-                                <div class="stat-widget-lbl">Saved Wishlist</div>
                             </div>
                         </a>
                     </div>
@@ -752,21 +951,426 @@ if (isset($_GET['saved']) && empty($addressMessage)) $addressMessage = 'Address 
 
                 <!-- TAB 2: ORDERS -->
                 <?php elseif ($activeTab === 'orders'): ?>
-                    <div class="tab-section-header">
-                        <h2 class="tab-section-title">
-                            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#1b3b2b" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path></svg>
-                            <span>Order History</span>
-                        </h2>
+                    <style>
+                        /* Orders Tab Modern Styles */
+                        .orders-header-wrap { display: flex; flex-direction: column; gap: 16px; margin-bottom: 24px; padding-bottom: 20px; border-bottom: 1px solid #edf2ef; }
+                        .orders-header-top  { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px; }
+                        .orders-page-title  { font-family: 'Merriweather', serif; font-size: 22px; color: #1a2721; display: flex; align-items: center; gap: 10px; margin: 0; }
+                        .orders-search-box  { position: relative; min-width: 240px; }
+                        .orders-search-input { width: 100%; padding: 10px 14px 10px 36px; border: 1.5px solid #dce8e0; border-radius: 10px; font-size: 13px; color: #1a2721; outline: none; transition: all 0.2s ease; background: #ffffff; }
+                        .orders-search-input:focus { border-color: #1b3b2b; box-shadow: 0 0 0 3px rgba(27, 59, 43, 0.08); }
+                        .orders-search-icon { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: #8fa095; pointer-events: none; }
+                        .orders-filter-pills { display: flex; align-items: center; gap: 8px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: thin; }
+                        .orders-filter-pill  { background: #f1f6f3; color: #4a5c52; border: 1px solid #e1ebe4; padding: 7px 16px; border-radius: 30px; font-size: 12.5px; font-weight: 600; cursor: pointer; white-space: nowrap; transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 6px; user-select: none; }
+                        .orders-filter-pill:hover { background: #e4eee7; color: #1b3b2b; }
+                        .orders-filter-pill.active { background: #1b3b2b; color: #ffffff; border-color: #1b3b2b; box-shadow: 0 4px 12px rgba(27, 59, 43, 0.18); }
+                        .orders-filter-count { background: rgba(255, 255, 255, 0.25); color: inherit; font-size: 11px; padding: 2px 7px; border-radius: 12px; font-weight: 700; }
+                        .orders-filter-pill:not(.active) .orders-filter-count { background: #e0eae3; color: #2b3d33; }
+
+                        /* Order Cards */
+                        .orders-list-wrapper { display: flex; flex-direction: column; gap: 20px; }
+                        .order-card { background: #ffffff; border: 1.5px solid #e2ece5; border-radius: 18px; overflow: hidden; transition: all 0.25s ease; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.02); }
+                        .order-card:hover { border-color: #b8ccbf; box-shadow: 0 8px 24px rgba(27, 59, 43, 0.08); }
+                        .order-card-header { background: #f8faf8; padding: 16px 20px; border-bottom: 1px solid #edf2ef; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+                        .order-meta-info { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+                        .order-number-badge { font-family: 'Merriweather', serif; font-size: 15px; font-weight: 700; color: #1a2721; display: inline-flex; align-items: center; gap: 6px; }
+                        .order-copy-btn { border: none; background: #eef4f0; color: #1b3b2b; padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; transition: all 0.18s ease; display: inline-flex; align-items: center; gap: 4px; }
+                        .order-copy-btn:hover { background: #1b3b2b; color: #ffffff; }
+                        .order-date-text { font-size: 12.5px; color: #64746b; display: flex; align-items: center; gap: 5px; }
+                        .order-header-right { display: flex; align-items: center; gap: 14px; }
+                        .order-total-price { font-size: 16px; font-weight: 700; color: #1b3b2b; }
+
+                        /* Status Badges */
+                        .order-status-badge { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 30px; font-size: 12px; font-weight: 700; letter-spacing: 0.3px; text-transform: capitalize; }
+                        .order-status-badge.status-pending    { background: #fffbeb; color: #b45309; border: 1px solid #fef3c7; }
+                        .order-status-badge.status-processing { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
+                        .order-status-badge.status-shipped    { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
+                        .order-status-badge.status-delivered  { background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; }
+                        .order-status-badge.status-cancelled  { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
+                        .status-pulse-dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; display: inline-block; animation: pulse 1.8s infinite; }
+                        @keyframes pulse { 0% { opacity: 0.4; } 50% { opacity: 1; } 100% { opacity: 0.4; } }
+
+                        /* Order Progress Stepper */
+                        .order-tracker-bar { padding: 18px 24px 14px; background: #fafcfb; border-bottom: 1px solid #edf2ef; overflow-x: auto; }
+                        .tracker-steps { display: flex; align-items: center; justify-content: space-between; position: relative; min-width: 320px; }
+                        .tracker-steps-line-bg { position: absolute; top: 14px; left: 30px; right: 30px; height: 3px; background: #e2ece5; z-index: 1; }
+                        .tracker-steps-line-fill { position: absolute; top: 14px; left: 30px; height: 3px; background: linear-gradient(90deg, #1b3b2b 0%, #2a523c 100%); z-index: 2; transition: width 0.4s ease; }
+                        .tracker-step { position: relative; z-index: 3; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+                        .tracker-step-icon { width: 28px; height: 28px; border-radius: 50%; background: #ffffff; border: 2px solid #cbd7cf; color: #8fa095; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; transition: all 0.25s ease; }
+                        .tracker-step.completed .tracker-step-icon { background: #1b3b2b; border-color: #1b3b2b; color: #ffffff; }
+                        .tracker-step.active .tracker-step-icon { background: #ffffff; border-color: #d4af37; color: #1b3b2b; box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.2); }
+                        .tracker-step-label { font-size: 11px; font-weight: 600; color: #728277; text-align: center; }
+                        .tracker-step.completed .tracker-step-label, .tracker-step.active .tracker-step-label { color: #1a2721; font-weight: 700; }
+
+                        /* Items List */
+                        .order-items-list { padding: 16px 20px; display: flex; flex-direction: column; gap: 10px; }
+                        .order-item-row { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 10px 14px; border-radius: 12px; background: #ffffff; border: 1px solid #f0f5f2; transition: background 0.2s ease; }
+                        .order-item-row:hover { background: #f8faf8; border-color: #e2ece5; }
+                        .order-item-left { display: flex; align-items: center; gap: 14px; }
+                        .order-item-thumb { width: 52px; height: 52px; border-radius: 10px; background: #f0f5f2; object-fit: cover; border: 1px solid #e1ebe4; display: flex; align-items: center; justify-content: center; color: #1b3b2b; flex-shrink: 0; font-size: 20px; }
+                        .order-item-title { font-size: 14px; font-weight: 700; color: #1a2721; margin-bottom: 2px; text-decoration: none; display: inline-block; }
+                        .order-item-title:hover { color: #1b3b2b; }
+                        .order-item-sub { font-size: 12px; color: #728277; display: flex; align-items: center; gap: 8px; }
+                        .order-item-qty { background: #eef4f0; color: #1b3b2b; font-weight: 700; font-size: 11.5px; padding: 2px 8px; border-radius: 6px; }
+                        .order-item-price { font-size: 14px; font-weight: 700; color: #1a2721; text-align: right; }
+
+                        /* Order Footer Actions */
+                        .order-card-footer { padding: 14px 20px; background: #f8faf8; border-top: 1px solid #edf2ef; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+                        .btn-order-action { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 8px; font-size: 12.5px; font-weight: 600; cursor: pointer; transition: all 0.2s ease; border: 1.5px solid #d4ddd7; background: #ffffff; color: #2c3e35; text-decoration: none; }
+                        .btn-order-action:hover { border-color: #1b3b2b; color: #1b3b2b; background: #f0f6f2; }
+                        .btn-order-action.primary { background: #1b3b2b; color: #ffffff; border-color: #1b3b2b; }
+                        .btn-order-action.primary:hover { background: #2a523c; border-color: #2a523c; }
+
+                        /* Expandable Drawer Panel */
+                        .order-details-drawer { display: none; padding: 20px; background: #ffffff; border-top: 1px dashed #dce8e0; animation: fadeSlideDown 0.25s ease; }
+                        .drawer-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+                        .drawer-box { background: #f8faf8; border: 1px solid #e5ede7; border-radius: 12px; padding: 16px; }
+                        .drawer-box-title { font-size: 12.5px; font-weight: 700; color: #1a2721; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+                        .drawer-price-row { display: flex; justify-content: space-between; font-size: 13px; color: #4a5c52; margin-bottom: 6px; }
+                        .drawer-price-row.total { border-top: 1px solid #e1ebe4; padding-top: 8px; margin-top: 8px; font-weight: 700; font-size: 15px; color: #1b3b2b; }
+
+                        /* Refined Empty State UI */
+                        .orders-empty-card { background: linear-gradient(145deg, #ffffff 0%, #f7faf8 100%); border: 1.5px solid #e2ece5; border-radius: 20px; padding: 50px 24px; text-align: center; box-shadow: 0 8px 30px rgba(27, 59, 43, 0.03); position: relative; overflow: hidden; }
+                        .orders-empty-card::before { content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 200px; height: 4px; background: linear-gradient(90deg, #1b3b2b 0%, #d4af37 50%, #2a523c 100%); border-radius: 0 0 4px 4px; }
+                        .orders-empty-icon-wrap { width: 84px; height: 84px; border-radius: 50%; background: linear-gradient(135deg, rgba(27,59,43,0.08) 0%, rgba(212,175,55,0.15) 100%); border: 2px solid #e1ebe4; color: #1b3b2b; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; box-shadow: 0 8px 20px rgba(0, 0, 0, 0.04); }
+                        .orders-empty-title { font-family: 'Merriweather', serif; font-size: 22px; font-weight: 700; color: #1a2721; margin-bottom: 8px; }
+                        .orders-empty-desc { font-size: 14px; color: #64746b; max-width: 460px; margin: 0 auto 24px; line-height: 1.6; }
+                        .orders-empty-actions { display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; margin-bottom: 28px; }
+                        .btn-orders-primary { background: linear-gradient(135deg, #1b3b2b 0%, #2a523c 100%); color: #ffffff; padding: 12px 28px; border-radius: 50px; font-weight: 700; font-size: 13.5px; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 6px 18px rgba(27, 59, 43, 0.22); transition: all 0.25s ease; }
+                        .btn-orders-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 22px rgba(27, 59, 43, 0.3); color: #ffffff; }
+                        .btn-orders-secondary { background: #ffffff; color: #1b3b2b; border: 1.5px solid #d4ddd7; padding: 12px 24px; border-radius: 50px; font-weight: 600; font-size: 13.5px; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; transition: all 0.25s ease; }
+                        .btn-orders-secondary:hover { border-color: #1b3b2b; background: #f4f8f5; color: #1b3b2b; }
+                        .orders-empty-categories { border-top: 1px solid #edf2ef; padding-top: 22px; }
+                        .empty-cat-title { font-size: 11.5px; font-weight: 700; color: #8fa095; text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 12px; }
+                        .empty-cat-pills { display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; }
+                        .empty-cat-pill { background: #ffffff; border: 1px solid #e1ebe4; padding: 7px 16px; border-radius: 20px; font-size: 12.5px; font-weight: 600; color: #2c3e35; text-decoration: none; transition: all 0.2s ease; }
+                        .empty-cat-pill:hover { border-color: #1b3b2b; color: #1b3b2b; background: #f0f6f2; }
+
+                        @media (max-width: 640px) {
+                            .drawer-grid { grid-template-columns: 1fr; }
+                            .order-card-header { flex-direction: column; align-items: flex-start; }
+                            .order-header-right { width: 100%; justify-content: space-between; }
+                        }
+                    </style>
+
+                    <!-- Header & Filter Bar -->
+                    <div class="orders-header-wrap">
+                        <div class="orders-header-top">
+                            <h2 class="orders-page-title">
+                                <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#1b3b2b" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line></svg>
+                                <span>My Orders & Purchases</span>
+                            </h2>
+
+                            <?php if ($ordersCount > 0): ?>
+                            <div class="orders-search-box">
+                                <svg class="orders-search-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                                <input type="text" id="orderSearchInput" class="orders-search-input" placeholder="Search order # or product name..." onkeyup="searchOrders(this.value)">
+                            </div>
+                            <?php endif; ?>
+                        </div>
+
+                        <?php if ($ordersCount > 0): ?>
+                        <!-- Status Filter Pills -->
+                        <div class="orders-filter-pills">
+                            <button type="button" class="orders-filter-pill active" onclick="filterOrders('all', this)">
+                                <span>All Orders</span>
+                                <span class="orders-filter-count"><?= $ordersCount ?></span>
+                            </button>
+                            <button type="button" class="orders-filter-pill" onclick="filterOrders('pending', this)">
+                                <span>Pending</span>
+                                <span class="orders-filter-count"><?= $ordersByStatus['pending'] ?></span>
+                            </button>
+                            <button type="button" class="orders-filter-pill" onclick="filterOrders('processing', this)">
+                                <span>Processing</span>
+                                <span class="orders-filter-count"><?= $ordersByStatus['processing'] ?></span>
+                            </button>
+                            <button type="button" class="orders-filter-pill" onclick="filterOrders('shipped', this)">
+                                <span>Shipped</span>
+                                <span class="orders-filter-count"><?= $ordersByStatus['shipped'] ?></span>
+                            </button>
+                            <button type="button" class="orders-filter-pill" onclick="filterOrders('delivered', this)">
+                                <span>Delivered</span>
+                                <span class="orders-filter-count"><?= $ordersByStatus['delivered'] ?></span>
+                            </button>
+                            <?php if ($ordersByStatus['cancelled'] > 0): ?>
+                            <button type="button" class="orders-filter-pill" onclick="filterOrders('cancelled', this)">
+                                <span>Cancelled</span>
+                                <span class="orders-filter-count"><?= $ordersByStatus['cancelled'] ?></span>
+                            </button>
+                            <?php endif; ?>
+                        </div>
+                        <?php endif; ?>
                     </div>
 
-                    <div style="text-align: center; padding: 48px 20px; color: #64746b;">
-                        <svg viewBox="0 0 24 24" width="54" height="54" fill="none" stroke="#c0d1c6" stroke-width="1.5" style="margin-bottom: 12px;"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line></svg>
-                        <h3 style="font-family: 'Playfair Display', serif; font-size: 20px; color: #1a2721; margin-bottom: 6px;">No Recent Orders Yet</h3>
-                        <p style="font-size: 14px; margin-bottom: 20px;">You haven't placed any orders with Biswas Enterprise yet.</p>
-                        <a href="<?= url('shop') ?>" class="btn-auth-submit" style="display: inline-flex; width: auto; padding: 12px 28px;">
-                            <span>Explore Products</span>
-                        </a>
-                    </div>
+                    <?php if ($ordersCount === 0): ?>
+                        <!-- REFINED EMPTY STATE -->
+                        <div class="orders-empty-card">
+                            <div class="orders-empty-icon-wrap">
+                                <svg viewBox="0 0 24 24" width="42" height="42" fill="none" stroke="#1b3b2b" stroke-width="1.6">
+                                    <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                                    <path d="M16 10a4 4 0 0 1-8 0"></path>
+                                </svg>
+                            </div>
+                            <h3 class="orders-empty-title">No Orders Placed Yet</h3>
+                            <p class="orders-empty-desc">You haven't placed any orders with Biswas Enterprise yet. Explore our authentic range of Ayurvedic care, Arjuna bark remedies, and organic formulations.</p>
+                            
+                            <div class="orders-empty-actions">
+                                <a href="<?= url('shop') ?>" class="btn-orders-primary">
+                                    <span>Explore All Products</span>
+                                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                                </a>
+                                <a href="<?= url('about') ?>" class="btn-orders-secondary">
+                                    <span>Learn About Us</span>
+                                </a>
+                            </div>
+                        </div>
+                    <?php else: ?>
+                        <!-- ORDERS CARDS LIST -->
+                        <div class="orders-list-wrapper" id="ordersContainer">
+                            <?php foreach ($userOrders as $order): ?>
+                                <?php 
+                                    $st = strtolower($order['order_status'] ?? 'pending');
+                                    $paySt = ucfirst($order['payment_status'] ?? 'pending');
+                                    $orderDate = date('M d, Y \a\t h:i A', strtotime($order['created_at']));
+                                    
+                                    // Progress calculations for tracker stepper
+                                    $progressPercent = 25;
+                                    $stepCompleted = [1 => true, 2 => false, 3 => false, 4 => false];
+                                    if ($st === 'processing') {
+                                        $progressPercent = 50;
+                                        $stepCompleted[2] = true;
+                                    } elseif ($st === 'shipped') {
+                                        $progressPercent = 75;
+                                        $stepCompleted[2] = true;
+                                        $stepCompleted[3] = true;
+                                    } elseif ($st === 'delivered') {
+                                        $progressPercent = 100;
+                                        $stepCompleted[2] = true;
+                                        $stepCompleted[3] = true;
+                                        $stepCompleted[4] = true;
+                                    }
+                                ?>
+                                <div class="order-card" data-status="<?= $st ?>" data-search="<?= strtolower(htmlspecialchars($order['order_number'])) ?> <?= strtolower(htmlspecialchars(implode(' ', array_column($order['items'], 'product_name')))) ?>">
+                                    <!-- Card Header -->
+                                    <div class="order-card-header">
+                                        <div class="order-meta-info">
+                                            <span class="order-number-badge">
+                                                #<?= htmlspecialchars($order['order_number']) ?>
+                                                <button type="button" class="order-copy-btn" onclick="copyOrderNumber('<?= htmlspecialchars($order['order_number']) ?>')" title="Copy Order Number">
+                                                    <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                                                    <span>Copy</span>
+                                                </button>
+                                            </span>
+                                            <span class="order-date-text">
+                                                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                                                <?= $orderDate ?>
+                                            </span>
+                                        </div>
+
+                                        <div class="order-header-right">
+                                            <span class="order-status-badge status-<?= $st ?>">
+                                                <span class="status-pulse-dot"></span>
+                                                <?= ucfirst($st) ?>
+                                            </span>
+                                            <span class="order-total-price">₹<?= number_format($order['total_amount'], 2) ?></span>
+                                        </div>
+                                    </div>
+
+                                    <?php if ($st !== 'cancelled'): ?>
+                                    <!-- Order Progress Stepper Bar -->
+                                    <div class="order-tracker-bar">
+                                        <div class="tracker-steps">
+                                            <div class="tracker-steps-line-bg"></div>
+                                            <div class="tracker-steps-line-fill" style="width: calc(<?= $progressPercent ?>% - 30px);"></div>
+
+                                            <div class="tracker-step <?= $stepCompleted[1] ? 'completed' : '' ?>">
+                                                <div class="tracker-step-icon">✓</div>
+                                                <div class="tracker-step-label">Placed</div>
+                                            </div>
+                                            <div class="tracker-step <?= $stepCompleted[2] ? 'completed' : ($st==='pending'?'active':'') ?>">
+                                                <div class="tracker-step-icon"><?= $stepCompleted[2] ? '✓' : '2' ?></div>
+                                                <div class="tracker-step-label">Processing</div>
+                                            </div>
+                                            <div class="tracker-step <?= $stepCompleted[3] ? 'completed' : ($st==='processing'?'active':'') ?>">
+                                                <div class="tracker-step-icon"><?= $stepCompleted[3] ? '✓' : '3' ?></div>
+                                                <div class="tracker-step-label">Dispatched</div>
+                                            </div>
+                                            <div class="tracker-step <?= $stepCompleted[4] ? 'completed' : ($st==='shipped'?'active':'') ?>">
+                                                <div class="tracker-step-icon"><?= $stepCompleted[4] ? '✓' : '4' ?></div>
+                                                <div class="tracker-step-label">Delivered</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <?php endif; ?>
+
+                                    <!-- Order Items Showcase -->
+                                    <div class="order-items-list">
+                                        <?php if (!empty($order['items'])): ?>
+                                            <?php foreach ($order['items'] as $item): ?>
+                                                <div class="order-item-row">
+                                                    <div class="order-item-left">
+                                                        <?php if (!empty($item['product_image'])): ?>
+                                                            <img src="<?= htmlspecialchars($item['product_image']) ?>" alt="<?= htmlspecialchars($item['product_name']) ?>" class="order-item-thumb">
+                                                        <?php else: ?>
+                                                            <div class="order-item-thumb">📦</div>
+                                                        <?php endif; ?>
+                                                        <div>
+                                                            <span class="order-item-title"><?= htmlspecialchars($item['product_name']) ?></span>
+                                                            <div class="order-item-sub">
+                                                                <span class="order-item-qty">Qty: <?= (int)$item['quantity'] ?></span>
+                                                                <span>× ₹<?= number_format($item['unit_price'], 2) ?></span>
+                                                                <?php if (!empty($item['sku'])): ?>
+                                                                    <span>• SKU: <?= htmlspecialchars($item['sku']) ?></span>
+                                                                <?php endif; ?>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="order-item-price">
+                                                        ₹<?= number_format($item['total'], 2) ?>
+                                                    </div>
+                                                </div>
+                                            <?php endforeach; ?>
+                                        <?php else: ?>
+                                            <div style="font-size: 13px; color: #728277; padding: 8px 10px;">Order items record available in receipt summary.</div>
+                                        <?php endif; ?>
+                                    </div>
+
+                                    <!-- Order Actions & Accordion Toggle -->
+                                    <div class="order-card-footer">
+                                        <button type="button" class="btn-order-action" onclick="toggleOrderDrawer(<?= $order['id'] ?>, this)">
+                                            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                                            <span>View Details</span>
+                                        </button>
+
+                                        <div style="display: flex; gap: 8px;">
+                                            <button type="button" class="btn-order-action" onclick="printOrderInvoice(<?= $order['id'] ?>)">
+                                                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+                                                <span>Print Receipt</span>
+                                            </button>
+                                            <a href="<?= url('contact') ?>" class="btn-order-action primary">
+                                                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                                                <span>Need Help?</span>
+                                            </a>
+                                        </div>
+                                    </div>
+
+                                    <!-- Expandable Drawer Content -->
+                                    <div id="orderDrawer-<?= $order['id'] ?>" class="order-details-drawer">
+                                        <div class="drawer-grid">
+                                            <!-- Shipping Details -->
+                                            <div class="drawer-box">
+                                                <div class="drawer-box-title">
+                                                    <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="#1b3b2b" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                                                    Delivery Address
+                                                </div>
+                                                <div style="font-size: 13.5px; color: #3a4a40; line-height: 1.6;">
+                                                    <strong><?= htmlspecialchars($order['ship_name'] ?? $currentUser['name']) ?></strong><br>
+                                                    <?= htmlspecialchars($order['address_line_1'] ?? 'Default Customer Address') ?><br>
+                                                    <?php if (!empty($order['address_line_2'])): ?><?= htmlspecialchars($order['address_line_2']) ?><br><?php endif; ?>
+                                                    <?= htmlspecialchars($order['city'] ?? '') ?><?= !empty($order['state']) ? ', ' . htmlspecialchars($order['state']) : '' ?> <?= htmlspecialchars($order['postal_code'] ?? '') ?><br>
+                                                    <?= htmlspecialchars($order['country'] ?? 'India') ?>
+                                                    <?php if (!empty($order['ship_phone'])): ?>
+                                                        <div style="margin-top: 4px; font-size: 12.5px; color: #728277;">📞 Phone: <?= htmlspecialchars($order['ship_phone']) ?></div>
+                                                    <?php endif; ?>
+                                                </div>
+                                            </div>
+
+                                            <!-- Payment & Price Summary -->
+                                            <div class="drawer-box">
+                                                <div class="drawer-box-title">
+                                                    <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="#1b3b2b" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
+                                                    Payment & Summary
+                                                </div>
+                                                <div class="drawer-price-row">
+                                                    <span>Payment Method:</span>
+                                                    <span style="font-weight:700; color:#1a2721; text-transform:uppercase;"><?= htmlspecialchars($order['payment_method'] ?? 'COD') ?></span>
+                                                </div>
+                                                <div class="drawer-price-row">
+                                                    <span>Payment Status:</span>
+                                                    <span style="font-weight:700; color:<?= strtolower($paySt)==='paid'?'#166534':'#92400e' ?>;"><?= $paySt ?></span>
+                                                </div>
+                                                <div class="drawer-price-row" style="margin-top: 8px;">
+                                                    <span>Subtotal:</span>
+                                                    <span>₹<?= number_format($order['subtotal'], 2) ?></span>
+                                                </div>
+                                                <div class="drawer-price-row">
+                                                    <span>Shipping Charge:</span>
+                                                    <span><?= $order['shipping_charge'] > 0 ? '₹'.number_format($order['shipping_charge'], 2) : 'FREE' ?></span>
+                                                </div>
+                                                <?php if ($order['discount'] > 0 || $order['coupon_discount'] > 0): ?>
+                                                <div class="drawer-price-row" style="color: #166534;">
+                                                    <span>Discount:</span>
+                                                    <span>- ₹<?= number_format($order['discount'] + $order['coupon_discount'], 2) ?></span>
+                                                </div>
+                                                <?php endif; ?>
+                                                <div class="drawer-price-row total">
+                                                    <span>Total Amount:</span>
+                                                    <span>₹<?= number_format($order['total_amount'], 2) ?></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php endif; ?>
+
+                    <script>
+                    function filterOrders(status, pillBtn) {
+                        const pills = document.querySelectorAll('.orders-filter-pill');
+                        pills.forEach(p => p.classList.remove('active'));
+                        if (pillBtn) pillBtn.classList.add('active');
+
+                        const cards = document.querySelectorAll('.order-card');
+                        cards.forEach(card => {
+                            const cardStatus = card.getAttribute('data-status');
+                            if (status === 'all' || cardStatus === status) {
+                                card.style.display = 'block';
+                            } else {
+                                card.style.display = 'none';
+                            }
+                        });
+                    }
+
+                    function searchOrders(query) {
+                        const q = query.toLowerCase().trim();
+                        const cards = document.querySelectorAll('.order-card');
+                        cards.forEach(card => {
+                            const searchData = card.getAttribute('data-search') || '';
+                            if (searchData.includes(q)) {
+                                card.style.display = 'block';
+                            } else {
+                                card.style.display = 'none';
+                            }
+                        });
+                    }
+
+                    function copyOrderNumber(ordNum) {
+                        navigator.clipboard.writeText(ordNum).then(() => {
+                            if (typeof showToastify === 'function') {
+                                showToastify('Order #' + ordNum + ' copied to clipboard!', 'success');
+                            } else {
+                                alert('Order #' + ordNum + ' copied to clipboard!');
+                            }
+                        }).catch(() => {
+                            alert('Order #' + ordNum);
+                        });
+                    }
+
+                    function toggleOrderDrawer(orderId, btn) {
+                        const drawer = document.getElementById('orderDrawer-' + orderId);
+                        if (!drawer) return;
+                        const isHidden = getComputedStyle(drawer).display === 'none';
+                        drawer.style.display = isHidden ? 'block' : 'none';
+                        btn.querySelector('span').textContent = isHidden ? 'Hide Details' : 'View Details';
+                        btn.querySelector('svg').style.transform = isHidden ? 'rotate(180deg)' : 'rotate(0deg)';
+                    }
+
+                    function printOrderInvoice(orderId) {
+                        window.open('<?= url("account.php?tab=orders") ?>&print_id=' + orderId, '_blank');
+                    }
+                    </script>
 
                 <!-- TAB 3: PROFILE EDIT -->
                 <?php elseif ($activeTab === 'profile'): ?>
@@ -1089,7 +1693,7 @@ if (isset($_GET['saved']) && empty($addressMessage)) $addressMessage = 'Address 
                     <style>
                         .sec-page-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; padding-bottom:18px; border-bottom:1px solid #edf2ef; }
                         .sec-page-title  { font-family:'Merriweather',serif; font-size:20px; color:#1a2721; display:flex; align-items:center; gap:10px; margin:0; }
-                        .sec-card { background:#fff; border:1.5px solid #e4ede8; border-radius:16px; padding:28px; max-width:540px; margin-bottom:24px; box-shadow:0 4px 16px rgba(27,59,43,0.03); }
+                        .sec-card { background:#fff; border:1.5px solid #e4ede8; border-radius:16px; padding:28px; width:100%; margin-bottom:24px; box-shadow:0 4px 16px rgba(27,59,43,0.03); }
                         .sec-card-title { font-size:16px; font-weight:700; color:#1a2721; margin:0 0 8px; display:flex; align-items:center; gap:8px; }
                         .sec-card-sub { font-size:13px; color:#6b7c72; margin-bottom:22px; line-height:1.5; }
                         .sec-form-grid { display:flex; flex-direction:column; gap:18px; }
@@ -1099,7 +1703,7 @@ if (isset($_GET['saved']) && empty($addressMessage)) $addressMessage = 'Address 
                         .sec-fg input:focus { border-color:#1b3b2b; box-shadow:0 0 0 3px rgba(27,59,43,0.08); }
                         .sec-submit-btn { background:#1b3b2b; color:#fff; border:none; padding:12px 26px; border-radius:9px; font-size:13.5px; font-weight:600; cursor:pointer; transition:background 0.2s,transform 0.15s; width:fit-content; display:inline-flex; align-items:center; gap:8px; margin-top:6px; }
                         .sec-submit-btn:hover { background:#2a523c; transform:translateY(-1px); }
-                        .sec-flash { display:flex; align-items:center; gap:10px; padding:13px 18px; border-radius:10px; font-size:13.5px; font-weight:500; margin-bottom:20px; max-width:540px; }
+                        .sec-flash { display:flex; align-items:center; gap:10px; padding:13px 18px; border-radius:10px; font-size:13.5px; font-weight:500; margin-bottom:20px; width:100%; }
                         .sec-flash.ok { background:#f0fdf4; color:#166534; border:1px solid #bbf7d0; }
                         .sec-flash.err { background:#fef2f2; color:#dc2626; border:1px solid #fecaca; }
                     </style>

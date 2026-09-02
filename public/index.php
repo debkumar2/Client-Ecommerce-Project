@@ -518,6 +518,126 @@ $companyDetails = [
             }
         }
 
+        /* Why Choose Biswas Enterprise Section */
+        .why-choose-section {
+            background: #ffffff;
+            padding: 80px 0;
+            position: relative;
+        }
+
+        .why-choose-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 24px;
+            margin-top: 48px;
+        }
+
+        .why-choose-card {
+            background: #f8faf8;
+            border: 1.5px solid #e2ebe4;
+            border-radius: 22px;
+            padding: 32px 24px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .why-choose-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #1b3b2b, #d4af37);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .why-choose-card:hover {
+            transform: translateY(-6px);
+            background: #ffffff;
+            border-color: #a8d5b5;
+            box-shadow: 0 16px 36px rgba(27, 59, 43, 0.08);
+        }
+
+        .why-choose-card:hover::before {
+            opacity: 1;
+        }
+
+        .why-choose-icon-box {
+            width: 52px;
+            height: 52px;
+            border-radius: 16px;
+            background: #e8f2eb;
+            color: #1b3b2b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .why-choose-card:hover .why-choose-icon-box {
+            background: #1b3b2b;
+            color: #d4af37;
+            transform: scale(1.08);
+        }
+
+        .why-choose-badge {
+            display: inline-block;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #1b3b2b;
+            background: #e1efe5;
+            padding: 4px 10px;
+            border-radius: 20px;
+            margin-bottom: 12px;
+            width: fit-content;
+        }
+
+        .why-choose-card h3 {
+            font-family: 'Merriweather', serif;
+            font-size: 17px;
+            color: #1a2721;
+            margin: 0 0 10px;
+            line-height: 1.35;
+        }
+
+        .why-choose-card p {
+            font-size: 13.5px;
+            color: #55685c;
+            line-height: 1.6;
+            margin: 0;
+        }
+
+        @media (max-width: 1024px) {
+            .why-choose-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 20px;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .why-choose-section {
+                padding: 50px 0;
+            }
+            .why-choose-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+                margin-top: 32px;
+            }
+            .why-choose-card {
+                padding: 24px 20px;
+                border-radius: 18px;
+            }
+        }
+
         /* ============================================
            INLINE RESPONSIVE OVERRIDES
            ============================================ */
@@ -905,6 +1025,63 @@ $companyDetails = [
 
                         </div>
 
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- WHY CHOOSE BISWAS ENTERPRISE SECTION -->
+        <section class="why-choose-section" aria-label="Why Choose Biswas Enterprise">
+            <div class="container">
+                <div class="section-header" style="text-align: center; max-width: 720px; margin: 0 auto;">
+                    <span class="eyebrow" style="color: #d4af37; letter-spacing: 0.1em; font-weight: 700;">OUR UNCOMPROMISING STANDARDS</span>
+                    <h2 style="font-family: 'Merriweather', serif; font-size: clamp(1.6rem, 4vw, 2.3rem); color: #1b3b2b; margin: 8px 0 12px;">Why Choose Biswas Enterprise</h2>
+                    <p style="color: #55685c; font-size: 15px; line-height: 1.6;">Supplying medicine-grade botanicals and reliable solar energy solutions built on authenticity, lab verification, and swift logistics.</p>
+                </div>
+
+                <div class="why-choose-grid">
+                    <div class="why-choose-card">
+                        <div>
+                            <div class="why-choose-icon-box">
+                                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                            </div>
+                            <span class="why-choose-badge">100% TRACEABLE</span>
+                            <h3>Direct Botanical Sourcing</h3>
+                            <p>Harvested directly from certified growers & natural forest reserves across West Bengal to ensure zero adulteration.</p>
+                        </div>
+                    </div>
+
+                    <div class="why-choose-card">
+                        <div>
+                            <div class="why-choose-icon-box">
+                                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg>
+                            </div>
+                            <span class="why-choose-badge">HIGH POTENCY</span>
+                            <h3>Shade-Cured Processing</h3>
+                            <p>Slow shade-cured and pulverized under hygienic parameters to preserve essential active bio-nutrients & oils.</p>
+                        </div>
+                    </div>
+
+                    <div class="why-choose-card">
+                        <div>
+                            <div class="why-choose-icon-box">
+                                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+                            </div>
+                            <span class="why-choose-badge">EXPORT READY</span>
+                            <h3>Custom Bulk Packaging</h3>
+                            <p>Moisture-proof jute bags, food-grade HDPE liners, and heavy-duty cartons designed for safe sea & air freight.</p>
+                        </div>
+                    </div>
+
+                    <div class="why-choose-card">
+                        <div>
+                            <div class="why-choose-icon-box">
+                                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg>
+                            </div>
+                            <span class="why-choose-badge">PAN-INDIA & EXPORT</span>
+                            <h3>Rapid Global Dispatch</h3>
+                            <p>Strategic Kolkata supply-chain hub enabling fast domestic freight and international containerized shipping.</p>
+                        </div>
                     </div>
                 </div>
             </div>
