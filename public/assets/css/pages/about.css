@@ -206,7 +206,7 @@
 
 .values-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: 2rem;
 }
 
@@ -344,28 +344,541 @@
     gap: 1.25rem;
 }
 
-/* --- Responsive Adjustments --- */
+/* ==========================================================================
+   ABOUT PAGE — MOBILE RESPONSIVE STYLES
+   Mirrors the same breakpoint rhythm as home.css & shop.css
+   ========================================================================== */
+
+/* ---- 992px: Tablet landscape / small laptops ---- */
 @media (max-width: 992px) {
-    .about-hero-grid, .story-grid {
+
+    /* Hero: stack text above image */
+    .about-hero {
+        padding: 3.5rem 0 2.5rem;
+    }
+    .about-hero-grid {
         grid-template-columns: 1fr;
         gap: 2.5rem;
     }
+    .about-hero-title {
+        font-size: clamp(1.75rem, 4vw, 2.5rem);
+    }
+    .about-hero-img {
+        height: 380px;
+    }
+
+    /* Story section: stack */
+    .about-story-section {
+        padding: 4rem 0;
+    }
+    .story-grid {
+        grid-template-columns: 1fr;
+        gap: 2.5rem;
+    }
+    .section-title {
+        font-size: 1.85rem;
+    }
+
+    /* Values: 2-col */
+    .about-values-section {
+        padding: 4rem 0;
+    }
     .values-grid {
         grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
+    }
+    .section-header-center {
+        margin-bottom: 2.5rem;
+    }
+
+    /* Portfolio: single column */
+    .portfolio-overview-section {
+        padding: 4rem 0;
     }
     .portfolio-grid {
         grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+
+    /* CTA */
+    .about-cta-section {
+        padding: 3.5rem 0;
+    }
+    .about-cta-title {
+        font-size: 2rem;
     }
 }
 
-@media (max-width: 576px) {
+/* ---- 778px: Tablet portrait ---- */
+@media (max-width: 778px) {
+
+    .about-hero {
+        padding: 2.75rem 0 2rem;
+    }
+    .about-hero-title {
+        font-size: clamp(1.5rem, 5vw, 2rem);
+        line-height: 1.2;
+    }
+    .about-hero-lead {
+        font-size: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    .about-hero-img {
+        height: 300px;
+    }
+    .about-experience-card {
+        bottom: 1.25rem;
+        left: 1.25rem;
+        padding: 1rem 1.25rem;
+    }
+    .exp-number {
+        font-size: 1.6rem;
+    }
+
+    /* Story */
+    .about-story-section {
+        padding: 3rem 0;
+    }
+    .section-title {
+        font-size: 1.65rem;
+        margin-bottom: 1.25rem;
+    }
+    .story-content p {
+        font-size: 1rem;
+    }
+    .story-highlights {
+        gap: 1.25rem;
+        margin-top: 1.75rem;
+    }
+
+    /* Values: Single card column at 778px */
+    .about-values-section {
+        padding: 3rem 0;
+    }
     .values-grid {
         grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+    .value-card {
+        padding: 2rem 1.25rem;
+    }
+    .value-card h3 {
+        font-size: 1.125rem;
+    }
+    .value-card p {
+        font-size: 0.875rem;
+    }
+
+    /* Portfolio */
+    .portfolio-overview-section {
+        padding: 3rem 0;
+    }
+    .portfolio-grid {
+        margin-top: 2rem;
+    }
+    .portfolio-card {
+        padding: 1.5rem;
+        gap: 1.25rem;
+    }
+    .portfolio-card-content h4 {
+        font-size: 1.1rem;
+    }
+    .portfolio-card-content p {
+        font-size: 0.875rem;
+    }
+
+    /* CTA */
+    .about-cta-section {
+        padding: 2.75rem 0;
+    }
+    .about-cta-title {
+        font-size: 1.75rem;
+    }
+    .about-cta-desc {
+        font-size: 1rem;
+        margin-bottom: 1.5rem;
+    }
+}
+
+/* ---- 640px: Large phones ---- */
+@media (max-width: 640px) {
+
+    .about-hero {
+        padding: 2rem 0 1.5rem;
+    }
+    .about-hero-subtitle {
+        font-size: 0.75rem;
+        margin-bottom: 0.75rem;
+    }
+    .about-hero-title {
+        font-size: clamp(1.3rem, 5.5vw, 1.75rem);
+        margin-bottom: 1rem;
+    }
+    .about-hero-lead {
+        font-size: 0.9375rem;
+        margin-bottom: 1.25rem;
+    }
+    .about-hero-badges {
+        gap: 0.875rem;
+    }
+    .hero-badge-item {
+        padding: 0.6rem 1rem;
+    }
+    .hero-badge-text {
+        font-size: 0.8125rem;
+    }
+    .about-hero-img {
+        height: 240px;
+    }
+    .about-experience-card {
+        bottom: 1rem;
+        left: 1rem;
+        padding: 0.875rem 1rem;
+    }
+    .exp-number {
+        font-size: 1.35rem;
+    }
+    .exp-label {
+        font-size: 0.72rem;
+    }
+
+    /* Story */
+    .about-story-section {
+        padding: 2.5rem 0;
+    }
+    .section-label {
+        font-size: 0.75rem;
+    }
+    .section-title {
+        font-size: 1.45rem;
+        line-height: 1.25;
+        margin-bottom: 1rem;
+    }
+    .story-content p {
+        font-size: 0.9375rem;
+        line-height: 1.7;
+        margin-bottom: 1rem;
     }
     .story-highlights {
         grid-template-columns: 1fr;
+        gap: 1rem;
+        margin-top: 1.5rem;
+    }
+    .highlight-box {
+        padding: 1.25rem;
+    }
+    .highlight-box h4 {
+        font-size: 1rem;
+    }
+    .highlight-box p {
+        font-size: 0.875rem !important;
+    }
+
+    /* Values */
+    .about-values-section {
+        padding: 2.5rem 0;
+    }
+    .values-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    .section-header-center {
+        margin-bottom: 2rem;
+    }
+    .section-header-center .section-title {
+        font-size: 1.45rem;
+    }
+    .value-card {
+        padding: 1.5rem 1.25rem;
+        text-align: left;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+    .value-icon-circle {
+        margin: 0 0 0.5rem 0;
+        flex-shrink: 0;
+        width: 48px;
+        height: 48px;
+    }
+    .value-icon-circle svg {
+        width: 24px;
+        height: 24px;
+    }
+
+    /* Portfolio */
+    .portfolio-overview-section {
+        padding: 2.5rem 0;
+    }
+    .portfolio-card {
+        padding: 1.25rem;
+        gap: 1rem;
+    }
+    .portfolio-card-icon {
+        width: 44px;
+        height: 44px;
+    }
+    .portfolio-card-icon svg {
+        width: 22px;
+        height: 22px;
+    }
+    .portfolio-card-content h4 {
+        font-size: 1rem;
+    }
+    .portfolio-card-content p {
+        font-size: 0.8125rem;
+    }
+
+    /* CTA */
+    .about-cta-section {
+        padding: 2.5rem 0;
+    }
+    .about-cta-title {
+        font-size: 1.5rem;
+        margin-bottom: 0.75rem;
+    }
+    .about-cta-desc {
+        font-size: 0.9375rem;
+        margin-bottom: 1.25rem;
     }
     .cta-buttons-group {
         flex-direction: column;
+        align-items: center;
+        gap: 0.875rem;
+    }
+    .cta-buttons-group .btn {
+        width: 100%;
+        max-width: 280px;
+        justify-content: center;
     }
 }
+
+/* ---- 575px: Mobile Phones ---- */
+@media (max-width: 575px) {
+    .about-hero {
+        padding: 1.75rem 0 1.25rem;
+    }
+    .about-hero-title {
+        font-size: clamp(1.25rem, 5.8vw, 1.6rem);
+        line-height: 1.22;
+        margin-bottom: 0.875rem;
+    }
+    .about-hero-lead {
+        font-size: 0.9rem;
+        line-height: 1.6;
+        margin-bottom: 1.25rem;
+    }
+    .hero-badge-item {
+        padding: 0.5rem 0.875rem;
+    }
+    .hero-badge-text {
+        font-size: 0.78rem;
+    }
+
+    /* Section Titles & Layouts */
+    .about-story-section,
+    .about-values-section,
+    .portfolio-overview-section,
+    .about-cta-section {
+        padding: 2.25rem 0;
+    }
+    .section-title {
+        font-size: 1.35rem;
+        line-height: 1.28;
+    }
+    .section-label {
+        font-size: 0.7rem;
+        letter-spacing: 0.1em;
+    }
+
+    /* Values Cards Fix: Vertical column stack */
+    .values-grid {
+        grid-template-columns: 1fr;
+        gap: 1.25rem;
+    }
+    .value-card {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 1.35rem 1.15rem;
+        gap: 0.6rem;
+    }
+    .value-card h3 {
+        font-size: 1.05rem;
+        line-height: 1.3;
+        margin-bottom: 0.25rem;
+        color: var(--text-heading);
+    }
+    .value-card p {
+        font-size: 0.875rem;
+        line-height: 1.6;
+        color: var(--text-muted);
+        margin: 0;
+    }
+    .value-icon-circle {
+        width: 44px;
+        height: 44px;
+        margin-bottom: 0.25rem;
+    }
+    .value-icon-circle svg {
+        width: 22px;
+        height: 22px;
+    }
+
+    /* Story Section Image */
+    .story-image-wrapper img {
+        height: 260px !important;
+    }
+
+    /* Portfolio Cards */
+    .portfolio-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    .portfolio-card {
+        padding: 1.25rem 1.15rem;
+    }
+}
+
+/* ---- 475px: Small phones ---- */
+@media (max-width: 475px) {
+
+    .about-hero {
+        padding: 1.5rem 0 1.25rem;
+    }
+    .about-hero-title {
+        font-size: clamp(1.2rem, 6vw, 1.45rem);
+    }
+    .about-hero-lead {
+        font-size: 0.875rem;
+    }
+    .about-hero-badges {
+        gap: 0.625rem;
+    }
+    .hero-badge-item {
+        padding: 0.5rem 0.875rem;
+        gap: 0.5rem;
+    }
+    .hero-badge-icon {
+        width: 18px;
+        height: 18px;
+    }
+    .hero-badge-text {
+        font-size: 0.75rem;
+    }
+    .about-hero-img {
+        height: 200px;
+    }
+    .about-experience-card {
+        padding: 0.75rem 0.875rem;
+    }
+    .exp-number {
+        font-size: 1.15rem;
+    }
+    .exp-label {
+        font-size: 0.65rem;
+    }
+
+    /* Story */
+    .about-story-section {
+        padding: 2rem 0;
+    }
+    .section-title {
+        font-size: 1.25rem;
+    }
+    .story-content p {
+        font-size: 0.875rem;
+    }
+
+    /* Values */
+    .about-values-section {
+        padding: 2rem 0;
+    }
+    .value-card {
+        padding: 1.25rem 1rem;
+    }
+    .value-card h3 {
+        font-size: 1rem;
+        margin-bottom: 0.5rem;
+    }
+    .value-card p {
+        font-size: 0.8125rem;
+    }
+
+    /* Portfolio */
+    .portfolio-overview-section {
+        padding: 2rem 0;
+    }
+    .portfolio-card {
+        flex-direction: column;
+        padding: 1.25rem;
+        gap: 0.875rem;
+    }
+    .portfolio-card-icon {
+        width: 40px;
+        height: 40px;
+    }
+
+    /* CTA */
+    .about-cta-section {
+        padding: 2rem 0;
+    }
+    .about-cta-title {
+        font-size: 1.35rem;
+    }
+    .about-cta-desc {
+        font-size: 0.875rem;
+    }
+    .cta-buttons-group .btn {
+        max-width: 100%;
+    }
+}
+
+/* ---- 375px: iPhone SE & smallest devices ---- */
+@media (max-width: 375px) {
+    .about-hero-title {
+        font-size: 1.1rem !important;
+        line-height: 1.3;
+    }
+    .about-hero-subtitle {
+        font-size: 0.65rem !important;
+    }
+    .about-hero-lead {
+        font-size: 0.8rem !important;
+    }
+    .section-title {
+        font-size: 1.15rem !important;
+    }
+    .section-label {
+        font-size: 0.65rem !important;
+    }
+    .story-content p {
+        font-size: 0.8125rem !important;
+    }
+    .highlight-box h4 {
+        font-size: 0.9rem !important;
+    }
+    .highlight-box p {
+        font-size: 0.8rem !important;
+    }
+    .value-card h3 {
+        font-size: 0.9rem !important;
+    }
+    .value-card p {
+        font-size: 0.75rem !important;
+    }
+    .portfolio-card-content h4 {
+        font-size: 0.9rem !important;
+    }
+    .portfolio-card-content p {
+        font-size: 0.75rem !important;
+    }
+    .about-cta-title {
+        font-size: 1.2rem !important;
+    }
+    .about-cta-desc {
+        font-size: 0.8rem !important;
+    }
+}
+

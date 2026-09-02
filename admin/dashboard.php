@@ -188,6 +188,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
     }
+
+    // 6. ORDER ACTIONS (Status Updates & Deletion)
+    if (isset($_POST['order_action'])) {
+        $orderId = (int)($_POST['order_id'] ?? 0);
+        $orderAction = $_POST['order_action'];
+        if ($orderId > 0) {
+            try {
+                $pdo = Database::getConnection();
+                if ($orderAction === 'update_status') {
+                    $newOrderStatus = trim($_POST['order_status'] ?? 'pending');
+                    $newPayStatus   = trim($_POST['payment_status'] ?? 'pending');
+                    $stmt = $pdo->prepare("UPDATE `orders` SET order_status = ?, payment_status = ?, updated_at = NOW() WHERE id = ?");
+                    $stmt->execute([$newOrderStatus, $newPayStatus, $orderId]);
+                    $actionMessage = 'Order #' . $orderId . ' status updated successfully!';
+                } elseif ($orderAction === 'accept_order') {
+                    $stmt = $pdo->prepare("UPDATE `orders` SET order_status = 'processing', updated_at = NOW() WHERE id = ?");
+                    $stmt->execute([$orderId]);
+                    $actionMessage = 'Order #' . $orderId . ' accepted successfully! Status updated to Processing.';
+                } elseif ($orderAction === 'delete_order') {
+                    $pdo->prepare("DELETE FROM `order_items` WHERE order_id = ?")->execute([$orderId]);
+                    $pdo->prepare("DELETE FROM `orders` WHERE id = ?")->execute([$orderId]);
+                    $actionMessage = 'Order #' . $orderId . ' deleted successfully.';
+                }
+            } catch (\Throwable $e) {
+                $actionMessage = 'Order Action Error: ' . $e->getMessage();
+            }
+        }
+    }
 }
 
 // Fetch Data for Admin Dashboard
@@ -195,6 +223,9 @@ $recentUsers = [];
 $recentEnquiries = [];
 $allEnquiries = [];
 $allUsers = [];
+$allOrders = [];
+$recentOrders = [];
+$orderItemsMap = [];
 $categoriesList = [];
 $productsList = [];
 $totalUsersCount = 0;
@@ -203,10 +234,34 @@ $totalEnquiriesCount = 0;
 $pendingEnquiriesCount = 0;
 $totalProductsCount = 0;
 $totalCategoriesCount = 0;
+$totalOrdersCount = 0;
+$pendingOrdersCount = 0;
 
 try {
     $pdo = Database::getConnection();
     
+    // Orders
+    $stmtOrdersCount = $pdo->query("SELECT COUNT(*) FROM `orders`");
+    $totalOrdersCount = (int)$stmtOrdersCount->fetchColumn();
+
+    $stmtPendingOrders = $pdo->query("SELECT COUNT(*) FROM `orders` WHERE order_status = 'pending'");
+    $pendingOrdersCount = (int)$stmtPendingOrders->fetchColumn();
+
+    $stmtOrders = $pdo->query("SELECT o.*, u.first_name, u.last_name, u.email as user_email, u.phone as user_phone 
+        FROM `orders` o 
+        LEFT JOIN `users` u ON o.user_id = u.id 
+        ORDER BY o.id DESC");
+    $allOrders = $stmtOrders->fetchAll(PDO::FETCH_ASSOC);
+    $recentOrders = array_slice($allOrders, 0, 5);
+
+    if (!empty($allOrders)) {
+        $stmtItems = $pdo->query("SELECT * FROM `order_items` ORDER BY id ASC");
+        $allItems = $stmtItems->fetchAll(PDO::FETCH_ASSOC);
+        foreach ($allItems as $item) {
+            $orderItemsMap[$item['order_id']][] = $item;
+        }
+    }
+
     // Users count
     $stmtCount = $pdo->query("SELECT COUNT(*) FROM `users`");
     $totalUsersCount = (int)$stmtCount->fetchColumn();
@@ -259,9 +314,44 @@ try {
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 
+    <!-- SweetAlert2 CDN -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <!-- CSS -->
     <link rel="stylesheet" href="<?= asset('css/main.css') ?>">
     <style>
+        /* SweetAlert2 Custom Enterprise Styling */
+        .swal2-popup {
+            font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, sans-serif !important;
+            border-radius: 18px !important;
+            padding: 26px !important;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15) !important;
+        }
+        .swal2-title {
+            font-family: 'Merriweather', serif !important;
+            font-size: 20px !important;
+            color: #1b3b2b !important;
+            font-weight: 700 !important;
+        }
+        .swal2-html-container {
+            font-size: 14px !important;
+            color: #4a5c51 !important;
+        }
+        .swal2-styled.swal2-confirm {
+            border-radius: 8px !important;
+            padding: 10px 22px !important;
+            font-weight: 600 !important;
+            font-size: 13.5px !important;
+            box-shadow: 0 4px 12px rgba(220, 38, 38, 0.25) !important;
+        }
+        .swal2-styled.swal2-cancel {
+            border-radius: 8px !important;
+            padding: 10px 22px !important;
+            font-weight: 600 !important;
+            font-size: 13.5px !important;
+        }
+
         .admin-layout {
             display: flex;
             min-height: 100vh;
@@ -276,6 +366,12 @@ try {
             display: flex;
             flex-direction: column;
             justify-content: space-between;
+            flex-shrink: 0;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            box-sizing: border-box;
+            overflow-y: auto;
         }
 
         .admin-logo {
@@ -325,6 +421,7 @@ try {
             flex: 1;
             padding: 40px;
             overflow-y: auto;
+            min-width: 0;
         }
 
         .admin-top-bar {
@@ -552,29 +649,238 @@ try {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+
+        .admin-logout-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background: #dc2626 !important;
+            color: #ffffff !important;
+            border: 1px solid #dc2626 !important;
+            padding: 12px 16px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(220, 38, 38, 0.25);
+        }
+
+        .admin-logout-btn:hover {
+            background: #b91c1c !important;
+            border-color: #b91c1c !important;
+            box-shadow: 0 6px 16px rgba(185, 28, 28, 0.4);
+            transform: translateY(-1px);
+        }
+
+        /* Quick Action Bar & Layout Grids */
+        .quick-actions-bar {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .category-page-grid {
+            display: grid;
+            grid-template-columns: 1fr 340px;
+            gap: 24px;
+        }
+
+        /* Mobile Header & Sidebar Drawer */
+        .admin-mobile-header {
+            display: none;
+            background: #1b3b2b;
+            color: #ffffff;
+            padding: 14px 20px;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 998;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+        }
+        .admin-mobile-logo {
+            font-family: 'Merriweather', serif;
+            font-size: 17px;
+            font-weight: 700;
+            color: #ffffff;
+        }
+        .admin-sidebar-toggle {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255,255,255,0.12);
+            color: #ffffff;
+            border: 1px solid rgba(255,255,255,0.25);
+            border-radius: 6px;
+            padding: 7px 13px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .admin-sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+            backdrop-filter: blur(2px);
+        }
+
+        /* Media Queries for Admin Responsiveness */
+        @media (max-width: 992px) {
+            .admin-layout {
+                flex-direction: column;
+            }
+            .admin-mobile-header {
+                display: flex;
+            }
+            .admin-sidebar {
+                position: fixed;
+                top: 0;
+                left: 0;
+                bottom: 0;
+                width: 270px;
+                z-index: 1000;
+                transform: translateX(-100%);
+                transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                box-shadow: 4px 0 20px rgba(0,0,0,0.3);
+            }
+            .admin-sidebar.mobile-open {
+                transform: translateX(0);
+            }
+            .admin-sidebar-overlay.mobile-open {
+                display: block;
+            }
+            .admin-main {
+                padding: 24px 20px;
+            }
+            .category-page-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .admin-top-bar {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 14px;
+                padding: 16px 20px;
+            }
+            .admin-top-bar a {
+                width: 100%;
+                text-align: center;
+                box-sizing: border-box;
+            }
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 14px;
+            }
+            .stat-card {
+                padding: 18px 16px;
+            }
+            .stat-card-value {
+                font-size: 22px;
+            }
+            .data-card {
+                padding: 20px 16px;
+            }
+            .data-card-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .quick-actions-bar {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .quick-actions-bar a {
+                width: 100%;
+                text-align: center;
+                box-sizing: border-box;
+                justify-content: center;
+            }
+            .form-grid-2 {
+                grid-template-columns: 1fr;
+                gap: 0;
+            }
+            .admin-table th, .admin-table td {
+                padding: 10px 10px;
+                font-size: 12px;
+            }
+            .product-thumb-sm {
+                width: 38px;
+                height: 38px;
+            }
+            .btn-action {
+                padding: 5px 8px;
+                font-size: 11px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .admin-main {
+                padding: 16px 12px;
+            }
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+            }
+            .stat-card-title {
+                font-size: 11px;
+            }
+            .stat-card-value {
+                font-size: 20px;
+            }
+            .admin-welcome h1 {
+                font-size: 20px;
+            }
+            .admin-welcome p {
+                font-size: 12px;
+            }
+        }
     </style>
 </head>
 <body>
+    <!-- Mobile Top Header Bar -->
+    <div class="admin-mobile-header">
+        <div class="admin-mobile-logo">Biswas Admin</div>
+        <button type="button" class="admin-sidebar-toggle" onclick="toggleAdminSidebar()" aria-label="Toggle Navigation">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+            <span>Menu</span>
+        </button>
+    </div>
+
+    <!-- Backdrop Overlay for Mobile Sidebar -->
+    <div class="admin-sidebar-overlay" id="admin-sidebar-overlay" onclick="closeAdminSidebar()"></div>
+
     <div class="admin-layout">
         <!-- Admin Sidebar -->
         <aside class="admin-sidebar">
             <div>
                 <div class="admin-logo">
-                    <span>🌿</span> Biswas Admin
+                    Biswas Admin
                 </div>
                 <ul class="admin-nav">
-                    <li><a href="#" class="active" id="nav-overview" onclick="switchView('overview', this); return false;">📊 Overview</a></li>
-                    <li><a href="#" id="nav-products" onclick="switchView('products', this); return false;">📦 Products Catalog</a></li>
-                    <li><a href="#" id="nav-add-product" onclick="switchView('add-product', this); return false;">➕ Add New Product</a></li>
-                    <li><a href="#" id="nav-categories" onclick="switchView('categories', this); return false;">🏷️ Categories</a></li>
-                    <li><a href="#" id="nav-enquiries" onclick="switchView('enquiries', this); return false;">📩 Wholesale Enquiries</a></li>
-                    <li><a href="#" id="nav-users" onclick="switchView('users', this); return false;">👥 Registered Users</a></li>
-                    <li><a href="<?= url('shop') ?>" target="_blank">🛒 View Live Store</a></li>
+                    <li><a href="#" class="active" id="nav-overview" onclick="switchView('overview', this); return false;">Overview</a></li>
+                    <li><a href="#" id="nav-orders" onclick="switchView('orders', this); return false;">Orders</a></li>
+                    <li><a href="#" id="nav-products" onclick="switchView('products', this); return false;">Products Catalog</a></li>
+                    <li><a href="#" id="nav-add-product" onclick="switchView('add-product', this); return false;">Add New Product</a></li>
+                    <li><a href="#" id="nav-categories" onclick="switchView('categories', this); return false;">Categories</a></li>
+                    <li><a href="#" id="nav-enquiries" onclick="switchView('enquiries', this); return false;">Wholesale Enquiries</a></li>
+                    <li><a href="#" id="nav-users" onclick="switchView('users', this); return false;">Registered Users</a></li>
+                    <li><a href="<?= url('shop') ?>" target="_blank">View Live Store</a></li>
                 </ul>
             </div>
-            <div>
-                <a href="<?= url('account.php?action=logout') ?>" style="display: flex; align-items: center; gap: 8px; color: #f87171; text-decoration: none; font-size: 14px; font-weight: 600;">
-                    <span>🚪 Sign Out</span>
+            <div style="padding-top: 20px; border-top: 1px solid rgba(255, 255, 255, 0.12); margin-top: 20px;">
+                <a href="<?= url('account.php?action=logout') ?>" class="admin-logout-btn">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                    <span>Sign Out / Log Out</span>
                 </a>
             </div>
         </aside>
@@ -585,41 +891,141 @@ try {
             <div class="admin-top-bar">
                 <div class="admin-welcome">
                     <h1>Administrator Dashboard</h1>
-                    <p>Connected Database: Hostinger MySQL (u410000684_ecommerce) | Cloudinary CDN Enabled | Admin: <strong><?= htmlspecialchars($currentUser['email']) ?></strong></p>
+                    <!-- <p>Connected Database: Hostinger MySQL (u410000684_ecommerce) | Cloudinary CDN Enabled | Admin: <strong><?= htmlspecialchars($currentUser['email']) ?></strong></p> -->
                 </div>
                 <a href="<?= url('shop') ?>" target="_blank" class="btn-primary" style="padding: 10px 18px; font-size: 13px; text-decoration: none;">View Live Store &rarr;</a>
             </div>
 
             <!-- Stats Grid -->
             <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-card-title">Total Products</div>
-                    <div class="stat-card-value"><?= number_format($totalProductsCount) ?></div>
+                <div class="stat-card" style="cursor: pointer;" onclick="switchView('orders', document.getElementById('nav-orders'));">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                        <div>
+                            <div class="stat-card-title">Customer Orders</div>
+                            <div class="stat-card-value" style="color: #10b981;"><?= number_format($totalOrdersCount) ?></div>
+                        </div>
+                        <div style="background: #e6f4ea; color: #10b981; padding: 10px; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+                        </div>
+                    </div>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-card-title">Product Categories</div>
-                    <div class="stat-card-value"><?= number_format($totalCategoriesCount) ?></div>
+
+                <div class="stat-card" style="cursor: pointer;" onclick="switchView('products', document.getElementById('nav-products'));">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                        <div>
+                            <div class="stat-card-title">Live Products</div>
+                            <div class="stat-card-value"><?= number_format($totalProductsCount) ?></div>
+                        </div>
+                        <div style="background: #f0f6f2; color: #1b3b2b; padding: 10px; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg>
+                        </div>
+                    </div>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-card-title">Total Enquiries</div>
-                    <div class="stat-card-value highlight-gold"><?= number_format($totalEnquiriesCount) ?></div>
+
+                <div class="stat-card" style="cursor: pointer;" onclick="switchView('categories', document.getElementById('nav-categories'));">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                        <div>
+                            <div class="stat-card-title">Categories</div>
+                            <div class="stat-card-value"><?= number_format($totalCategoriesCount) ?></div>
+                        </div>
+                        <div style="background: #f0f6f2; color: #1b3b2b; padding: 10px; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+                        </div>
+                    </div>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-card-title">Registered Customers</div>
-                    <div class="stat-card-value"><?= number_format($totalUsersCount) ?></div>
+
+                <div class="stat-card" style="cursor: pointer;" onclick="switchView('enquiries', document.getElementById('nav-enquiries'));">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                        <div>
+                            <div class="stat-card-title">Wholesale Enquiries</div>
+                            <div class="stat-card-value highlight-gold"><?= number_format($totalEnquiriesCount) ?></div>
+                        </div>
+                        <div style="background: #fefce8; color: #b8860b; padding: 10px; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stat-card" style="cursor: pointer;" onclick="switchView('users', document.getElementById('nav-users'));">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                        <div>
+                            <div class="stat-card-title">Registered Customers</div>
+                            <div class="stat-card-value"><?= number_format($totalUsersCount) ?></div>
+                        </div>
+                        <div style="background: #f0f6f2; color: #1b3b2b; padding: 10px; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 1-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                        </div>
+                    </div>
                 </div>
             </div>
 
             <!-- ===================== OVERVIEW SECTION ===================== -->
             <div id="section-overview">
-                <!-- Quick Action Bar -->
-                <div style="display:flex; gap: 12px; margin-bottom: 24px;">
-                    <a href="#" onclick="switchView('add-product', document.getElementById('nav-add-product')); return false;" class="btn-primary" style="padding: 12px 20px; text-decoration: none; font-size: 13.5px;">
-                        ➕ Add New Product (Cloudinary)
-                    </a>
-                    <a href="#" onclick="switchView('categories', document.getElementById('nav-categories')); return false;" class="btn-action" style="padding: 12px 20px; font-size: 13.5px;">
-                        🏷️ Manage Categories
-                    </a>
+
+                <!-- Recent Orders Overview Card -->
+                <div class="data-card">
+                    <div class="data-card-header">
+                        <div>
+                            <h2 class="data-card-title">Recent Customer Orders</h2>
+                            <div style="font-size: 12px; color: #728277; margin-top: 2px;">Latest store purchases awaiting approval or fulfillment</div>
+                        </div>
+                        <a href="#" onclick="switchView('orders', document.getElementById('nav-orders')); return false;" style="font-size: 13px; font-weight: 600; color: #1b3b2b;">View All Orders &rarr;</a>
+                    </div>
+                    <?php if (empty($recentOrders)): ?>
+                        <p style="color: #63756a; font-size: 14px;">No customer orders placed yet.</p>
+                    <?php else: ?>
+                    <div style="overflow-x: auto; -webkit-overflow-scrolling: touch;">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>Order #</th>
+                                    <th>Customer</th>
+                                    <th>Total Amount</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            <?php foreach ($recentOrders as $ord): ?>
+                                <?php 
+                                    $customerName = trim(($ord['first_name'] ?? '') . ' ' . ($ord['last_name'] ?? ''));
+                                    if (empty($customerName)) $customerName = 'Customer #' . ($ord['user_id'] ?: 'Guest');
+                                    $oStatus = strtolower($ord['order_status'] ?? 'pending');
+                                ?>
+                                <tr>
+                                    <td><strong>#<?= htmlspecialchars($ord['order_number'] ?: ('ORD-' . $ord['id'])) ?></strong></td>
+                                    <td><strong><?= htmlspecialchars($customerName) ?></strong><br><small style="color:#64746b"><?= htmlspecialchars($ord['user_email'] ?? 'N/A') ?></small></td>
+                                    <td><strong>₹<?= number_format((float)$ord['total_amount'], 2) ?></strong></td>
+                                    <td>
+                                        <?php if ($oStatus === 'pending'): ?>
+                                            <span class="badge-status badge-pending">Pending</span>
+                                        <?php elseif ($oStatus === 'processing'): ?>
+                                            <span class="badge-status" style="background:#e0f2fe; color:#0369a1;">Processing</span>
+                                        <?php elseif ($oStatus === 'shipped'): ?>
+                                            <span class="badge-status" style="background:#f3e8ff; color:#6b21a8;">Shipped</span>
+                                        <?php elseif ($oStatus === 'delivered'): ?>
+                                            <span class="badge-status badge-quoted">Delivered</span>
+                                        <?php else: ?>
+                                            <span class="badge-status" style="background:#fee2e2; color:#991b1b;">Cancelled</span>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td>
+                                        <?php if ($oStatus === 'pending'): ?>
+                                        <form method="POST" action="" style="display:inline;">
+                                            <input type="hidden" name="order_id" value="<?= $ord['id'] ?>">
+                                            <input type="hidden" name="order_action" value="accept_order">
+                                            <button type="submit" class="btn-action" style="background: #10b981; color: #ffffff; border: none; font-weight: 600; padding: 4px 10px; cursor: pointer; border-radius: 4px;">✓ Accept Order</button>
+                                        </form>
+                                        <?php else: ?>
+                                            <a href="#" onclick="switchView('orders', document.getElementById('nav-orders')); return false;" class="btn-action">Manage</a>
+                                        <?php endif; ?>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                    <?php endif; ?>
                 </div>
 
                 <!-- Recent Enquiries -->
@@ -634,7 +1040,7 @@ try {
                     <?php if (empty($recentEnquiries)): ?>
                         <p style="color: #63756a; font-size: 14px;">No enquiries received yet.</p>
                     <?php else: ?>
-                    <div style="overflow-x: auto;">
+                    <div style="overflow-x: auto; -webkit-overflow-scrolling: touch;">
                         <table class="admin-table">
                             <thead>
                                 <tr>
@@ -666,7 +1072,7 @@ try {
                                     </td>
                                     <td>
                                         <?php $waPhone = preg_replace('/[^0-9]/', '', $enq['phone']); ?>
-                                        <a href="https://wa.me/<?= $waPhone ?>?text=<?= urlencode('Hello ' . $enq['full_name'] . ', regarding your enquiry for ' . ($enq['product_name'] ?: 'Biswas Enterprise products') . '...') ?>" target="_blank" class="btn-action btn-whatsapp">💬 Reply</a>
+                                        <a href="https://wa.me/<?= $waPhone ?>?text=<?= urlencode('Hello ' . $enq['full_name'] . ', regarding your enquiry for ' . ($enq['product_name'] ?: 'Biswas Enterprise products') . '...') ?>" target="_blank" class="btn-action btn-whatsapp">Reply</a>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>
@@ -675,42 +1081,143 @@ try {
                     </div>
                     <?php endif; ?>
                 </div>
+            </div>
 
-                <!-- Recent Products Overview -->
+            <!-- ===================== ORDERS MANAGEMENT SECTION ===================== -->
+            <div id="section-orders" style="display:none;">
                 <div class="data-card">
-                    <div class="data-card-header">
+                    <div class="data-card-header" style="flex-wrap: wrap; gap: 12px;">
                         <div>
-                            <h2 class="data-card-title">Live Products Catalog</h2>
-                            <div style="font-size: 12px; color: #728277; margin-top: 2px;">Recently created products in store</div>
+                            <h2 class="data-card-title">Customer Orders Management</h2>
+                            <div style="font-size: 12px; color: #728277; margin-top: 2px;">Manage store transactions, shipping statuses, &amp; payment tracking</div>
                         </div>
-                        <a href="#" onclick="switchView('products', document.getElementById('nav-products')); return false;" style="font-size: 13px; font-weight: 600; color: #1b3b2b;">View All Products &rarr;</a>
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <span style="font-size: 12px; font-weight: 700; background: #e8f0eb; color: #1b3b2b; padding: 6px 14px; border-radius: 50px;">
+                                <?= count($allOrders) ?> Total Orders
+                            </span>
+                            <?php if ($pendingOrdersCount > 0): ?>
+                            <span style="font-size: 12px; font-weight: 700; background: #fef3c7; color: #92400e; padding: 6px 14px; border-radius: 50px;">
+                                <?= $pendingOrdersCount ?> Pending Processing
+                            </span>
+                            <?php endif; ?>
+                        </div>
                     </div>
-                    <div style="overflow-x: auto;">
-                        <table class="admin-table">
+
+                    <?php if (empty($allOrders)): ?>
+                        <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 50px 20px; background: #fafcfb; border: 1px dashed #d1ded6; border-radius: 12px; margin-top: 10px;">
+                            <div style="width: 56px; height: 56px; background: #e8f0eb; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 14px;">
+                                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#1b3b2b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                                    <path d="M16 10a4 4 0 0 1-8 0"></path>
+                                </svg>
+                            </div>
+                            <h3 style="font-size: 17px; font-weight: 700; color: #1b3b2b; margin: 0 0 6px 0;">No Orders Placed Yet</h3>
+                            <p style="font-size: 13.5px; color: #647569; max-width: 420px; margin: 0; line-height: 1.5;">When customers place orders in the online shop, they will automatically appear here with full item breakdowns and status controls.</p>
+                        </div>
+                    <?php else: ?>
+                    
+                    <!-- Search & Filter Controls -->
+                    <div style="display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap;">
+                        <input type="text" id="orderSearchInput" onkeyup="filterOrdersTable()" placeholder="Search Order #, Customer, or Email..." class="form-input" style="max-width: 320px; font-size: 13px; padding: 8px 12px;">
+                        <select id="orderStatusFilter" onchange="filterOrdersTable()" class="form-input" style="max-width: 200px; font-size: 13px; padding: 8px 12px;">
+                            <option value="all">All Order Statuses</option>
+                            <option value="pending">Pending</option>
+                            <option value="processing">Processing</option>
+                            <option value="shipped">Shipped</option>
+                            <option value="delivered">Delivered</option>
+                            <option value="cancelled">Cancelled</option>
+                        </select>
+                    </div>
+
+                    <div style="overflow-x: auto; -webkit-overflow-scrolling: touch;">
+                        <table class="admin-table" id="adminOrdersTable">
                             <thead>
                                 <tr>
-                                    <th>Image</th>
-                                    <th>Product Name</th>
-                                    <th>Respective Category</th>
-                                    <th>Price</th>
-                                    <th>Stock</th>
-                                    <th>Badge</th>
+                                    <th>Order #</th>
+                                    <th>Customer</th>
+                                    <th>Total Items</th>
+                                    <th>Total Amount</th>
+                                    <th>Payment</th>
+                                    <th>Order Status</th>
+                                    <th>Date</th>
+                                    <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
-                            <?php foreach (array_slice($productsList, 0, 5) as $p): ?>
-                                <tr>
-                                    <td><img src="<?= htmlspecialchars($p['image']) ?>" alt="<?= htmlspecialchars($p['name']) ?>" class="product-thumb-sm"></td>
-                                    <td><strong><?= htmlspecialchars($p['name']) ?></strong></td>
-                                    <td><span style="background:#e8f0eb;color:#1b3b2b;padding:3px 8px;border-radius:6px;font-size:12px;font-weight:600;"><?= htmlspecialchars($p['category']) ?></span></td>
-                                    <td><strong>&#8377;<?= number_format($p['price']) ?></strong> <small style="text-decoration:line-through;color:#999">&#8377;<?= number_format($p['regular_price']) ?></small></td>
-                                    <td><?= (int)$p['stock_quantity'] ?> units</td>
-                                    <td><?= !empty($p['badge']) ? '<span class="badge-status badge-pending">'.htmlspecialchars($p['badge']).'</span>' : '-' ?></td>
+                            <?php foreach ($allOrders as $ord): ?>
+                                <?php 
+                                    $oItems = $orderItemsMap[$ord['id']] ?? [];
+                                    $itemCount = count($oItems);
+                                    $customerName = trim(($ord['first_name'] ?? '') . ' ' . ($ord['last_name'] ?? ''));
+                                    if (empty($customerName)) $customerName = 'Customer #' . ($ord['user_id'] ?: 'Guest');
+                                    $customerEmail = $ord['user_email'] ?? 'N/A';
+                                    $customerPhone = $ord['user_phone'] ?? 'N/A';
+                                    $oStatus = strtolower($ord['order_status'] ?? 'pending');
+                                    $pStatus = strtolower($ord['payment_status'] ?? 'pending');
+                                ?>
+                                <tr data-status="<?= htmlspecialchars($oStatus) ?>">
+                                    <td><strong>#<?= htmlspecialchars($ord['order_number'] ?: ('ORD-' . $ord['id'])) ?></strong></td>
+                                    <td>
+                                        <strong><?= htmlspecialchars($customerName) ?></strong><br>
+                                        <small style="color: #64746b;"><?= htmlspecialchars($customerEmail) ?></small>
+                                    </td>
+                                    <td>
+                                        <span class="badge-status badge-quoted"><?= $itemCount ?> <?= $itemCount === 1 ? 'Item' : 'Items' ?></span>
+                                    </td>
+                                    <td>
+                                        <strong style="color: #1b3b2b;">₹<?= number_format((float)$ord['total_amount'], 2) ?></strong><br>
+                                        <small style="color: #728277; text-transform: uppercase;"><?= htmlspecialchars($ord['payment_method'] ?? 'COD') ?></small>
+                                    </td>
+                                    <td>
+                                        <?php if ($pStatus === 'paid'): ?>
+                                            <span class="badge-status badge-quoted">Paid</span>
+                                        <?php elseif ($pStatus === 'failed' || $pStatus === 'refunded'): ?>
+                                            <span class="badge-status" style="background:#fee2e2; color:#991b1b;"><?= ucfirst($pStatus) ?></span>
+                                        <?php else: ?>
+                                            <span class="badge-status badge-pending">Pending</span>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td>
+                                        <?php if ($oStatus === 'pending'): ?>
+                                            <span class="badge-status badge-pending">Pending</span>
+                                        <?php elseif ($oStatus === 'processing'): ?>
+                                            <span class="badge-status" style="background:#e0f2fe; color:#0369a1;">Processing</span>
+                                        <?php elseif ($oStatus === 'shipped'): ?>
+                                            <span class="badge-status" style="background:#f3e8ff; color:#6b21a8;">Shipped</span>
+                                        <?php elseif ($oStatus === 'delivered'): ?>
+                                            <span class="badge-status badge-quoted">Delivered</span>
+                                        <?php else: ?>
+                                            <span class="badge-status" style="background:#fee2e2; color:#991b1b;">Cancelled</span>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td style="white-space: nowrap; font-size: 12px; color: #64746b;">
+                                        <?= date('M d, Y h:i A', strtotime($ord['created_at'])) ?>
+                                    </td>
+                                    <td>
+                                        <div style="display: flex; gap: 6px; flex-wrap: wrap; align-items: center;">
+                                            <?php if ($oStatus === 'pending'): ?>
+                                            <form method="POST" action="" style="display:inline;">
+                                                <input type="hidden" name="order_id" value="<?= $ord['id'] ?>">
+                                                <input type="hidden" name="order_action" value="accept_order">
+                                                <button type="submit" class="btn-action" style="background: #10b981; color: #ffffff; border: none; font-weight: 600; padding: 4px 10px; cursor: pointer; border-radius: 4px;">✓ Accept Order</button>
+                                            </form>
+                                            <?php endif; ?>
+
+                                            <button type="button" class="btn-action" onclick="openOrderStatusModal(<?= $ord['id'] ?>, '<?= htmlspecialchars($oStatus) ?>', '<?= htmlspecialchars($pStatus) ?>')">Update Status</button>
+                                            <form method="POST" action="" style="display:inline;" onsubmit="return confirmAction(event, 'Delete Order #<?= $ord['id'] ?>?', 'Are you sure you want to permanently delete this customer order record?');">
+                                                <input type="hidden" name="order_id" value="<?= $ord['id'] ?>">
+                                                <input type="hidden" name="order_action" value="delete_order">
+                                                <button type="submit" class="btn-action btn-delete">Delete</button>
+                                            </form>
+                                        </div>
+                                    </td>
                                 </tr>
                             <?php endforeach; ?>
                             </tbody>
                         </table>
                     </div>
+                    <?php endif; ?>
                 </div>
             </div>
 
@@ -723,13 +1230,13 @@ try {
                             <div style="font-size: 12px; color: #728277; margin-top: 2px;">Manage store products, prices, stock and categories in database</div>
                         </div>
                         <a href="#" onclick="switchView('add-product', document.getElementById('nav-add-product')); return false;" class="btn-primary" style="padding: 10px 18px; text-decoration: none; font-size: 13px;">
-                            ➕ Add New Product
+                            Add New Product
                         </a>
                     </div>
                     <?php if (empty($productsList)): ?>
                         <p style="color:#63756a;font-size:14px;">No products in catalog yet.</p>
                     <?php else: ?>
-                    <div style="overflow-x:auto;">
+                    <div style="overflow-x:auto; -webkit-overflow-scrolling: touch;">
                         <table class="admin-table">
                             <thead>
                                 <tr>
@@ -754,10 +1261,10 @@ try {
                                     <td><span class="badge-status badge-quoted"><?= (int)$p['stock_quantity'] ?> In Stock</span></td>
                                     <td><?= !empty($p['badge']) ? '<span class="badge-status badge-pending">'.htmlspecialchars($p['badge']).'</span>' : '-' ?></td>
                                     <td>
-                                        <form method="POST" action="" onsubmit="return confirm('Are you sure you want to delete this product?');">
+                                        <form method="POST" action="" onsubmit="return confirmAction(event, 'Delete Product?', 'Are you sure you want to delete \'<?= htmlspecialchars($p['name'], ENT_QUOTES) ?>\' from catalog?');">
                                             <input type="hidden" name="action_type" value="delete_product">
                                             <input type="hidden" name="product_id" value="<?= $p['id'] ?>">
-                                            <button type="submit" class="btn-action btn-delete">🗑 Delete</button>
+                                            <button type="submit" class="btn-action btn-delete">Delete</button>
                                         </form>
                                     </td>
                                 </tr>
@@ -774,7 +1281,7 @@ try {
                 <div class="data-card">
                     <div class="data-card-header">
                         <div>
-                            <h2 class="data-card-title">➕ Add New Product to Respective Category</h2>
+                            <h2 class="data-card-title">Add New Product to Respective Category</h2>
                             <div style="font-size: 12px; color: #728277; margin-top: 2px;">Image will be uploaded directly to Cloudinary CDN via API (.env credentials)</div>
                         </div>
                     </div>
@@ -833,7 +1340,7 @@ try {
                         <!-- Cloudinary Image Upload Box -->
                         <div class="cloudinary-box">
                             <h3 style="font-size: 15px; color: #1b3b2b; margin: 0 0 10px 0; font-family: 'Merriweather', serif;">
-                                ☁️ Cloudinary Image Upload
+                                Cloudinary Image Upload
                             </h3>
                             <p style="font-size: 12.5px; color: #55665c; margin: 0 0 14px 0;">
                                 Select an image from your computer to upload directly to Cloudinary CDN, or enter a direct image URL.
@@ -861,7 +1368,7 @@ try {
                         </div>
 
                         <button type="submit" id="save-product-btn" class="btn-primary" style="background:#1b3b2b; color:#ffffff; padding: 14px 30px; font-size: 14px; font-weight: 600; border-radius: 8px; border:none; cursor:pointer; display:inline-flex; align-items:center;">
-                            🚀 Upload Image to Cloudinary &amp; Save Product
+                            Upload Image to Cloudinary &amp; Save Product
                         </button>
                     </form>
                 </div>
@@ -869,7 +1376,7 @@ try {
 
             <!-- ===================== CATEGORIES MANAGEMENT SECTION ===================== -->
             <div id="section-categories" style="display:none;">
-                <div style="display:grid; grid-template-columns: 1fr 340px; gap: 24px;">
+                <div class="category-page-grid">
                     
                     <!-- Left: Categories Table -->
                     <div class="data-card" style="margin-bottom:0;">
@@ -879,7 +1386,7 @@ try {
                                 <div style="font-size: 12px; color: #728277; margin-top: 2px;">Categories fetched directly from MySQL categories table</div>
                             </div>
                         </div>
-                        <div style="overflow-x:auto;">
+                        <div style="overflow-x:auto; -webkit-overflow-scrolling: touch;">
                             <table class="admin-table">
                                 <thead>
                                     <tr>
@@ -908,10 +1415,10 @@ try {
                                         <td><small style="color:#647569"><?= htmlspecialchars(substr($cat['description'] ?? '', 0, 60)) ?></small></td>
                                         <td><span class="badge-status badge-quoted"><?= (int)($cat['product_count'] ?? 0) ?> Products</span></td>
                                         <td>
-                                            <form method="POST" action="" onsubmit="return confirm('Are you sure you want to delete this category?');">
+                                            <form method="POST" action="" onsubmit="return confirmAction(event, 'Delete Category?', 'Are you sure you want to delete \'<?= htmlspecialchars($cat['name'], ENT_QUOTES) ?>\' category?');">
                                                 <input type="hidden" name="action_type" value="delete_category">
                                                 <input type="hidden" name="category_id" value="<?= $cat['id'] ?>">
-                                                <button type="submit" class="btn-action btn-delete">🗑 Delete</button>
+                                                <button type="submit" class="btn-action btn-delete">Delete</button>
                                             </form>
                                         </td>
                                     </tr>
@@ -923,7 +1430,7 @@ try {
 
                     <!-- Right: Add Category Form -->
                     <div class="data-card" style="margin-bottom:0; align-self: start;">
-                        <h2 class="data-card-title" style="margin-bottom:16px;">🏷️ Add Category</h2>
+                        <h2 class="data-card-title" style="margin-bottom:16px;">Add Category</h2>
                         <form id="add-category-form" method="POST" action="" enctype="multipart/form-data">
                             <input type="hidden" name="action_type" value="add_category">
 
@@ -953,7 +1460,7 @@ try {
                             </div>
 
                             <button type="submit" id="save-category-btn" class="btn-primary" style="background:#1b3b2b; color:#ffffff; width:100%; padding: 12px; font-size: 13.5px; border-radius: 8px; border:none; cursor:pointer; display:inline-flex; align-items:center; justify-content:center;">
-                                ➕ Create Category
+                                Create Category
                             </button>
                         </form>
                     </div>
@@ -976,7 +1483,7 @@ try {
                     <?php if (empty($allEnquiries)): ?>
                         <p style="color: #63756a; font-size: 14px;">No wholesale enquiries submitted yet.</p>
                     <?php else: ?>
-                    <div style="overflow-x: auto;">
+                    <div style="overflow-x: auto; -webkit-overflow-scrolling: touch;">
                         <table class="admin-table">
                             <thead>
                                 <tr>
@@ -1013,20 +1520,20 @@ try {
                                     <td>
                                         <?php $waPhone = preg_replace('/[^0-9]/', '', $enq['phone']); ?>
                                         <div style="display: flex; gap: 4px; flex-wrap: wrap;">
-                                            <a href="https://wa.me/<?= $waPhone ?>?text=<?= urlencode('Hello ' . $enq['full_name'] . ', regarding your enquiry for ' . ($enq['product_name'] ?: 'Biswas Enterprise products') . '...') ?>" target="_blank" class="btn-action btn-whatsapp">💬 Reply</a>
+                                            <a href="https://wa.me/<?= $waPhone ?>?text=<?= urlencode('Hello ' . $enq['full_name'] . ', regarding your enquiry for ' . ($enq['product_name'] ?: 'Biswas Enterprise products') . '...') ?>" target="_blank" class="btn-action btn-whatsapp">Reply</a>
                                             
                                             <?php if ($enq['status'] === 'pending'): ?>
                                             <form method="POST" action="" style="display:inline;">
                                                 <input type="hidden" name="enquiry_id" value="<?= $enq['id'] ?>">
                                                 <input type="hidden" name="enquiry_action" value="mark_contacted">
-                                                <button type="submit" class="btn-action">✓ Contacted</button>
+                                                <button type="submit" class="btn-action">Contacted</button>
                                             </form>
                                             <?php endif; ?>
 
-                                            <form method="POST" action="" style="display:inline;" onsubmit="return confirm('Delete this enquiry record?');">
+                                            <form method="POST" action="" style="display:inline;" onsubmit="return confirmAction(event, 'Delete Enquiry Record?', 'Are you sure you want to delete this wholesale enquiry record?');">
                                                 <input type="hidden" name="enquiry_id" value="<?= $enq['id'] ?>">
                                                 <input type="hidden" name="enquiry_action" value="delete">
-                                                <button type="submit" class="btn-action btn-delete">🗑 Delete</button>
+                                                <button type="submit" class="btn-action btn-delete">Delete</button>
                                             </form>
                                         </div>
                                     </td>
@@ -1054,7 +1561,7 @@ try {
                     <?php if (empty($allUsers)): ?>
                         <p style="color:#63756a;font-size:14px;">No users registered yet.</p>
                     <?php else: ?>
-                    <div style="overflow-x:auto;">
+                    <div style="overflow-x:auto; -webkit-overflow-scrolling: touch;">
                         <table class="admin-table">
                             <thead>
                                 <tr>
@@ -1087,10 +1594,96 @@ try {
         </main>
     </div>
 
+    <!-- Order Status Update Modal -->
+    <div id="orderStatusModal" class="admin-sidebar-overlay" style="display: none; align-items: center; justify-content: center; z-index: 10000;">
+        <div style="background: #ffffff; width: 90%; max-width: 440px; border-radius: 14px; padding: 26px; box-shadow: 0 20px 40px rgba(0,0,0,0.3); position: relative;">
+            <h3 style="margin-top:0; font-size: 18px; font-weight: 700; color: #1b3b2b; margin-bottom: 16px;">Update Order Status</h3>
+            <form method="POST" action="">
+                <input type="hidden" name="order_action" value="update_status">
+                <input type="hidden" name="order_id" id="modal_order_id" value="0">
+                
+                <div class="form-group" style="margin-bottom: 16px;">
+                    <label for="modal_order_status" style="font-size: 12.5px; font-weight: 600; color: #4a5c52; margin-bottom: 6px; display: block;">Order Shipping & Processing Status</label>
+                    <select name="order_status" id="modal_order_status" class="form-input" style="width: 100%; padding: 10px 12px; border-radius: 8px;">
+                        <option value="pending">Pending</option>
+                        <option value="processing">Processing</option>
+                        <option value="shipped">Shipped</option>
+                        <option value="delivered">Delivered</option>
+                        <option value="cancelled">Cancelled</option>
+                    </select>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 20px;">
+                    <label for="modal_payment_status" style="font-size: 12.5px; font-weight: 600; color: #4a5c52; margin-bottom: 6px; display: block;">Payment Status</label>
+                    <select name="payment_status" id="modal_payment_status" class="form-input" style="width: 100%; padding: 10px 12px; border-radius: 8px;">
+                        <option value="pending">Pending</option>
+                        <option value="paid">Paid</option>
+                        <option value="failed">Failed</option>
+                        <option value="refunded">Refunded</option>
+                    </select>
+                </div>
+
+                <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 24px;">
+                    <button type="button" onclick="closeOrderStatusModal()" class="btn-action" style="padding: 10px 18px;">Cancel</button>
+                    <button type="submit" class="btn-primary" style="padding: 10px 22px; font-size: 13px;">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
+    function toggleAdminSidebar() {
+        const sidebar = document.querySelector('.admin-sidebar');
+        const overlay = document.getElementById('admin-sidebar-overlay');
+        if (sidebar && overlay) {
+            sidebar.classList.toggle('mobile-open');
+            overlay.classList.toggle('mobile-open');
+        }
+    }
+
+    function closeAdminSidebar() {
+        const sidebar = document.querySelector('.admin-sidebar');
+        const overlay = document.getElementById('admin-sidebar-overlay');
+        if (sidebar && overlay) {
+            sidebar.classList.remove('mobile-open');
+            overlay.classList.remove('mobile-open');
+        }
+    }
+
+    function openOrderStatusModal(orderId, orderStatus, payStatus) {
+        const modal = document.getElementById('orderStatusModal');
+        document.getElementById('modal_order_id').value = orderId;
+        document.getElementById('modal_order_status').value = orderStatus || 'pending';
+        document.getElementById('modal_payment_status').value = payStatus || 'pending';
+        if (modal) modal.style.display = 'flex';
+    }
+
+    function closeOrderStatusModal() {
+        const modal = document.getElementById('orderStatusModal');
+        if (modal) modal.style.display = 'none';
+    }
+
+    function filterOrdersTable() {
+        const query = (document.getElementById('orderSearchInput')?.value || '').toLowerCase();
+        const status = document.getElementById('orderStatusFilter')?.value || 'all';
+        const rows = document.querySelectorAll('#adminOrdersTable tbody tr');
+
+        rows.forEach(row => {
+            const text = row.innerText.toLowerCase();
+            const rowStatus = (row.getAttribute('data-status') || '').toLowerCase();
+            const matchesQuery = !query || text.includes(query);
+            const matchesStatus = status === 'all' || rowStatus === status;
+
+            row.style.display = (matchesQuery && matchesStatus) ? '' : 'none';
+        });
+    }
+
     function switchView(view, clickedEl) {
+        // Close mobile sidebar drawer if open
+        closeAdminSidebar();
+
         // Hide all sections
-        const sections = ['overview', 'products', 'add-product', 'categories', 'enquiries', 'users'];
+        const sections = ['overview', 'orders', 'products', 'add-product', 'categories', 'enquiries', 'users'];
         sections.forEach(s => {
             const el = document.getElementById('section-' + s);
             if (el) el.style.display = 'none';
@@ -1116,7 +1709,7 @@ try {
     document.getElementById('add-product-form')?.addEventListener('submit', function() {
         const btn = document.getElementById('save-product-btn');
         if (btn) {
-            btn.innerHTML = '<span class="btn-spinner"></span> ⏳ Uploading to Cloudinary CDN &amp; Saving... Please wait';
+            btn.innerHTML = '<span class="btn-spinner"></span> Uploading to Cloudinary CDN &amp; Saving... Please wait';
             btn.style.opacity = '0.8';
             btn.style.pointerEvents = 'none';
         }
@@ -1126,11 +1719,45 @@ try {
     document.getElementById('add-category-form')?.addEventListener('submit', function() {
         const btn = document.getElementById('save-category-btn');
         if (btn) {
-            btn.innerHTML = '<span class="btn-spinner"></span> ⏳ Uploading Image &amp; Creating...';
+            btn.innerHTML = '<span class="btn-spinner"></span> Uploading Image &amp; Creating...';
             btn.style.opacity = '0.8';
             btn.style.pointerEvents = 'none';
         }
     });
+
+    // SweetAlert2 Confirmation Dialog Helper
+    function confirmAction(event, titleText, bodyText = "This action cannot be undone!", confirmBtnText = "Yes, Delete It!") {
+        if (event) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+        const form = event.target.closest('form');
+        if (!form) return false;
+
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                title: titleText,
+                text: bodyText,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc2626',
+                cancelButtonColor: '#64748b',
+                confirmButtonText: confirmBtnText,
+                cancelButtonText: 'Cancel',
+                reverseButtons: true,
+                focusCancel: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            });
+        } else {
+            if (confirm(titleText + '\n' + bodyText)) {
+                form.submit();
+            }
+        }
+        return false;
+    }
 
     // Toastify Notification Pop-up
     <?php if (!empty($actionMessage)): ?>
@@ -1160,7 +1787,7 @@ try {
     // On page load, check URL hash
     (function() {
         const hash = window.location.hash.replace('#', '');
-        if (['products', 'add-product', 'categories', 'enquiries', 'users'].includes(hash)) {
+        if (['orders', 'products', 'add-product', 'categories', 'enquiries', 'users'].includes(hash)) {
             switchView(hash, null);
         }
     })();

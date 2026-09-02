@@ -391,21 +391,293 @@
 }
 
 /* ============================================================
-   RESPONSIVE
+   CONTACT PAGE — MOBILE RESPONSIVE STYLES
+   Mirrors the exact breakpoint rhythm of home.css, shop.css & about.css
    ============================================================ */
-@media (max-width: 900px) {
+
+/* ---- 992px: Tablet landscape ---- */
+@media (max-width: 992px) {
+    .contact-hero {
+        padding: 3.75rem 0 3rem;
+    }
+    .contact-hero h1 {
+        font-size: clamp(1.85rem, 4.5vw, 2.5rem);
+    }
+    .contact-hero-lead {
+        font-size: 1rem;
+        max-width: 520px;
+    }
+    .contact-main-section {
+        padding: 4rem 0;
+    }
     .contact-grid {
         grid-template-columns: 1fr;
+        gap: 2.5rem;
+    }
+    .contact-form-panel {
+        padding: 2.25rem 2rem;
+    }
+}
+
+/* ---- 768px: Tablet portrait ---- */
+@media (max-width: 768px) {
+    .contact-hero {
+        padding: 3rem 0 2.25rem;
+    }
+    .contact-hero h1 {
+        font-size: clamp(1.6rem, 5vw, 2.1rem);
+    }
+    .contact-hero-lead {
+        font-size: 0.95rem;
+        margin-bottom: 1.5rem;
+    }
+    .contact-hero-chips {
+        gap: 0.5rem;
+    }
+    .contact-chip {
+        padding: 0.35rem 0.85rem;
+        font-size: 0.78rem;
+    }
+
+    .contact-main-section {
+        padding: 3rem 0;
+    }
+    .contact-info-title {
+        font-size: 1.45rem;
+    }
+    .contact-detail-card {
+        padding: 1.2rem 1.35rem;
     }
     .contact-form-panel {
         padding: 2rem 1.5rem;
     }
+    .contact-form-heading {
+        font-size: 1.35rem;
+    }
+
+    .contact-map-section {
+        padding: 0 0 3.5rem;
+    }
+    .contact-map-wrapper {
+        height: 350px;
+    }
 }
-@media (max-width: 600px) {
-    .form-row { grid-template-columns: 1fr; }
-    .contact-hero { padding: 3.5rem 0 3rem; }
-    .contact-hero h1 { font-size: 1.75rem; }
-    .contact-main-section { padding: 3rem 0; }
-    .contact-map-section { padding-bottom: 3rem; }
-    .contact-map-wrapper { height: 300px; }
+
+/* ---- 640px: Large phones ---- */
+@media (max-width: 640px) {
+    .contact-hero {
+        padding: 2.25rem 0 1.75rem;
+    }
+    .contact-hero-label {
+        font-size: 0.68rem;
+        letter-spacing: 0.14em;
+        margin-bottom: 0.65rem;
+    }
+    .contact-hero h1 {
+        font-size: clamp(1.4rem, 5.5vw, 1.8rem);
+        margin-bottom: 0.75rem;
+    }
+    .contact-hero-lead {
+        font-size: 0.9rem;
+        line-height: 1.6;
+        margin-bottom: 1.25rem;
+    }
+    .contact-hero-chips {
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+        gap: 0.5rem;
+    }
+    .contact-chip {
+        width: 100%;
+        max-width: 320px;
+        justify-content: center;
+        padding: 0.45rem 0.875rem;
+    }
+
+    .contact-main-section {
+        padding: 2.5rem 0;
+    }
+    .contact-info-panel {
+        gap: 1.15rem;
+    }
+    .contact-info-title {
+        font-size: 1.3rem;
+    }
+    .contact-info-subtitle {
+        font-size: 0.88rem;
+    }
+
+    /* Stack form row elements into single column */
+    .form-row {
+        grid-template-columns: 1fr;
+        gap: 0;
+        margin-bottom: 0;
+    }
+    .contact-form-panel {
+        padding: 1.6rem 1.25rem;
+    }
+    .contact-form-heading {
+        font-size: 1.25rem;
+    }
+    .contact-form-subhead {
+        font-size: 0.85rem;
+        margin-bottom: 1.35rem;
+    }
+
+    .form-group label {
+        font-size: 0.75rem;
+    }
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        padding: 0.65rem 0.875rem;
+        font-size: 0.875rem;
+    }
+
+    .contact-map-wrapper {
+        height: 300px;
+    }
 }
+
+/* ---- 575px: Mobile phones ---- */
+@media (max-width: 575px) {
+    .contact-hero {
+        padding: 1.75rem 0 1.25rem;
+    }
+    .contact-hero h1 {
+        font-size: clamp(1.25rem, 5.8vw, 1.55rem);
+    }
+    .contact-hero-lead {
+        font-size: 0.875rem;
+    }
+
+    .contact-main-section {
+        padding: 2rem 0;
+    }
+    .contact-grid {
+        gap: 1.75rem;
+    }
+
+    .contact-detail-card {
+        padding: 1rem 1.15rem;
+        gap: 0.875rem;
+    }
+    .contact-detail-icon {
+        width: 38px;
+        height: 38px;
+    }
+    .contact-detail-icon svg {
+        width: 18px;
+        height: 18px;
+    }
+    .contact-detail-text h4 {
+        font-size: 0.7rem;
+    }
+    .contact-detail-text p,
+    .contact-detail-text a {
+        font-size: 0.875rem;
+    }
+
+    .gst-badge-block {
+        padding: 0.85rem 1.15rem;
+        gap: 0.65rem;
+    }
+    .gst-badge-block span {
+        font-size: 0.8rem;
+    }
+    .gst-badge-block small {
+        font-size: 0.72rem;
+    }
+
+    .whatsapp-cta {
+        padding: 0.8rem 1.15rem;
+        font-size: 0.85rem;
+        justify-content: center;
+    }
+
+    .form-submit-btn {
+        padding: 0.8rem 1.25rem;
+        font-size: 0.85rem;
+    }
+
+    .contact-map-section {
+        padding: 0 0 2.5rem;
+    }
+    .contact-map-header h2 {
+        font-size: 1.45rem;
+    }
+    .contact-map-wrapper {
+        height: 270px;
+    }
+}
+
+/* ---- 475px: Small phones ---- */
+@media (max-width: 475px) {
+    .contact-hero {
+        padding: 1.5rem 0 1rem;
+    }
+    .contact-hero h1 {
+        font-size: clamp(1.15rem, 6vw, 1.4rem);
+    }
+    .contact-hero-lead {
+        font-size: 0.82rem;
+        line-height: 1.5;
+    }
+    .contact-chip {
+        font-size: 0.75rem;
+        padding: 0.4rem 0.75rem;
+    }
+
+    .contact-form-panel {
+        padding: 1.25rem 1rem;
+        border-radius: var(--radius-md);
+    }
+    .contact-form-heading {
+        font-size: 1.15rem;
+    }
+    .contact-form-subhead {
+        font-size: 0.8rem;
+        margin-bottom: 1rem;
+    }
+    .form-group {
+        margin-bottom: 0.85rem;
+    }
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        padding: 0.6rem 0.75rem;
+        font-size: 0.82rem;
+    }
+    .form-group textarea {
+        min-height: 90px;
+    }
+
+    .contact-map-wrapper {
+        height: 240px;
+        border-radius: var(--radius-md);
+    }
+}
+
+/* ---- 375px: iPhone SE & smallest screens ---- */
+@media (max-width: 375px) {
+    .contact-hero h1 {
+        font-size: 1.15rem !important;
+    }
+    .contact-info-title,
+    .contact-form-heading,
+    .contact-map-header h2 {
+        font-size: 1.1rem !important;
+    }
+    .contact-detail-text p,
+    .contact-detail-text a {
+        font-size: 0.8125rem !important;
+    }
+    .whatsapp-cta {
+        font-size: 0.8rem !important;
+    }
+    .form-submit-btn {
+        font-size: 0.8rem !important;
+    }
+}
+

@@ -147,6 +147,42 @@ function initDatabaseTables(): void {
             `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
 
+        // Create orders table
+        $pdo->exec("CREATE TABLE IF NOT EXISTS `orders` (
+            `id` BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+            `order_number` VARCHAR(50) NOT NULL UNIQUE,
+            `user_id` BIGINT UNSIGNED NULL,
+            `subtotal` DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+            `discount` DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+            `coupon_discount` DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+            `shipping_charge` DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+            `tax` DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+            `total_amount` DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+            `payment_method` VARCHAR(50) DEFAULT 'cod',
+            `payment_status` VARCHAR(30) DEFAULT 'pending',
+            `order_status` VARCHAR(30) DEFAULT 'pending',
+            `shipping_address_id` BIGINT UNSIGNED NULL,
+            `billing_address_id` BIGINT UNSIGNED NULL,
+            `notes` TEXT NULL,
+            `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
+
+        // Create order_items table
+        $pdo->exec("CREATE TABLE IF NOT EXISTS `order_items` (
+            `id` BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+            `order_id` BIGINT UNSIGNED NOT NULL,
+            `product_id` INT UNSIGNED NULL,
+            `product_name` VARCHAR(191) NOT NULL,
+            `sku` VARCHAR(100) NULL,
+            `quantity` INT NOT NULL DEFAULT 1,
+            `unit_price` DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+            `discount` DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+            `tax` DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+            `total` DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+            `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
+
         // Safely drop any legacy strict foreign key constraint on wishlist_items if present
         try {
             $pdo->exec("ALTER TABLE `wishlist_items` DROP FOREIGN KEY `fk_wishlist_item_product`");

@@ -226,11 +226,73 @@ $companyDetails = [
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,400;0,700;1,400&family=Open+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
 
-    <!-- Core Stylesheets -->
+    <!-- Core Stylesheets & Swiper 11 CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
     <link rel="stylesheet" href="<?= asset('css/main.css') ?>">
     <link rel="stylesheet" href="<?= asset('css/pages/home.css') ?>">
 
     <style>
+        /* Swiper Category & Featured Product Slider Styles */
+        .categories-slider-wrapper {
+            position: relative;
+            padding: 10px 20px 60px 20px;
+        }
+        .categoriesSwiper {
+            padding: 10px 6px 45px 6px !important;
+        }
+        .categoriesSwiper .swiper-slide {
+            height: auto;
+            display: flex;
+        }
+        .categoriesSwiper .category-card {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        .categoriesSwiper .category-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        .category-swiper-prev, .category-swiper-next {
+            width: 44px !important;
+            height: 44px !important;
+            background: #ffffff !important;
+            border: 1px solid #d2ded5 !important;
+            border-radius: 50% !important;
+            color: #1b3b2b !important;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.12) !important;
+            transition: all 0.25s ease !important;
+            top: 42% !important;
+            z-index: 10 !important;
+        }
+        .category-swiper-prev { left: -14px !important; }
+        .category-swiper-next { right: -14px !important; }
+        .category-swiper-prev:hover, .category-swiper-next:hover {
+            background: #1b3b2b !important;
+            color: #ffffff !important;
+            border-color: #1b3b2b !important;
+            transform: scale(1.08);
+        }
+        .category-swiper-prev::after, .category-swiper-next::after {
+            font-size: 16px !important;
+            font-weight: 700 !important;
+        }
+        .categoriesSwiper .swiper-pagination {
+            bottom: 5px !important;
+        }
+        .categoriesSwiper .swiper-pagination-bullet {
+            background: #b0c4b6;
+            opacity: 0.6;
+        }
+        .categoriesSwiper .swiper-pagination-bullet-active {
+            background: #1b3b2b !important;
+            width: 24px !important;
+            border-radius: 10px !important;
+            opacity: 1 !important;
+        }
+
         /* Modernized D2C Styling Overrides */
         .btn-modern-primary {
             background: linear-gradient(135deg, #1b3b2b 0%, #2a523c 100%) !important;
@@ -859,7 +921,7 @@ $companyDetails = [
 
                 <?php if (count($categories) > 4): ?>
                     <!-- Swiper Carousel Slider for > 4 Categories -->
-                    <div class="categories-slider-wrapper" style="position: relative; padding: 10px 5px 45px 5px;">
+                    <div class="categories-slider-wrapper" style="position: relative;">
                         <div class="swiper categoriesSwiper">
                             <div class="swiper-wrapper">
                                 <?php foreach ($categories as $cat): ?>
@@ -879,7 +941,7 @@ $companyDetails = [
                                     </div>
                                 <?php endforeach; ?>
                             </div>
-                            <div class="swiper-pagination" style="bottom: 0px;"></div>
+                            <div class="swiper-pagination"></div>
                         </div>
                         <div class="swiper-button-prev category-swiper-prev"></div>
                         <div class="swiper-button-next category-swiper-next"></div>

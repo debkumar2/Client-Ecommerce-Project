@@ -617,3 +617,337 @@
     max-width: 420px;
     margin: 0 auto 1.75rem;
 }
+
+/* ==========================================================================
+   SHOP PAGE — MOBILE RESPONSIVE STYLES
+   ========================================================================== */
+
+/* ---- 992px: Tablet / small laptops ---- */
+@media (max-width: 992px) {
+    .shop-hero {
+        padding: 2rem 0 1.5rem;
+    }
+    .shop-hero-title {
+        font-size: clamp(1.6rem, 4vw, 2.25rem);
+    }
+
+    /* Stack sidebar + product column */
+    .shop-layout {
+        flex-direction: column;
+        gap: 0;
+    }
+    .shop-products-column {
+        width: 100%;
+    }
+
+    /* Hide sort label, keep select */
+    .sort-label {
+        display: none;
+    }
+}
+
+/* ---- 768px: Tablet portrait ---- */
+@media (max-width: 768px) {
+    .shop-hero {
+        padding: 1.75rem 0 1.25rem;
+    }
+    .shop-hero-title {
+        font-size: clamp(1.45rem, 5vw, 2rem);
+    }
+    .shop-hero-description {
+        font-size: 0.9375rem;
+    }
+    .shop-page-section {
+        padding: 1.75rem 0 3.5rem;
+    }
+
+    /* 3-col grid on tablets */
+    .products-grid:not(.products-list) {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.25rem;
+    }
+}
+
+/* ---- 640px: Large phones ---- */
+@media (max-width: 640px) {
+    .shop-hero {
+        padding: 1.5rem 0 1rem;
+    }
+    .shop-hero-title {
+        font-size: clamp(1.3rem, 5.5vw, 1.75rem);
+        line-height: 1.25;
+    }
+    .shop-hero-eyebrow {
+        font-size: 0.72rem;
+    }
+    .shop-hero-description {
+        font-size: 0.875rem;
+        line-height: 1.55;
+    }
+
+    /* Breadcrumb: horizontal scroll */
+    .breadcrumb-list {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: 4px;
+        font-size: 0.8125rem;
+    }
+
+    /* Toolbar */
+    .shop-toolbar {
+        padding: 0.875rem 1rem;
+        gap: 0.875rem;
+    }
+    .results-count {
+        font-size: 0.78rem;
+    }
+    .sort-select {
+        font-size: 0.8125rem;
+        padding: 0.5rem 1.8rem 0.5rem 0.65rem;
+    }
+    /* Hide grid/list toggle on small phones */
+    .view-mode-toggle {
+        display: none;
+    }
+
+    /* 2-col product grid */
+    .products-grid:not(.products-list) {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.875rem;
+    }
+
+    /* Product card body */
+    .product-card-body {
+        padding: 0.875rem;
+    }
+    .product-title {
+        font-size: 0.875rem;
+    }
+    .product-category {
+        font-size: 0.68rem;
+    }
+    .price-current {
+        font-size: 1rem;
+    }
+    .price-original {
+        font-size: 0.78rem;
+    }
+    .btn-add-cart {
+        font-size: 0.78rem;
+        padding: 0.5rem 0.75rem;
+    }
+
+    /* Quick view */
+    .quick-view-title {
+        font-size: 1.35rem;
+    }
+    .quick-view-price {
+        font-size: 1.2rem;
+    }
+
+    /* Empty state */
+    .empty-state {
+        padding: 3rem 1.5rem;
+    }
+    .empty-state-icon {
+        width: 60px;
+        height: 60px;
+    }
+    .empty-state-icon svg {
+        width: 28px;
+        height: 28px;
+    }
+    .empty-state-title {
+        font-size: 1.25rem;
+    }
+}
+
+/* ---- 475px: Small phones ---- */
+@media (max-width: 475px) {
+    .shop-hero {
+        padding: 1.25rem 0 0.875rem;
+    }
+    .shop-hero-title {
+        font-size: clamp(1.2rem, 6vw, 1.5rem);
+    }
+    .shop-hero-description {
+        font-size: 0.8125rem;
+    }
+    .shop-page-section {
+        padding: 1.25rem 0 2.5rem;
+    }
+
+    /* Toolbar: compact */
+    .shop-toolbar {
+        padding: 0.75rem;
+        gap: 0.75rem;
+        border-radius: var(--radius-sm);
+    }
+    .btn-mobile-filter {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.78rem;
+    }
+    .results-count {
+        font-size: 0.72rem;
+    }
+    .toolbar-search-input {
+        font-size: 0.8125rem;
+        padding: 0.55rem 2.25rem 0.55rem 2.25rem;
+    }
+
+    /* 2-col with tighter gap */
+    .products-grid:not(.products-list) {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.625rem;
+    }
+    .product-card-body {
+        padding: 0.75rem;
+    }
+    .product-title {
+        font-size: 0.8125rem;
+    }
+    .product-category {
+        font-size: 0.625rem;
+        margin-bottom: 0.25rem;
+    }
+    .price-current {
+        font-size: 0.9375rem;
+    }
+    .price-original {
+        font-size: 0.72rem;
+    }
+    .product-rating {
+        margin-bottom: 0.5rem;
+    }
+    .rating-stars svg {
+        width: 11px;
+        height: 11px;
+    }
+    .rating-count {
+        font-size: 0.68rem;
+    }
+    .btn-add-cart {
+        font-size: 0.72rem;
+        padding: 0.45rem 0.5rem;
+        gap: 0.25rem;
+    }
+
+    /* Quick view modal */
+    .quick-view-modal {
+        max-height: 95vh;
+        border-radius: var(--radius-md);
+    }
+    .quick-view-grid {
+        padding: 1.25rem;
+        gap: 1.25rem;
+    }
+    .quick-view-title {
+        font-size: 1.15rem;
+    }
+    .quick-view-price {
+        font-size: 1.1rem;
+    }
+    .quick-view-actions {
+        flex-direction: column;
+    }
+    .quick-view-actions .btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    /* Specs card */
+    .product-details-specs-card {
+        padding: 1.25rem;
+    }
+    .specs-title {
+        font-size: 1.1rem;
+        margin-bottom: 1rem;
+    }
+    .spec-label-title {
+        min-width: 110px;
+        font-size: 0.8125rem;
+    }
+    .spec-value-text {
+        font-size: 0.875rem;
+    }
+    .btn-interested {
+        font-size: 0.875rem;
+        padding: 0.75rem 1.5rem;
+        width: 100%;
+    }
+
+    /* Enquiry modal */
+    .enquiry-form-body {
+        padding: 1rem 1.25rem 1.25rem;
+    }
+    .enquiry-form-banner h2 {
+        font-size: 0.95rem;
+    }
+}
+
+/* ---- 400px: Very small phones ---- */
+@media (max-width: 400px) {
+    /* Drop to single-column grid */
+    .products-grid:not(.products-list) {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    .shop-hero-title {
+        font-size: 1.2rem;
+    }
+    .shop-hero-description {
+        font-size: 0.78rem;
+    }
+    .toolbar-left {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+}
+
+/* ---- 375px: iPhone SE & smallest devices ---- */
+@media (max-width: 375px) {
+    .shop-hero-title {
+        font-size: 1.1rem !important;
+        line-height: 1.3;
+    }
+    .shop-hero-eyebrow {
+        font-size: 0.65rem !important;
+    }
+    .shop-hero-description {
+        font-size: 0.75rem !important;
+    }
+    .product-title {
+        font-size: 0.78rem !important;
+    }
+    .price-current {
+        font-size: 0.875rem !important;
+    }
+    .btn-add-cart {
+        font-size: 0.68rem !important;
+        padding: 0.4rem !important;
+    }
+    .quick-view-title {
+        font-size: 1rem !important;
+    }
+    .specs-title {
+        font-size: 1rem !important;
+    }
+    .spec-label-title {
+        min-width: 95px !important;
+        font-size: 0.75rem !important;
+    }
+    .spec-value-text {
+        font-size: 0.8125rem !important;
+    }
+    .empty-state {
+        padding: 2.5rem 1rem !important;
+    }
+    .empty-state-title {
+        font-size: 1.1rem !important;
+    }
+    .empty-state-desc {
+        font-size: 0.8125rem !important;
+    }
+}
+

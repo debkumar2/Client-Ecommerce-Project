@@ -187,13 +187,56 @@
         box-shadow: 0 10px 25px rgba(212, 175, 55, 0.35) !important;
     }
 
+    .enquiry-modal-eyebrow {
+        font-size: 11px;
+        font-weight: 800;
+        color: #d4af37;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        display: block;
+        margin-bottom: 6px;
+    }
+
+    .enquiry-modal-title {
+        font-family: 'Merriweather', serif;
+        font-size: 2.1rem;
+        color: #ffffff !important;
+        margin: 0 0 16px 0;
+        line-height: 1.25;
+        font-weight: 700;
+    }
+
+    .enquiry-modal-desc {
+        font-size: 14px;
+        color: #a4bea9 !important;
+        line-height: 1.65;
+        margin: 0 0 24px 0;
+    }
+
+    .enquiry-contact-list {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+        font-size: 13.5px;
+        color: #e0ece3 !important;
+    }
+
     @media (max-width: 768px) {
         .enquiry-modal-grid {
             grid-template-columns: 1fr !important;
-            gap: 24px !important;
+            gap: 20px !important;
         }
         .enquiry-modal-card {
-            padding: 28px 20px !important;
+            padding: 32px 24px !important;
+            max-height: 92vh !important;
+        }
+        .enquiry-modal-title {
+            font-size: 1.6rem !important;
+            margin-bottom: 12px !important;
+        }
+        .enquiry-modal-desc {
+            font-size: 13px !important;
+            margin-bottom: 16px !important;
         }
     }
 
@@ -217,6 +260,66 @@
             letter-spacing: 0.1em !important;
         }
     }
+
+    /* ---- 475px: Compact Mobile Form ---- */
+    @media (max-width: 475px) {
+        .enquiry-modal-overlay {
+            padding: 10px !important;
+        }
+        .enquiry-modal-card {
+            padding: 20px 14px 14px 14px !important;
+            border-radius: 18px !important;
+            max-height: 95vh !important;
+        }
+        .enquiry-modal-close {
+            top: 10px !important;
+            right: 10px !important;
+            width: 28px !important;
+            height: 28px !important;
+            font-size: 18px !important;
+        }
+        .enquiry-modal-grid {
+            gap: 12px !important;
+        }
+        .enquiry-modal-eyebrow {
+            font-size: 9px !important;
+            letter-spacing: 0.1em !important;
+            margin-bottom: 2px !important;
+        }
+        .enquiry-modal-title {
+            font-size: 1.2rem !important;
+            line-height: 1.25 !important;
+            margin-bottom: 6px !important;
+        }
+        .enquiry-modal-desc {
+            font-size: 11px !important;
+            line-height: 1.4 !important;
+            margin-bottom: 10px !important;
+        }
+        .enquiry-contact-list {
+            gap: 6px !important;
+            font-size: 11px !important;
+        }
+        .enquiry-contact-list span {
+            font-size: 11px !important;
+        }
+        .enquiry-form-input {
+            padding: 9px 12px !important;
+            margin-bottom: 8px !important;
+            font-size: 12px !important;
+            border-radius: 6px !important;
+        }
+        .enquiry-textarea {
+            min-height: 50px !important;
+            padding: 8px 12px !important;
+            margin-bottom: 10px !important;
+        }
+        .enquiry-submit-btn {
+            padding: 10px 14px !important;
+            font-size: 11px !important;
+            border-radius: 20px !important;
+        }
+    }
 </style>
 
 <!-- FLOATING TRIGGER BUTTON -->
@@ -235,26 +338,26 @@
         <div class="enquiry-modal-grid">
             <!-- Left Info Column -->
             <div style="color: #ffffff; background: transparent !important;">
-                <span style="font-size: 11px; font-weight: 800; color: #d4af37; letter-spacing: 0.14em; text-transform: uppercase; display: block; margin-bottom: 6px;">QUICK BULK ENQUIRY</span>
+                <span class="enquiry-modal-eyebrow">QUICK BULK ENQUIRY</span>
                 
-                <h2 style="font-family: 'Merriweather', serif; font-size: 2.1rem; color: #ffffff !important; margin: 0 0 16px 0; line-height: 1.25; font-weight: 700; background: transparent !important;">
+                <h2 class="enquiry-modal-title">
                     Request Wholesale Best Price
                 </h2>
                 
-                <p style="font-size: 14px; color: #a4bea9 !important; line-height: 1.65; margin: 0 0 28px 0; background: transparent !important;">
+                <p class="enquiry-modal-desc">
                     Looking for bulk quantities of Harad Powder, Arjuna Bark, or Commercial Solar LED Lights? Send us your requirement and our export team will send you the best quote within 2 hours.
                 </p>
 
-                <div style="display: flex; flex-direction: column; gap: 14px; font-size: 13.5px; color: #e0ece3 !important; background: transparent !important;">
-                    <div style="display: flex; align-items: center; gap: 10px; background: transparent !important;">
+                <div class="enquiry-contact-list">
+                    <div style="display: flex; align-items: center; gap: 8px; background: transparent !important;">
                         <span style="color: #d4af37;">📞</span>
                         <span><strong style="color: #ffffff;">Direct Call / WhatsApp:</strong> +91 93300 51702</span>
                     </div>
-                    <div style="display: flex; align-items: center; gap: 10px; background: transparent !important;">
+                    <div style="display: flex; align-items: center; gap: 8px; background: transparent !important;">
                         <span style="color: #d4af37;">✉️</span>
                         <span><strong style="color: #ffffff;">Official Email:</strong> dipak_200607@yahoo.co.in</span>
                     </div>
-                    <div style="display: flex; align-items: flex-start; gap: 10px; background: transparent !important;">
+                    <div style="display: flex; align-items: flex-start; gap: 8px; background: transparent !important;">
                         <span style="color: #d4af37; margin-top: 2px;">📍</span>
                         <span><strong style="color: #ffffff;">Address:</strong> Na Kalikapur Berhampore Murshidabad, Bara Bazar, Kolkata - 742102</span>
                     </div>
@@ -279,7 +382,7 @@
                         <option value="Custom Bulk Export Order" style="color: #fff; background: #0f291b;">Custom Bulk Export Order</option>
                     </select>
                     
-                    <textarea name="details" class="enquiry-form-input" rows="3" placeholder="Requirement Details (Quantity, Destination, etc.)" style="resize: vertical; min-height: 90px;"></textarea>
+                    <textarea name="details" class="enquiry-form-input enquiry-textarea" rows="2" placeholder="Requirement Details (Quantity, Destination, etc.)" style="resize: vertical;"></textarea>
                     
                     <button type="submit" class="enquiry-submit-btn">SUBMIT BULK ENQUIRY</button>
                 </form>
