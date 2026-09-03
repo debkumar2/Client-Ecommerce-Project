@@ -596,26 +596,22 @@
         margin-bottom: 1.25rem;
     }
 
-    /* Horizontal scrollable category pills on mobile */
+    /* Wrap category pills into multiple lines on mobile */
     .blog-filter-bar {
         display: flex;
-        flex-wrap: nowrap;
-        justify-content: flex-start;
-        overflow-x: auto;
-        padding-bottom: 0.5rem;
-        margin: 0 -1rem;
-        padding-left: 1rem;
-        padding-right: 1rem;
-        -webkit-overflow-scrolling: touch;
-        scrollbar-width: none;
-    }
-    .blog-filter-bar::-webkit-scrollbar {
-        display: none;
+        flex-wrap: wrap;
+        justify-content: center;
+        overflow-x: visible;
+        padding-bottom: 0;
+        margin: 0;
+        padding-left: 0;
+        padding-right: 0;
+        gap: 0.5rem;
     }
     .blog-filter-pill {
-        flex-shrink: 0;
-        white-space: nowrap;
-        padding: 0.4rem 0.9rem;
+        flex-shrink: 1;
+        white-space: normal;
+        padding: 0.35rem 0.85rem;
         font-size: 0.72rem;
     }
 
@@ -669,6 +665,14 @@
         font-size: 0.85rem;
     }
 
+    .blog-filter-bar {
+        gap: 0.4rem;
+    }
+    .blog-filter-pill {
+        padding: 0.3rem 0.7rem;
+        font-size: 0.68rem;
+    }
+
     .blog-main-section {
         padding: 2rem 0;
     }
@@ -711,6 +715,12 @@
         font-size: 0.8rem;
         line-height: 1.5;
         margin-bottom: 1rem;
+    }
+
+    .blog-filter-pill {
+        padding: 0.25rem 0.6rem;
+        font-size: 0.64rem;
+        letter-spacing: 0.05em;
     }
 
     .blog-featured-img-wrap {

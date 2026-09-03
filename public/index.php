@@ -816,26 +816,6 @@ $companyDetails = [
         </div>
     </header>
 
-    <!-- MOBILE DRAWER OVERLAY -->
-    <div class="drawer-overlay" id="drawer-overlay"></div>
-
-    <!-- MOBILE NAVIGATION DRAWER -->
-    <div class="mobile-drawer" id="mobile-drawer" role="dialog" aria-modal="true" aria-label="Mobile Navigation">
-        <div class="drawer-header">
-            <a href="<?= url() ?>" class="site-logo" aria-label="Biswas Enterprise Home">
-                <img src="<?= asset('image/logo.png') ?>" alt="Biswas Enterprise" class="brand-logo-img">
-            </a>
-            <button class="drawer-close" id="drawer-close" aria-label="Close menu">&times;</button>
-        </div>
-        <nav class="mobile-nav-links">
-            <a href="<?= url() ?>">Home</a>
-            <a href="<?= url('shop') ?>">Shop</a>
-            <a href="<?= url('about') ?>">About Us</a>
-            <a href="<?= url('contact') ?>">Contact</a>
-            <a href="<?= url('blog') ?>">Blog</a>
-        </nav>
-    </div>
-
     <main id="main-content">
         <!-- 3. HERO SECTION -->
         <section class="hero-section" aria-label="Hero Introduction">

@@ -137,20 +137,7 @@ $featured = array_shift($articles); // pull first as featured
     </div>
 </header>
 
-<div class="drawer-overlay" id="drawer-overlay"></div>
-<div class="mobile-drawer" id="mobile-drawer" role="dialog" aria-modal="true" aria-label="Mobile Navigation">
-    <div class="drawer-header">
-        <a href="<?= url() ?>" class="site-logo"><img src="<?= asset('image/logo.png') ?>" alt="Biswas Enterprise" class="brand-logo-img"></a>
-        <button class="drawer-close" id="drawer-close" aria-label="Close menu">&times;</button>
-    </div>
-    <nav class="mobile-nav-links">
-        <a href="<?= url() ?>">Home</a>
-        <a href="<?= url('shop') ?>">Shop</a>
-        <a href="<?= url('about') ?>">About Us</a>
-        <a href="<?= url('contact') ?>">Contact</a>
-        <a href="<?= url('blog') ?>">Blog Journal</a>
-    </nav>
-</div>
+
 
 <main id="main-content">
 

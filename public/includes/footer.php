@@ -148,3 +148,72 @@ $companyLocation = $companyDetails['location'] ?? 'Na Kalikapur Berhampore Mursh
     </div>
 
 </footer>
+
+<!-- Mobile Navigation Drawer Component -->
+<?php if (!isset($mobileDrawerRendered)): $mobileDrawerRendered = true; ?>
+<div class="mobile-drawer" id="mobile-drawer" aria-hidden="true">
+    <div class="drawer-header">
+        <a href="<?= url() ?>" class="site-logo" aria-label="Biswas Enterprise Home">
+            <img src="<?= asset('image/logo.png') ?>" alt="Biswas Enterprise" class="brand-logo-img">
+        </a>
+        <button class="drawer-close" id="drawer-close" aria-label="Close menu">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+        </button>
+    </div>
+    <div class="drawer-body">
+        <nav class="drawer-navigation" aria-label="Mobile Navigation">
+            <ul>
+                <li><a href="<?= url() ?>" class="drawer-link">Home</a></li>
+                <li><a href="<?= url('shop') ?>" class="drawer-link">Shop</a></li>
+                <li><a href="<?= url('about') ?>" class="drawer-link">About Us</a></li>
+                <li><a href="<?= url('contact') ?>" class="drawer-link">Contact</a></li>
+                <li><a href="<?= url('blog') ?>" class="drawer-link">Blog</a></li>
+            </ul>
+        </nav>
+    </div>
+</div>
+<div class="drawer-overlay" id="drawer-overlay" aria-hidden="true"></div>
+
+<script>
+(function() {
+    function setupDrawer() {
+        const toggle = document.getElementById('mobile-toggle');
+        const drawer = document.getElementById('mobile-drawer');
+        const overlay = document.getElementById('drawer-overlay');
+        const closeBtn = document.getElementById('drawer-close');
+
+        if (toggle && drawer && overlay) {
+            toggle.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                drawer.classList.add('open');
+                overlay.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            });
+            if (closeBtn) {
+                closeBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    drawer.classList.remove('open');
+                    overlay.classList.remove('active');
+                    document.body.style.overflow = '';
+                });
+            }
+            overlay.addEventListener('click', function() {
+                drawer.classList.remove('open');
+                overlay.classList.remove('active');
+                document.body.style.overflow = '';
+            });
+        }
+    }
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', setupDrawer);
+    } else {
+        setupDrawer();
+    }
+})();
+</script>
+<?php endif; ?>

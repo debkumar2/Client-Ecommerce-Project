@@ -42,25 +42,53 @@ if (!function_exists('env')) {
     function url(string $path = ''): string {
         $appUrl = env('APP_URL');
 
-        if (empty($appUrl) || $appUrl === 'http://localhost/ecommerce') {
+        // On live web host (e.g. biswas-enterprise.in), HTTP_HOST takes precedence over local .env APP_URL
+        if (isset($_SERVER['HTTP_HOST']) && $_SERVER['HTTP_HOST'] !== 'localhost' && $_SERVER['HTTP_HOST'] !== '127.0.0.1') {
+            $scheme = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' && $_SERVER['HTTPS'] !== '0') ? 'https' : 'http';
+            $host = $_SERVER['HTTP_HOST'];
+            $scriptDir = dirname($_SERVER['SCRIPT_NAME'] ?? '');
+            $scriptDir = str_replace('\\', '/', $scriptDir);
+            if (strpos($scriptDir, '/public') !== false) {
+                $scriptDir = preg_replace('/\/public$/', '', $scriptDir);
+            }
+            if ($scriptDir === '/' || $scriptDir === '.') {
+                $scriptDir = '';
+            }
+            $baseUrl = rtrim($scheme . '://' . $host . $scriptDir, '/');
+        } elseif (!empty($appUrl) && strpos($appUrl, 'localhost') === false) {
+            $baseUrl = rtrim($appUrl, '/');
+        } else {
             if (isset($_SERVER['HTTP_HOST'])) {
-                $scheme = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+                $scheme = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' && $_SERVER['HTTPS'] !== '0') ? 'https' : 'http';
                 $host = $_SERVER['HTTP_HOST'];
                 $scriptDir = dirname($_SERVER['SCRIPT_NAME'] ?? '');
-                $scriptDir = preg_replace('/\/public$/', '', str_replace('\\', '/', $scriptDir));
+                $scriptDir = str_replace('\\', '/', $scriptDir);
+                if (strpos($scriptDir, '/public') !== false) {
+                    $scriptDir = preg_replace('/\/public$/', '', $scriptDir);
+                }
+                if ($scriptDir === '/' || $scriptDir === '.') {
+                    $scriptDir = '';
+                }
                 $baseUrl = rtrim($scheme . '://' . $host . $scriptDir, '/');
             } else {
                 $baseUrl = 'http://localhost/Client-Ecommerce-Project';
             }
-        } else {
-            $baseUrl = rtrim($appUrl, '/');
         }
 
-        return $baseUrl . '/' . ltrim($path, '/');
+        return $baseUrl . ($path !== '' ? '/' . ltrim($path, '/') : '');
     }
 
     function asset(string $path): string {
-        return url('public/assets/' . ltrim($path, '/'));
+        $scriptName = str_replace('\\', '/', $_SERVER['SCRIPT_NAME'] ?? '');
+        $requestUri = str_replace('\\', '/', $_SERVER['REQUEST_URI'] ?? '');
+
+        // If 'public/' is part of the URL path (like http://localhost/Client-Ecommerce-Project/public/index.php)
+        if (strpos($scriptName, '/public/') !== false || strpos($requestUri, '/public/') !== false) {
+            return url('public/assets/' . ltrim($path, '/'));
+        }
+
+        // On live web hosting where public_html / web root is directly serving the files
+        return url('assets/' . ltrim($path, '/'));
     }
 }
 
