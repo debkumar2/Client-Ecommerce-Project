@@ -915,13 +915,9 @@ $companyDetails = [
                         
                         <!-- Left Column: Company Narrative & Actions -->
                         <div class="glimpse-left-content">
-                            <div class="glimpse-verified-badge">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                                <span>VERIFIED GOVT REGISTERED EXPORTER</span>
-                            </div>
-                            
-                            <h2 style="font-family: 'Merriweather', serif; font-size: clamp(1.5rem, 4vw, 2rem); color: #1b3b2b; margin: 0; line-height: 1.25;">
-                                About Biswas Enterprise
+                            <span class="eyebrow" style="color: #d4af37; font-weight: 700; letter-spacing: 0.12em;">VERIFIED GOVT REGISTERED EXPORTER</span>
+                            <h2 style="font-family: 'Merriweather', serif; font-size: clamp(1.8rem, 4vw, 2.3rem); color: #1b3b2b; margin: 6px 0 12px; line-height: 1.2; text-transform: uppercase;">
+                                ABOUT BISWAS ENTERPRISE
                             </h2>
                             
                             <p style="font-size: 14px; color: #4a5c51; line-height: 1.65; margin: 0;">
@@ -1010,62 +1006,166 @@ $companyDetails = [
             </div>
         </section>
 
-        <!-- WHY CHOOSE BISWAS ENTERPRISE SECTION -->
-        <section class="why-choose-section" aria-label="Why Choose Biswas Enterprise">
+        <!-- WHY CHOOSE BISWAS ENTERPRISE SECTION (PREMIUM MODERN ELEVATED CARDS) -->
+        <section class="why-choose-section" aria-label="Why Choose Biswas Enterprise" style="background: linear-gradient(180deg, #ffffff 0%, #f4f8f5 100%); padding: 5rem 0;">
             <div class="container">
-                <div class="section-header" style="text-align: center; max-width: 720px; margin: 0 auto;">
-                    <span class="eyebrow" style="color: #d4af37; letter-spacing: 0.1em; font-weight: 700;">OUR UNCOMPROMISING STANDARDS</span>
-                    <h2 style="font-family: 'Merriweather', serif; font-size: clamp(1.6rem, 4vw, 2.3rem); color: #1b3b2b; margin: 8px 0 12px;">Why Choose Biswas Enterprise</h2>
-                    <p style="color: #55685c; font-size: 15px; line-height: 1.6;">Supplying medicine-grade botanicals and reliable solar energy solutions built on authenticity, lab verification, and swift logistics.</p>
+                <div class="section-header">
+                    <span class="eyebrow">OUR UNCOMPROMISING STANDARDS</span>
+                    <h2>WHY CHOOSE BISWAS ENTERPRISE</h2>
+                    <p>Supplying medicine-grade botanicals and reliable solar energy solutions built on authenticity, lab verification, and swift logistics.</p>
                 </div>
 
-                <div class="why-choose-grid">
-                    <div class="why-choose-card">
-                        <div>
-                            <div class="why-choose-icon-box">
-                                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                <div class="why-choose-grid-modern">
+                    <!-- Card 1 -->
+                    <div class="why-card-lux">
+                        <div class="why-card-top">
+                            <div class="why-icon-circle">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
                             </div>
-                            <span class="why-choose-badge">100% TRACEABLE</span>
-                            <h3>Direct Botanical Sourcing</h3>
-                            <p>Harvested directly from certified growers & natural forest reserves across West Bengal to ensure zero adulteration.</p>
+                            <span class="why-pill-badge">100% TRACEABLE</span>
                         </div>
+                        <h3>Direct Botanical Sourcing</h3>
+                        <p>Harvested directly from certified growers & natural forest reserves across West Bengal to ensure zero chemical adulteration.</p>
                     </div>
 
-                    <div class="why-choose-card">
-                        <div>
-                            <div class="why-choose-icon-box">
-                                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg>
+                    <!-- Card 2 -->
+                    <div class="why-card-lux">
+                        <div class="why-card-top">
+                            <div class="why-icon-circle">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg>
                             </div>
-                            <span class="why-choose-badge">HIGH POTENCY</span>
-                            <h3>Shade-Cured Processing</h3>
-                            <p>Slow shade-cured and pulverized under hygienic parameters to preserve essential active bio-nutrients & oils.</p>
+                            <span class="why-pill-badge">HIGH POTENCY</span>
                         </div>
+                        <h3>Shade-Cured Processing</h3>
+                        <p>Slow shade-cured and pulverized under hygienic parameters to preserve essential active bio-nutrients & natural essential oils.</p>
                     </div>
 
-                    <div class="why-choose-card">
-                        <div>
-                            <div class="why-choose-icon-box">
-                                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+                    <!-- Card 3 -->
+                    <div class="why-card-lux">
+                        <div class="why-card-top">
+                            <div class="why-icon-circle">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
                             </div>
-                            <span class="why-choose-badge">EXPORT READY</span>
-                            <h3>Custom Bulk Packaging</h3>
-                            <p>Moisture-proof jute bags, food-grade HDPE liners, and heavy-duty cartons designed for safe sea & air freight.</p>
+                            <span class="why-pill-badge">EXPORT READY</span>
                         </div>
+                        <h3>Custom Bulk Packaging</h3>
+                        <p>Moisture-proof jute bags, food-grade HDPE vacuum liners, and heavy 5-ply cartons designed for maritime & air freight safety.</p>
                     </div>
 
-                    <div class="why-choose-card">
-                        <div>
-                            <div class="why-choose-icon-box">
-                                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg>
+                    <!-- Card 4 -->
+                    <div class="why-card-lux">
+                        <div class="why-card-top">
+                            <div class="why-icon-circle">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg>
                             </div>
-                            <span class="why-choose-badge">PAN-INDIA & EXPORT</span>
-                            <h3>Rapid Global Dispatch</h3>
-                            <p>Strategic Kolkata supply-chain hub enabling fast domestic freight and international containerized shipping.</p>
+                            <span class="why-pill-badge">PAN-INDIA & EXPORT</span>
                         </div>
+                        <h3>Rapid Global Dispatch</h3>
+                        <p>Strategic Kolkata logistics hub enabling swift domestic freight and containerized maritime shipping with full customs clearance.</p>
                     </div>
                 </div>
             </div>
         </section>
+
+        <!-- Custom Styles for Premium Why Choose Cards -->
+        <style>
+            .why-choose-grid-modern {
+                display: grid;
+                grid-template-columns: repeat(4, 1fr);
+                gap: 24px;
+            }
+            .why-card-lux {
+                background: #ffffff;
+                border: 1px solid #e1ebe4;
+                border-radius: 20px;
+                padding: 32px 24px;
+                position: relative;
+                overflow: hidden;
+                transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+                box-shadow: 0 4px 16px rgba(27, 59, 43, 0.03);
+                display: flex;
+                flex-direction: column;
+            }
+            .why-card-lux::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                height: 4px;
+                background: linear-gradient(90deg, #1b3b2b 0%, #d4af37 100%);
+                opacity: 0;
+                transition: opacity 0.3s ease;
+            }
+            .why-card-lux:hover {
+                transform: translateY(-8px);
+                border-color: #c0dbc8;
+                box-shadow: 0 16px 36px rgba(27, 59, 43, 0.09);
+            }
+            .why-card-lux:hover::before {
+                opacity: 1;
+            }
+            .why-card-top {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                margin-bottom: 22px;
+            }
+            .why-icon-circle {
+                width: 48px;
+                height: 48px;
+                border-radius: 14px;
+                background: #eaf3ed;
+                color: #1b3b2b;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: all 0.3s ease;
+            }
+            .why-card-lux:hover .why-icon-circle {
+                background: #1b3b2b;
+                color: #ffffff;
+            }
+            .why-pill-badge {
+                font-size: 10.5px;
+                font-weight: 800;
+                letter-spacing: 0.08em;
+                color: #1b3b2b;
+                background: #f0f6f2;
+                padding: 4px 10px;
+                border-radius: 20px;
+                border: 1px solid #d4e4d8;
+            }
+            .why-card-lux h3 {
+                font-family: 'Merriweather', serif;
+                font-size: 1.15rem;
+                color: #1b3b2b;
+                margin: 0 0 10px;
+                line-height: 1.35;
+            }
+            .why-card-lux p {
+                font-size: 14px;
+                color: #55685c;
+                line-height: 1.65;
+                margin: 0;
+            }
+
+            @media (max-width: 992px) {
+                .why-choose-grid-modern {
+                    grid-template-columns: repeat(2, 1fr);
+                    gap: 20px;
+                }
+            }
+            @media (max-width: 575px) {
+                .why-choose-grid-modern {
+                    grid-template-columns: 1fr;
+                    gap: 16px;
+                }
+                .why-card-lux {
+                    padding: 24px 20px;
+                }
+            }
+        </style>
 
         <!-- 6. SHOP BY CATEGORY -->
         <section class="section-padding" style="background-color: #f8faf8;" aria-label="Categories Overview">
@@ -1184,7 +1284,268 @@ $companyDetails = [
             </div>
         </section>
 
-        <!-- 8. INSTANT BULK ENQUIRY / QUOTE SECTION -->
+        <!-- 8. INTERACTIVE WORKFLOW DISPLAY (CLEAN SPLIT DESIGN) -->
+        <section class="section-padding" style="background-color: #f4f8f5; border-top: 1px solid #e2ebe4; border-bottom: 1px solid #e2ebe4;" aria-label="Global Export Process">
+            <div class="container">
+                <div class="section-header" style="text-align: center; max-width: 720px; margin: 0 auto 48px;">
+                    <span class="eyebrow" style="color: #d4af37; letter-spacing: 0.1em; font-weight: 700;">HOW WE OPERATE</span>
+                    <h2 style="font-family: 'Merriweather', serif; font-size: clamp(1.6rem, 4vw, 2.3rem); color: #1b3b2b; margin: 8px 0 12px;">Quality Assurance & Export Pipeline</h2>
+                    <p style="color: #55685c; font-size: 15px; line-height: 1.6;">Click each phase to explore how Biswas Enterprise guarantees pure botanicals and seamless international delivery.</p>
+                </div>
+
+                <div class="workflow-split-layout">
+                    <!-- Left: Interactive Vertical Step List -->
+                    <div class="workflow-steps-nav">
+                        <div class="workflow-step-item active" onclick="switchWorkflowStep(0, this)">
+                            <div class="step-num-circle">01</div>
+                            <div class="step-nav-text">
+                                <h4>Ethical Sourcing & Harvesting</h4>
+                                <span>Wild forest reserves & direct grower network</span>
+                            </div>
+                        </div>
+
+                        <div class="workflow-step-item" onclick="switchWorkflowStep(1, this)">
+                            <div class="step-num-circle">02</div>
+                            <div class="step-nav-text">
+                                <h4>Lab Quality Testing</h4>
+                                <span>Moisture control & zero chemical purity tests</span>
+                            </div>
+                        </div>
+
+                        <div class="workflow-step-item" onclick="switchWorkflowStep(2, this)">
+                            <div class="step-num-circle">03</div>
+                            <div class="step-nav-text">
+                                <h4>Vacuum Sealed Packaging</h4>
+                                <span>Moisture-barrier HDPE & heavy corrugated boxes</span>
+                            </div>
+                        </div>
+
+                        <div class="workflow-step-item" onclick="switchWorkflowStep(3, this)">
+                            <div class="step-num-circle">04</div>
+                            <div class="step-nav-text">
+                                <h4>Global Dispatch & Customs</h4>
+                                <span>Sea port logistics & Pan-India freight</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right: Dynamic Showcase Card Panel -->
+                    <div class="workflow-showcase-panel" id="workflowShowcase">
+                        <div class="showcase-badge" id="wfBadge">PHASE 01 • HARVESTING</div>
+                        <h3 id="wfTitle" style="font-family: 'Merriweather', serif; font-size: 1.5rem; color: #1b3b2b; margin: 12px 0 16px; line-height: 1.3;">
+                            Ethical Botanical Sourcing
+                        </h3>
+                        <p id="wfDesc" style="font-size: 14.5px; color: #4a5c51; line-height: 1.75; margin-bottom: 24px;">
+                            We collect 99% pure Harad, Arjuna Bark, and medicinal leaves directly from certified growers and natural forest reserves across West Bengal. Every batch includes complete origin tracking to prevent adulteration.
+                        </p>
+                        
+                        <div class="wf-highlights-grid" id="wfHighlights">
+                            <div class="wf-hl-tag">🌿 100% Traceable Batches</div>
+                            <div class="wf-hl-tag">🛡️ Fair-Trade Sourcing</div>
+                            <div class="wf-hl-tag">📍 West Bengal Sourcing Hubs</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Custom Styling & Dynamic Script for Interactive Workflow -->
+        <style>
+            .workflow-split-layout {
+                display: grid;
+                grid-template-columns: 1.1fr 1.3fr;
+                gap: 36px;
+                align-items: center;
+            }
+            .workflow-steps-nav {
+                display: flex;
+                flex-direction: column;
+                gap: 14px;
+            }
+            .workflow-step-item {
+                display: flex;
+                align-items: center;
+                gap: 16px;
+                padding: 16px 20px;
+                border-radius: 16px;
+                background: #ffffff;
+                border: 1.5px solid #e1ebe4;
+                cursor: pointer;
+                transition: all 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+            .workflow-step-item:hover {
+                border-color: #a8d5b5;
+                transform: translateX(4px);
+            }
+            .workflow-step-item.active {
+                background: #1b3b2b;
+                border-color: #1b3b2b;
+                color: #ffffff;
+                box-shadow: 0 10px 24px rgba(27, 59, 43, 0.15);
+            }
+            .step-num-circle {
+                width: 42px;
+                height: 42px;
+                border-radius: 50%;
+                background: #eaf3ed;
+                color: #1b3b2b;
+                font-family: 'Merriweather', serif;
+                font-weight: 700;
+                font-size: 1rem;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                flex-shrink: 0;
+                transition: all 0.25s ease;
+            }
+            .workflow-step-item.active .step-num-circle {
+                background: #d4af37;
+                color: #1b3b2b;
+            }
+            .step-nav-text h4 {
+                font-family: 'Merriweather', serif;
+                font-size: 0.98rem;
+                margin: 0 0 3px;
+                color: #1a2721;
+                transition: color 0.2s;
+            }
+            .workflow-step-item.active .step-nav-text h4 {
+                color: #ffffff;
+            }
+            .step-nav-text span {
+                font-size: 0.78rem;
+                color: #647569;
+                display: block;
+            }
+            .workflow-step-item.active .step-nav-text span {
+                color: #c2d8ca;
+            }
+            .workflow-showcase-panel {
+                background: #ffffff;
+                border: 1.5px solid #dbe6dd;
+                border-radius: 24px;
+                padding: 40px 36px;
+                position: relative;
+                box-shadow: 0 14px 32px rgba(27, 59, 43, 0.05);
+                transition: all 0.3s ease;
+            }
+            .showcase-badge {
+                display: inline-block;
+                font-size: 11px;
+                font-weight: 700;
+                letter-spacing: 0.1em;
+                text-transform: uppercase;
+                color: #1b3b2b;
+                background: #e2efe6;
+                padding: 5px 12px;
+                border-radius: 20px;
+            }
+            .wf-highlights-grid {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 10px;
+                padding-top: 16px;
+                border-top: 1px solid #edf3ee;
+            }
+            .wf-hl-tag {
+                font-size: 12.5px;
+                font-weight: 600;
+                color: #1b3b2b;
+                background: #f0f6f2;
+                padding: 6px 14px;
+                border-radius: 20px;
+                border: 1px solid #d4e4d8;
+            }
+
+            @media (max-width: 992px) {
+                .workflow-split-layout {
+                    grid-template-columns: 1fr;
+                    gap: 24px;
+                }
+                .workflow-showcase-panel {
+                    padding: 28px 22px;
+                }
+            }
+            @media (max-width: 575px) {
+                .workflow-step-item {
+                    padding: 14px 16px;
+                    gap: 12px;
+                }
+                .step-num-circle {
+                    width: 36px;
+                    height: 36px;
+                    font-size: 0.9rem;
+                }
+                .step-nav-text h4 {
+                    font-size: 0.92rem;
+                }
+                .step-nav-text span {
+                    font-size: 0.74rem;
+                }
+                .workflow-showcase-panel {
+                    padding: 22px 18px;
+                    border-radius: 18px;
+                }
+                .wf-hl-tag {
+                    font-size: 11.5px;
+                    padding: 5px 12px;
+                }
+            }
+        </style>
+
+        <script>
+            const workflowData = [
+                {
+                    badge: "PHASE 01 • HARVESTING",
+                    title: "Ethical Botanical Sourcing",
+                    desc: "We collect 99% pure Harad, Arjuna Bark, and medicinal leaves directly from certified growers and natural forest reserves across West Bengal. Every batch includes complete origin tracking to prevent adulteration.",
+                    tags: ["🌿 100% Traceable Batches", "🛡️ Fair-Trade Sourcing", "📍 West Bengal Sourcing Hubs"]
+                },
+                {
+                    badge: "PHASE 02 • TESTING & SHADE-CURING",
+                    title: "Lab Verification & Active Potency Test",
+                    desc: "Harvested botanicals undergo slow shade-curing under hygienic parameters to protect active bio-nutrients. Moisture content is lab-tested and standardized to ensure zero chemical additives or foreign impurities.",
+                    tags: ["🔬 HPLC Tested Pure", "💧 Controlled Moisture (≤8%)", "☀️ Shade-Cured Processing"]
+                },
+                {
+                    badge: "PHASE 03 • EXPORT PACKAGING",
+                    title: "Moisture-Barrier & Sealed Packaging",
+                    desc: "Products are packed in food-grade inner HDPE liners, vacuum-sealed bags, and heavy-duty 5-ply corrugated outer boxes to ensure zero spoilage during prolonged maritime or transit journeys.",
+                    tags: ["📦 Vacuum-Sealed Liners", "🛡️ 5-Ply Corrugated Outer", "✈️ Food-Grade Packaging"]
+                },
+                {
+                    badge: "PHASE 04 • LOGISTICS & SHIPPING",
+                    title: "Global Dispatch & Pan-India Freight",
+                    desc: "Direct shipping dispatch through Kolkata Sea Port and Netaji Subhash Chandra Bose International Airport. Complete customs clearance, bill of lading, and certificate of origin documentation provided.",
+                    tags: ["🚢 Kolkata Sea Port Export", "✈️ Air Freight Express", "📄 Govt Phytosanitary Certificate"]
+                }
+            ];
+
+            function switchWorkflowStep(index, el) {
+                document.querySelectorAll('.workflow-step-item').forEach(item => item.classList.remove('active'));
+                el.classList.add('active');
+
+                const data = workflowData[index];
+                const panel = document.getElementById('workflowShowcase');
+                
+                panel.style.opacity = '0.4';
+                panel.style.transform = 'translateY(4px)';
+
+                setTimeout(() => {
+                    document.getElementById('wfBadge').innerText = data.badge;
+                    document.getElementById('wfTitle').innerText = data.title;
+                    document.getElementById('wfDesc').innerText = data.desc;
+
+                    const tagsContainer = document.getElementById('wfHighlights');
+                    tagsContainer.innerHTML = data.tags.map(t => `<div class="wf-hl-tag">${t}</div>`).join('');
+
+                    panel.style.opacity = '1';
+                    panel.style.transform = 'translateY(0)';
+                }, 150);
+            }
+        </script>
+
+        <!-- 9. INSTANT BULK ENQUIRY / QUOTE SECTION -->
         <section id="quick-quote" class="section-padding" style="background-color: #f8faf8;" aria-label="Bulk Enquiry Form">
             <div class="container">
                 <div class="bulk-quote-section">
