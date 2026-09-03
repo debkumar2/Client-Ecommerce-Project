@@ -124,22 +124,50 @@
 }
 
 @keyframes preloaderSpin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
 }
 
 @keyframes preloaderSpinReverse {
-    0% { transform: rotate(360deg); }
-    100% { transform: rotate(0deg); }
+    0% {
+        transform: rotate(360deg);
+    }
+
+    100% {
+        transform: rotate(0deg);
+    }
 }
 
 @keyframes preloaderPulse {
-    0% { transform: scale(0.96); opacity: 0.85; }
-    100% { transform: scale(1.04); opacity: 1; }
+    0% {
+        transform: scale(0.96);
+        opacity: 0.85;
+    }
+
+    100% {
+        transform: scale(1.04);
+        opacity: 1;
+    }
 }
 
 @keyframes preloaderProgress {
-    0% { left: -40%; width: 40%; }
-    50% { left: 30%; width: 50%; }
-    100% { left: 100%; width: 40%; }
+    0% {
+        left: -40%;
+        width: 40%;
+    }
+
+    50% {
+        left: 30%;
+        width: 50%;
+    }
+
+    100% {
+        left: 100%;
+        width: 40%;
+    }
 }
