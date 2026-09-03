@@ -273,61 +273,99 @@
 .mobile-drawer {
     position: fixed;
     top: 0;
-    left: -100%;
+    left: 0;
     width: 82%;
     max-width: 320px;
     height: 100vh;
+    height: 100dvh;
     background-color: #ffffff;
-    box-shadow: 10px 0 30px rgba(0, 0, 0, 0.12);
+    box-shadow: 10px 0 30px rgba(0, 0, 0, 0.2);
     z-index: 2000;
-    transition: left 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    transform: translateX(-100%);
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease, visibility 0.25s ease;
     padding: 1.75rem 1.5rem;
     display: flex;
     flex-direction: column;
+    overflow-y: auto;
 }
 
 .mobile-drawer.open {
-    left: 0;
+    transform: translateX(0);
+    visibility: visible;
+    opacity: 1;
+    pointer-events: auto;
 }
 
 .drawer-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 2.25rem;
-    padding-bottom: 1.25rem;
-    border-bottom: 1px solid #e2ebe5;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    margin-bottom: 2.25rem !important;
+    padding-bottom: 1.25rem !important;
+    border-bottom: 1px solid #e2ebe5 !important;
+    width: 100% !important;
+    position: relative !important;
+    background: transparent !important;
+}
+
+.drawer-header .drawer-logo,
+.drawer-header .site-logo {
+    position: static !important;
+    transform: none !important;
+    left: auto !important;
+    display: flex !important;
+    align-items: center !important;
+    text-decoration: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
 }
 
 .drawer-header .brand-logo-img {
-    height: 54px;
-    width: auto;
-    max-width: 170px;
+    height: 48px !important;
+    width: auto !important;
+    max-width: 160px !important;
+    object-fit: contain !important;
+    display: block !important;
 }
 
 .drawer-close {
-    background: none;
-    border: none;
-    color: #2d3748;
-    cursor: pointer;
-    padding: 0.35rem;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 6px;
-    transition: all 0.2s ease;
+    position: relative !important;
+    background: #f0f4f1 !important;
+    border: none !important;
+    color: #1b3b2b !important;
+    cursor: pointer !important;
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px !important;
+    min-height: 36px !important;
+    border-radius: 50% !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: all 0.25s ease !important;
+    flex-shrink: 0 !important;
+    margin-left: auto !important;
+    z-index: 10 !important;
 }
 
 .drawer-close:hover {
-    background-color: #f0f4f1;
-    color: #1b3b2b;
+    background-color: #1b3b2b !important;
+    color: #ffffff !important;
+    transform: rotate(90deg) !important;
+}
+
+.drawer-body {
+    padding-top: 0.5rem;
 }
 
 .drawer-navigation ul,
 .mobile-nav-links {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    gap: 1.85rem;
     list-style: none;
     margin: 0;
     padding: 0;
@@ -337,32 +375,41 @@
 .mobile-nav-links a {
     font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, sans-serif;
     font-size: 1.25rem;
-    font-weight: 600;
-    color: #2d3748;
+    font-weight: 700;
+    color: #1b3b2b;
     text-decoration: none;
     transition: color 0.2s ease, transform 0.2s ease;
     display: inline-block;
-    letter-spacing: -0.01em;
+    letter-spacing: 0.01em;
 }
 
 .drawer-link:hover,
 .mobile-nav-links a:hover {
-    color: #1b3b2b;
-    transform: translateX(4px);
+    color: #2b6140;
+    transform: translateX(6px);
 }
 
 .drawer-overlay {
     position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.4);
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
     z-index: 1999;
     opacity: 0;
+    visibility: hidden;
     pointer-events: none;
-    transition: opacity 0.3s ease;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
 }
 
 .drawer-overlay.active {
     opacity: 1;
+    visibility: visible;
     pointer-events: auto;
 }
 
@@ -537,11 +584,12 @@
     }
     .drawer-link,
     .mobile-nav-links a {
-        font-size: 1.1rem;
+        font-size: 1.15rem;
+        font-weight: 700;
     }
     .drawer-navigation ul,
     .mobile-nav-links {
-        gap: 1.25rem;
+        gap: 1.6rem;
     }
 }
 
@@ -559,11 +607,12 @@
     }
     .drawer-link,
     .mobile-nav-links a {
-        font-size: 1rem;
+        font-size: 1.05rem;
+        font-weight: 700;
     }
     .drawer-navigation ul,
     .mobile-nav-links {
-        gap: 1.1rem;
+        gap: 1.4rem;
     }
 }
 
@@ -581,11 +630,12 @@
     }
     .drawer-link,
     .mobile-nav-links a {
-        font-size: 0.95rem;
+        font-size: 1rem;
+        font-weight: 700;
     }
     .drawer-navigation ul,
     .mobile-nav-links {
-        gap: 0.95rem;
+        gap: 1.25rem;
     }
 }
 

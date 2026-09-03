@@ -81,14 +81,21 @@ if (!function_exists('env')) {
     function asset(string $path): string {
         $scriptName = str_replace('\\', '/', $_SERVER['SCRIPT_NAME'] ?? '');
         $requestUri = str_replace('\\', '/', $_SERVER['REQUEST_URI'] ?? '');
+        $relativePath = ltrim($path, '/');
 
-        // If 'public/' is part of the URL path (like http://localhost/Client-Ecommerce-Project/public/index.php)
+        // Check if public/ prefix is needed
         if (strpos($scriptName, '/public/') !== false || strpos($requestUri, '/public/') !== false) {
-            return url('public/assets/' . ltrim($path, '/'));
+            $fullUrl = url('public/assets/' . $relativePath);
+            $filePath = __DIR__ . '/../public/assets/' . $relativePath;
+        } else {
+            $fullUrl = url('assets/' . $relativePath);
+            $filePath = __DIR__ . '/../public/assets/' . $relativePath;
         }
 
-        // On live web hosting where public_html / web root is directly serving the files
-        return url('assets/' . ltrim($path, '/'));
+        // Automatic cache busting for CSS and JS assets
+        $v = file_exists($filePath) ? filemtime($filePath) : '1.2';
+        $separator = strpos($fullUrl, '?') === false ? '?' : '&';
+        return $fullUrl . $separator . 'v=' . $v;
     }
 }
 

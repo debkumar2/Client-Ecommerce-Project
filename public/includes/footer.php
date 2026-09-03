@@ -153,11 +153,11 @@ $companyLocation = $companyDetails['location'] ?? 'Na Kalikapur Berhampore Mursh
 <?php if (!isset($mobileDrawerRendered)): $mobileDrawerRendered = true; ?>
 <div class="mobile-drawer" id="mobile-drawer" aria-hidden="true">
     <div class="drawer-header">
-        <a href="<?= url() ?>" class="site-logo" aria-label="Biswas Enterprise Home">
+        <a href="<?= url() ?>" class="drawer-logo" aria-label="Biswas Enterprise Home">
             <img src="<?= asset('image/logo.png') ?>" alt="Biswas Enterprise" class="brand-logo-img">
         </a>
-        <button class="drawer-close" id="drawer-close" aria-label="Close menu">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <button type="button" class="drawer-close" id="drawer-close" aria-label="Close menu">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                 <line x1="18" y1="6" x2="6" y2="18"></line>
                 <line x1="6" y1="6" x2="18" y2="18"></line>
             </svg>
@@ -185,27 +185,52 @@ $companyLocation = $companyDetails['location'] ?? 'Na Kalikapur Berhampore Mursh
         const overlay = document.getElementById('drawer-overlay');
         const closeBtn = document.getElementById('drawer-close');
 
-        if (toggle && drawer && overlay) {
-            toggle.addEventListener('click', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
+        if (drawer && overlay) {
+            // Ensure menu starts closed on page load
+            drawer.classList.remove('open');
+            overlay.classList.remove('active');
+            document.body.style.overflow = '';
+
+            function closeMenu() {
+                drawer.classList.remove('open');
+                overlay.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+
+            function openMenu() {
                 drawer.classList.add('open');
                 overlay.classList.add('active');
                 document.body.style.overflow = 'hidden';
-            });
+            }
+
+            if (toggle) {
+                toggle.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    openMenu();
+                });
+            }
+
             if (closeBtn) {
                 closeBtn.addEventListener('click', function(e) {
                     e.preventDefault();
                     e.stopPropagation();
-                    drawer.classList.remove('open');
-                    overlay.classList.remove('active');
-                    document.body.style.overflow = '';
+                    closeMenu();
                 });
             }
-            overlay.addEventListener('click', function() {
-                drawer.classList.remove('open');
-                overlay.classList.remove('active');
-                document.body.style.overflow = '';
+
+            overlay.addEventListener('click', closeMenu);
+
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && drawer.classList.contains('open')) {
+                    closeMenu();
+                }
+            });
+
+            // Close on drawer link click
+            const links = drawer.querySelectorAll('a');
+            links.forEach(function(link) {
+                link.addEventListener('click', closeMenu);
             });
         }
     }
