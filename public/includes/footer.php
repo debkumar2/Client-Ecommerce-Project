@@ -9,6 +9,9 @@ $companyEmail = $companyDetails['email'] ?? 'dipak_200607@yahoo.co.in';
 $companyPhone = $companyDetails['phone'] ?? '+91 93300 51702';
 $companyWhatsapp = $companyDetails['whatsapp'] ?? '+919330051702';
 $companyLocation = $companyDetails['location'] ?? 'Na Kalikapur Berhampore Murshidabad, Bara Bazar, Kolkata, West Bengal - 742102';
+
+// Render Brand Preloader Component
+require_once __DIR__ . '/loader.php';
 ?>
 <footer class="site-footer" role="contentinfo">
 

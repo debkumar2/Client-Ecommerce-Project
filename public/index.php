@@ -57,6 +57,17 @@ if (in_array($path, ['/logout', '/logout.php'])) {
     exit;
 }
 
+if (in_array($path, ['/404', '/404.php'])) {
+    require_once __DIR__ . '/404.php';
+    exit;
+}
+
+// Fallback for invalid paths ending with unknown extension or unknown routes (excluding root and home)
+if (!in_array($path, ['/', '/index.php', '']) && !file_exists(__DIR__ . $path) && !str_starts_with($path, '/product/')) {
+    require_once __DIR__ . '/404.php';
+    exit;
+}
+
 // Dynamic Product Categories from Database Table
 $categories = [];
 try {
