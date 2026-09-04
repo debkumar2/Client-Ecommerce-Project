@@ -79,6 +79,19 @@ try {
 
     $enquiryId = $pdo->lastInsertId();
 
+    // Send Admin Notification Email
+    require_once __DIR__ . '/../helpers/mail.php';
+    sendEnquiryAdminNotification([
+        'enquiry_id'          => $enquiryId,
+        'full_name'           => $fullName,
+        'email'               => $email,
+        'phone'               => $phone,
+        'product_name'        => $productName,
+        'quantity'            => $quantity,
+        'destination'         => $destination,
+        'requirement_details' => $requirementDetails
+    ]);
+
     jsonResponse([
         'success' => true,
         'message' => 'Thank you! Your enquiry has been received and stored in our database.',

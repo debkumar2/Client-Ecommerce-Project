@@ -337,10 +337,29 @@ require_once __DIR__ . '/../config/database.php';
                     const result = await response.json();
 
                     if (result.success) {
-                        showToastify('Thank you! Your enquiry has been sent successfully. We will respond within 24 hours.', 'success');
                         form.reset();
+                        if (typeof Swal !== 'undefined') {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Thank You for Your Interest!',
+                                html: `<p style="font-size: 15px; color: #475569; margin: 8px 0 16px;">Dear <strong>${name}</strong>, your enquiry has been sent successfully! Our team will respond within 24 hours.</p>`,
+                                confirmButtonText: 'Great, Thanks!',
+                                confirmButtonColor: '#1b3b2b'
+                            });
+                        } else {
+                            showToastify('Thank you for your interest! Your enquiry has been sent successfully.', 'success');
+                        }
                     } else {
-                        showToastify(result.message || 'Error sending enquiry.', 'error');
+                        if (typeof Swal !== 'undefined') {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Submission Error',
+                                text: result.message || 'Error sending enquiry.',
+                                confirmButtonColor: '#1b3b2b'
+                            });
+                        } else {
+                            showToastify(result.message || 'Error sending enquiry.', 'error');
+                        }
                     }
                 } catch (error) {
                     console.error('Contact Enquiry Error:', error);

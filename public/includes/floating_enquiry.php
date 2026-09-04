@@ -1,4 +1,5 @@
 <!-- GLOBAL FLOATING RIGHT ENQUIRY BUTTON & POPUP MODAL -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <style>
     /* Floating Right Vertical Enquiry Button */
     .floating-enquiry-trigger {
@@ -78,18 +79,18 @@
 
     /* Modal Container matching exact screenshot design */
     .enquiry-modal-card {
-        background: #0f291b !important; /* Rich Dark Forest Green as shown in image */
+        background: #0f291b !important; /* Rich Dark Forest Green */
         color: #ffffff !important;
-        border-radius: 24px !important;
-        padding: 44px !important;
-        max-width: 960px !important;
+        border-radius: 20px !important;
+        padding: 26px 32px !important;
+        max-width: 840px !important;
         width: 100% !important;
         position: relative !important;
-        box-shadow: 0 28px 70px rgba(0, 0, 0, 0.6) !important;
+        box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6) !important;
         border: 1px solid rgba(255, 255, 255, 0.12) !important;
         transform: scale(0.92) translateY(20px);
         transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
-        max-height: 90vh !important;
+        max-height: 92vh !important;
         overflow-y: auto !important;
         box-sizing: border-box !important;
     }
@@ -110,15 +111,15 @@
 
     .enquiry-modal-close {
         position: absolute !important;
-        top: 20px !important;
-        right: 24px !important;
+        top: 16px !important;
+        right: 18px !important;
         background: rgba(255, 255, 255, 0.12) !important;
         border: 1px solid rgba(255, 255, 255, 0.2) !important;
         color: #ffffff !important;
-        width: 36px !important;
-        height: 36px !important;
+        width: 32px !important;
+        height: 32px !important;
         border-radius: 50% !important;
-        font-size: 22px !important;
+        font-size: 20px !important;
         display: flex !important;
         align-items: center !important;
         justify-content: center !important;
@@ -136,19 +137,19 @@
     .enquiry-modal-grid {
         display: grid !important;
         grid-template-columns: 1fr 1fr !important;
-        gap: 44px !important;
+        gap: 28px !important;
         align-items: start !important;
     }
 
     .enquiry-form-input {
         width: 100% !important;
-        padding: 14px 18px !important;
-        border-radius: 10px !important;
+        padding: 9px 13px !important;
+        border-radius: 8px !important;
         border: 1px solid rgba(255, 255, 255, 0.2) !important;
         background: rgba(255, 255, 255, 0.08) !important;
         color: #ffffff !important;
-        font-size: 14px !important;
-        margin-bottom: 14px !important;
+        font-size: 13px !important;
+        margin-bottom: 10px !important;
         box-sizing: border-box !important;
         outline: none !important;
         transition: border 0.2s ease, background 0.2s ease !important;
@@ -157,6 +158,23 @@
 
     .enquiry-form-input::placeholder {
         color: #8aa694 !important;
+        font-size: 11px !important;
+        font-weight: 400 !important;
+    }
+    .enquiry-form-input::-webkit-input-placeholder {
+        color: #8aa694 !important;
+        font-size: 11px !important;
+        font-weight: 400 !important;
+    }
+    .enquiry-form-input::-moz-placeholder {
+        color: #8aa694 !important;
+        font-size: 11px !important;
+        font-weight: 400 !important;
+    }
+    .enquiry-form-input:-ms-input-placeholder {
+        color: #8aa694 !important;
+        font-size: 11px !important;
+        font-weight: 400 !important;
     }
 
     .enquiry-form-input:focus {
@@ -166,19 +184,20 @@
 
     .enquiry-submit-btn {
         width: 100% !important;
-        padding: 16px !important;
-        border-radius: 30px !important;
+        padding: 12px !important;
+        border-radius: 24px !important;
         border: none !important;
         background: #d4af37 !important;
         color: #0f291b !important;
         font-family: 'Open Sans', sans-serif !important;
-        font-size: 13px !important;
+        font-size: 12.5px !important;
         font-weight: 800 !important;
         letter-spacing: 0.08em !important;
         text-transform: uppercase !important;
         cursor: pointer !important;
         transition: all 0.25s ease !important;
         box-shadow: 0 6px 20px rgba(212, 175, 55, 0.25) !important;
+        margin-top: 2px !important;
     }
 
     .enquiry-submit-btn:hover {
@@ -188,36 +207,36 @@
     }
 
     .enquiry-modal-eyebrow {
-        font-size: 11px;
+        font-size: 10px;
         font-weight: 800;
         color: #d4af37;
         letter-spacing: 0.14em;
         text-transform: uppercase;
         display: block;
-        margin-bottom: 6px;
+        margin-bottom: 4px;
     }
 
     .enquiry-modal-title {
         font-family: 'Merriweather', serif;
-        font-size: 2.1rem;
+        font-size: 1.65rem;
         color: #ffffff !important;
-        margin: 0 0 16px 0;
+        margin: 0 0 10px 0;
         line-height: 1.25;
         font-weight: 700;
     }
 
     .enquiry-modal-desc {
-        font-size: 14px;
+        font-size: 12.5px;
         color: #a4bea9 !important;
-        line-height: 1.65;
-        margin: 0 0 24px 0;
+        line-height: 1.5;
+        margin: 0 0 16px 0;
     }
 
     .enquiry-contact-list {
         display: flex;
         flex-direction: column;
-        gap: 14px;
-        font-size: 13.5px;
+        gap: 10px;
+        font-size: 12.5px;
         color: #e0ece3 !important;
     }
 
@@ -359,7 +378,7 @@
                     </div>
                     <div style="display: flex; align-items: flex-start; gap: 8px; background: transparent !important;">
                         <span style="color: #d4af37; margin-top: 2px;">📍</span>
-                        <span><strong style="color: #ffffff;">Address:</strong> Na Kalikapur Berhampore Murshidabad, Bara Bazar, Kolkata - 742102</span>
+                        <span><strong style="color: #ffffff;">Address:</strong> Na Kalikapur Berhampore Murshidabad,<br/> Bara Bazar, Kolkata - 742102</span>
                     </div>
                 </div>
             </div>
@@ -381,8 +400,13 @@
                         <option value="Solar LED Street Lights" style="color: #fff; background: #0f291b;">Solar LED Street Lights</option>
                         <option value="Custom Bulk Export Order" style="color: #fff; background: #0f291b;">Custom Bulk Export Order</option>
                     </select>
+
+                    <div style="display: flex; gap: 10px; background: transparent !important;">
+                        <input type="text" name="quantity" class="enquiry-form-input" placeholder="Quantity Required (e.g. 500 kg, 2 Tons)">
+                        <input type="text" name="destination" class="enquiry-form-input" placeholder="Destination Port / City (e.g. Kolkata)">
+                    </div>
                     
-                    <textarea name="details" class="enquiry-form-input enquiry-textarea" rows="2" placeholder="Requirement Details (Quantity, Destination, etc.)" style="resize: vertical;"></textarea>
+                    <textarea name="details" class="enquiry-form-input enquiry-textarea" rows="2" placeholder="Additional Requirement Details..." style="resize: vertical;"></textarea>
                     
                     <button type="submit" class="enquiry-submit-btn">SUBMIT BULK ENQUIRY</button>
                 </form>
@@ -436,26 +460,37 @@
             const result = await response.json();
 
             if (result.success) {
-                alert('Thank you ' + form.full_name.value + '! Your bulk enquiry has been received and stored in our database. Our sales export team will contact you shortly.');
-
-                const name = form.full_name.value;
-                const phone = form.phone.value;
-                const product = form.product.value;
-                const details = form.details.value;
-                const waText = encodeURIComponent(`Hello Biswas Enterprise, I submitted a bulk enquiry for ${product}.\nName: ${name}\nPhone: ${phone}\nDetails: ${details}`);
-                
-                if (confirm('Would you also like to send this inquiry directly to WhatsApp (+91 93300 51702)?')) {
-                    window.open(`https://api.whatsapp.com/send?phone=919330051702&text=${waText}`, '_blank');
-                }
+                const name = form.full_name.value || '';
 
                 form.reset();
                 closeEnquiryModal();
+
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Thank You for Your Interest!',
+                    html: `<p style="font-size: 15px; color: #475569; margin: 8px 0 16px;">Dear <strong>${name}</strong>, your bulk enquiry has been received successfully! Our sales export team will contact you shortly.</p>`,
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#1b3b2b',
+                    showCancelButton: false,
+                    showDenyButton: false,
+                    background: '#ffffff'
+                });
             } else {
-                alert('Error: ' + (result.message || 'Failed to submit enquiry.'));
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Submission Failed',
+                    text: result.message || 'Failed to submit enquiry. Please try again.',
+                    confirmButtonColor: '#1b3b2b'
+                });
             }
         } catch (error) {
             console.error('Enquiry Submission Error:', error);
-            alert('Something went wrong. Please try again or contact us via WhatsApp.');
+            Swal.fire({
+                icon: 'error',
+                title: 'Something went wrong',
+                text: 'Please try again or contact us directly via WhatsApp.',
+                confirmButtonColor: '#1b3b2b'
+            });
         } finally {
             if (submitBtn) {
                 submitBtn.disabled = false;

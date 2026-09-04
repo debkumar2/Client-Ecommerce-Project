@@ -102,5 +102,8 @@ if (!function_exists('env')) {
 // Load the .env file from the project root
 loadEnv(dirname(__DIR__) . '/.env');
 
+// Set default timezone to Indian Standard Time (IST)
+date_default_timezone_set(env('APP_TIMEZONE', 'Asia/Kolkata'));
+
 // Load Cloudinary image helper
 require_once __DIR__ . '/cloudinary.php';
