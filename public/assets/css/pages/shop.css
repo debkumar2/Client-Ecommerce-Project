@@ -37,40 +37,61 @@
     font-size: 0.8rem;
 }
 
-/* --- 2. Compact Shop Hero --- */
+/* --- 2. Compact Shop Hero (Luxury Botanical Theme) --- */
 .shop-hero {
-    background: linear-gradient(135deg, var(--background) 0%, var(--surface-alt) 100%);
-    padding: 2.5rem 0 2rem;
-    border-bottom: 1px solid var(--border-light);
+    background: linear-gradient(135deg, #092615 0%, #113f25 50%, #0d2817 100%);
+    padding: 3.25rem 0 2.75rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.shop-hero::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -10%;
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(16, 185, 129, 0.15) 0%, rgba(0,0,0,0) 70%);
+    pointer-events: none;
 }
 
 .shop-hero-content {
-    max-width: 680px;
+    max-width: 720px;
+    position: relative;
+    z-index: 2;
 }
 
 .shop-hero-eyebrow {
-    font-size: 0.8125rem;
+    font-size: 0.78125rem;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.12em;
-    color: var(--accent);
-    margin-bottom: 0.5rem;
-    display: block;
+    letter-spacing: 0.14em;
+    color: #10b981;
+    background: rgba(16, 185, 129, 0.12);
+    border: 1px solid rgba(16, 185, 129, 0.25);
+    padding: 0.35rem 0.9rem;
+    border-radius: 20px;
+    display: inline-block;
+    margin-bottom: 0.85rem;
 }
 
 .shop-hero-title {
-    font-family: var(--font-heading);
-    font-size: clamp(1.85rem, 3.5vw, 2.75rem);
-    color: var(--primary-dark);
+    font-family: 'Merriweather', serif;
+    font-size: clamp(2.1rem, 4vw, 3rem);
+    color: #ffffff;
     line-height: 1.2;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.75rem;
+    letter-spacing: -0.01em;
 }
 
 .shop-hero-description {
-    font-size: 1rem;
-    color: var(--muted);
-    line-height: 1.6;
+    font-size: 1.05rem;
+    color: #cbd5e1;
+    line-height: 1.65;
     margin: 0;
+    font-weight: 400;
 }
 
 /* --- 3. Main Shop Layout --- */

@@ -3,16 +3,16 @@
    =================================== */
 
 .shop-toolbar {
-    background-color: var(--surface);
-    border: 1px solid var(--border-light);
-    border-radius: var(--radius-md);
-    padding: 1rem 1.25rem;
+    background-color: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.07);
+    border-radius: 16px;
+    padding: 1rem 1.35rem;
     margin-bottom: 2rem;
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 1.25rem;
-    box-shadow: var(--shadow-subtle);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
 }
 
 /* Left Section: Mobile Filter Button & Results Count */
@@ -26,19 +26,20 @@
     display: none;
     align-items: center;
     gap: 0.5rem;
-    padding: 0.6rem 1rem;
-    background-color: var(--primary-light);
-    color: var(--primary-dark);
+    padding: 0.65rem 1.1rem;
+    background-color: #ecfdf5;
+    color: #059669;
     font-size: 0.875rem;
-    font-weight: 600;
-    border-radius: var(--radius-sm);
-    border: 1px solid var(--border);
-    transition: var(--transition);
+    font-weight: 700;
+    border-radius: 20px;
+    border: 1px solid rgba(16, 185, 129, 0.25);
+    transition: all 0.25s ease;
+    cursor: pointer;
 }
 
 .btn-mobile-filter:hover {
-    background-color: var(--primary);
-    color: var(--surface);
+    background-color: #059669;
+    color: #ffffff;
 }
 
 .btn-mobile-filter svg {
@@ -48,19 +49,19 @@
 
 .results-count {
     font-size: 0.9rem;
-    color: var(--muted);
+    color: #64748b;
     font-weight: 500;
 }
 
 .results-count strong {
-    color: var(--text);
+    color: #0f172a;
     font-weight: 700;
 }
 
 /* Middle Section: Search Input */
 .toolbar-search {
     flex: 1;
-    max-width: 400px;
+    max-width: 420px;
     position: relative;
 }
 
@@ -72,36 +73,37 @@
 
 .toolbar-search-icon {
     position: absolute;
-    left: 14px;
+    left: 16px;
     width: 18px;
     height: 18px;
-    color: var(--muted);
+    color: #94a3b8;
     pointer-events: none;
 }
 
 .toolbar-search-input {
     width: 100%;
-    padding: 0.65rem 2.5rem 0.65rem 2.6rem;
+    padding: 0.7rem 2.5rem 0.7rem 2.75rem;
     font-size: 0.9rem;
-    background-color: var(--background);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-md);
-    color: var(--text);
-    transition: var(--transition);
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 30px;
+    color: #1e293b;
+    transition: all 0.25s ease;
 }
 
 .toolbar-search-input:focus {
-    background-color: var(--surface);
-    border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(11, 83, 37, 0.1);
+    background-color: #ffffff;
+    border-color: #059669;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+    outline: none;
 }
 
 .toolbar-search-clear {
     position: absolute;
-    right: 12px;
+    right: 14px;
     background: none;
     border: none;
-    color: var(--muted);
+    color: #94a3b8;
     font-size: 1.1rem;
     cursor: pointer;
     display: none;
@@ -113,18 +115,18 @@
 }
 
 .toolbar-search-clear:hover {
-    color: var(--danger);
-    background-color: rgba(211, 47, 47, 0.1);
+    color: #ef4444;
+    background-color: rgba(239, 68, 68, 0.1);
 }
 
 /* Search Loading Spinner */
 .toolbar-search-spinner {
     position: absolute;
-    right: 12px;
+    right: 14px;
     width: 16px;
     height: 16px;
-    border: 2px solid var(--border);
-    border-top-color: var(--primary);
+    border: 2px solid #e2e8f0;
+    border-top-color: #059669;
     border-radius: 50%;
     animation: spin 0.6s linear infinite;
     display: none;
@@ -138,19 +140,19 @@
 .toolbar-right {
     display: flex;
     align-items: center;
-    gap: 1rem;
+    gap: 1.25rem;
 }
 
 .sort-wrapper {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.6rem;
 }
 
 .sort-label {
     font-size: 0.85rem;
     font-weight: 600;
-    color: var(--muted);
+    color: #64748b;
     white-space: nowrap;
 }
 
@@ -160,30 +162,32 @@
 
 .sort-select {
     appearance: none;
-    background-color: var(--background);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    padding: 0.6rem 2.2rem 0.6rem 0.85rem;
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 20px;
+    padding: 0.6rem 2.2rem 0.6rem 1rem;
     font-size: 0.875rem;
-    font-weight: 500;
-    color: var(--text);
+    font-weight: 600;
+    color: #1e293b;
     cursor: pointer;
-    transition: var(--transition);
+    transition: all 0.25s ease;
 }
 
 .sort-select:focus {
-    border-color: var(--primary);
-    background-color: var(--surface);
+    border-color: #059669;
+    background-color: #ffffff;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
 }
 
 .sort-select-arrow {
     position: absolute;
-    right: 10px;
+    right: 12px;
     top: 50%;
     transform: translateY(-50%);
     width: 14px;
     height: 14px;
-    color: var(--muted);
+    color: #64748b;
     pointer-events: none;
 }
 
@@ -192,10 +196,10 @@
     display: flex;
     align-items: center;
     gap: 4px;
-    background-color: var(--background);
-    padding: 3px;
-    border-radius: var(--radius-sm);
-    border: 1px solid var(--border);
+    background-color: #f1f5f9;
+    padding: 4px;
+    border-radius: 24px;
+    border: 1px solid #e2e8f0;
 }
 
 .view-btn {
@@ -204,22 +208,22 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: var(--radius-sm);
-    color: var(--muted);
+    border-radius: 50%;
+    color: #64748b;
     background: none;
     border: none;
     cursor: pointer;
-    transition: var(--transition);
+    transition: all 0.2s ease;
 }
 
 .view-btn:hover {
-    color: var(--primary);
+    color: #059669;
 }
 
 .view-btn.active {
-    background-color: var(--surface);
-    color: var(--primary);
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    background-color: #ffffff;
+    color: #059669;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .view-btn svg {
