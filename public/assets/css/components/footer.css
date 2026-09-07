@@ -223,21 +223,35 @@
 }
 
 .footer-back-to-top {
-    background: rgba(255, 255, 255, 0.08);
+    position: fixed;
+    bottom: 40px;
+    right: 40px;
+    z-index: 9999;
+    background: rgba(5, 13, 9, 0.85); /* dark green/black with opacity */
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     color: #d4af37;
-    border: 1px solid rgba(212, 175, 55, 0.2);
-    padding: 6px 14px;
-    border-radius: 20px;
-    font-size: 0.75rem;
-    font-weight: 700;
+    border: 1px solid rgba(212, 175, 55, 0.4);
+    padding: 12px 24px;
+    border-radius: 50px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 1px;
     text-decoration: none;
-    transition: all 0.2s ease;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     cursor: pointer;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .footer-back-to-top:hover {
     background: #d4af37;
-    color: #1b3b2b;
+    color: #050d09;
+    transform: translateY(-6px);
+    box-shadow: 0 15px 35px rgba(212, 175, 55, 0.3);
+    border-color: #d4af37;
 }
 
 /* Responsive Styles */
