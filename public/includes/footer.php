@@ -244,6 +244,8 @@ require_once __DIR__ . '/loader.php';
     }
 })();
 </script>
+<!-- Prevent Right-Click & DevTools Access -->
+<script src="<?= asset('js/core/disable-inspect.js') ?>"></script>
 <!-- SweetAlert2 Library for Modern Popups -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <?php endif; ?>

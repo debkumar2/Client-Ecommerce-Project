@@ -1792,5 +1792,6 @@ try {
         }
     })();
     </script>
+    <script src="<?= asset('js/core/disable-inspect.js') ?>"></script>
 </body>
 </html>

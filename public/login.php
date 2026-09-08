@@ -329,5 +329,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
     </script>
+    <script src="<?= asset('js/core/disable-inspect.js') ?>"></script>
 </body>
 </html>
