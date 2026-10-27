@@ -2,6 +2,7 @@
 # This is a basic setup; a proper router should handle admin auth.
 <IfModule mod_rewrite.c>
     RewriteEngine On
+    RewriteRule ^logout/?$ logout.php [L]
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteRule ^(.*)$ dashboard.php [L]

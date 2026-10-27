@@ -48,9 +48,7 @@ if (!function_exists('env')) {
             $host = $_SERVER['HTTP_HOST'];
             $scriptDir = dirname($_SERVER['SCRIPT_NAME'] ?? '');
             $scriptDir = str_replace('\\', '/', $scriptDir);
-            if (strpos($scriptDir, '/public') !== false) {
-                $scriptDir = preg_replace('/\/public$/', '', $scriptDir);
-            }
+            $scriptDir = preg_replace('/\/(public|admin|api)(\/.*)?$/', '', $scriptDir);
             if ($scriptDir === '/' || $scriptDir === '.') {
                 $scriptDir = '';
             }
@@ -63,9 +61,7 @@ if (!function_exists('env')) {
                 $host = $_SERVER['HTTP_HOST'];
                 $scriptDir = dirname($_SERVER['SCRIPT_NAME'] ?? '');
                 $scriptDir = str_replace('\\', '/', $scriptDir);
-                if (strpos($scriptDir, '/public') !== false) {
-                    $scriptDir = preg_replace('/\/public$/', '', $scriptDir);
-                }
+                $scriptDir = preg_replace('/\/(public|admin|api)(\/.*)?$/', '', $scriptDir);
                 if ($scriptDir === '/' || $scriptDir === '.') {
                     $scriptDir = '';
                 }

@@ -386,12 +386,16 @@ function logoutUser(): void {
         session_start();
     }
     $_SESSION = [];
-    if (ini_get("session.use_cookies")) {
+    if (ini_get("session.use_cookies") && !headers_sent()) {
         $params = session_get_cookie_params();
         setcookie(session_name(), '', time() - 42000,
             $params["path"], $params["domain"],
             $params["secure"], $params["httponly"]
         );
+        // Also ensure root path cookie is cleared
+        setcookie(session_name(), '', time() - 42000, '/');
     }
-    session_destroy();
+    if (session_status() === PHP_SESSION_ACTIVE) {
+        session_destroy();
+    }
 }

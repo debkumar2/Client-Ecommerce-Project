@@ -10,8 +10,18 @@ $errorMessage = '';
 $successMessage = '';
 $activeTab = $_GET['tab'] ?? ($_GET['action'] ?? 'login');
 
+// Handle direct logout request on login page
+if (isset($_GET['action']) && $_GET['action'] === 'logout') {
+    logoutUser();
+    $successMessage = 'You have been signed out successfully.';
+    $activeTab = 'login';
+} elseif (isset($_GET['logged_out'])) {
+    $successMessage = 'You have been signed out successfully.';
+    $activeTab = 'login';
+}
+
 // Redirect if already logged in (unless logging out)
-if (isLoggedIn() && !isset($_GET['action'])) {
+if (isLoggedIn() && (!isset($_GET['action']) || $_GET['action'] !== 'logout')) {
     if (isAdmin()) {
         header('Location: ' . url('admin/dashboard.php'));
         exit;
